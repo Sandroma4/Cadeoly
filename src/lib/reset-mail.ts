@@ -2,6 +2,7 @@ import { mkdir, writeFile, rename } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { emailSchema } from "./validation";
+import { gmailConfiguration, sendGmailMail } from "./gmail-mail";
 async function recordDelivery(
   outcome: "accepted" | "failed",
   category: string,
@@ -34,6 +35,9 @@ export function mailConfiguration() {
   const base = new URL(process.env.AUTH_URL);
   const local = ["localhost", "127.0.0.1", "[::1]"].includes(base.hostname);
   const file = process.env.MAIL_TRANSPORT === "file";
+  const gmail = process.env.MAIL_TRANSPORT === "gmail";
+  if (process.env.MAIL_TRANSPORT && !["file", "gmail", "resend"].includes(process.env.MAIL_TRANSPORT))
+    throw new Error("emailUnavailable");
   if (
     base.username ||
     base.password ||
@@ -42,7 +46,8 @@ export function mailConfiguration() {
     (file && !local)
   )
     throw new Error("emailUnavailable");
-  if (!file && (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM))
+  if (gmail) gmailConfiguration();
+  if (!file && !gmail && (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM))
     throw new Error("emailUnavailable");
   if (!file) {
     const from = process.env.MAIL_FROM!.trim();
@@ -92,6 +97,16 @@ export async function sendResetMail(
       JSON.stringify(message, null, 2),
       { flag: "wx", mode: 0o600 },
     );
+    return;
+  }
+  if (process.env.MAIL_TRANSPORT === "gmail") {
+    try {
+      await sendGmailMail(message);
+    } catch {
+      await recordDelivery("failed", "gmail");
+      throw new Error("emailDeliveryFailed");
+    }
+    await recordDelivery("accepted", "gmail");
     return;
   }
   let response: Response;
