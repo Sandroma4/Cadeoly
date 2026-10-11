@@ -85,13 +85,13 @@ export default async function DashboardLayout({
                     ›
                   </span>
                 </Link>
-                <div className={styles.optionsGroup}>
+                <div className={`${styles.optionsGroup} ${styles.mobileOnly}`}>
                   <span className={styles.optionsLabel}>
                     {t("optionsLanguage")}
                   </span>
                   <LanguageSwitcher />
                 </div>
-                <div className={styles.optionsGroup}>
+                <div className={`${styles.optionsGroup} ${styles.mobileOnly}`}>
                   <span className={styles.optionsLabel}>
                     {t("optionsAppearance")}
                   </span>
@@ -115,6 +115,14 @@ export default async function DashboardLayout({
                 </div>
               </div>
             </OptionsMenu>
+            <div className={styles.desktopControls}>
+              <div className={styles.desktopControlRow}>
+                <LanguageSwitcher />
+              </div>
+              <div className={styles.desktopControlRow}>
+                <ThemeSwitcher initial={theme} />
+              </div>
+            </div>
             <Link href="/dashboard/profile" className={styles.profile}>
               <div className={styles.avatar}>
                 {user.name?.[0]?.toUpperCase() || "U"}
