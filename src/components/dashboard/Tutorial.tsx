@@ -17,7 +17,7 @@ import styles from "./Tutorial.module.css";
 
 const Replay = createContext<(() => void) | null>(null);
 const steps = ["welcome", "list", "share", "reserve"] as const;
-const icons = ["gift", "gift", "people", "giving"] as const;
+const icons = ["gift", "list", "people", "giving"] as const;
 
 export function Tutorial({
   completed,
@@ -84,6 +84,15 @@ export function Tutorial({
           void finish();
         }}
       >
+        <div className={styles.headerProgress} role="presentation">
+          <div
+            className={styles.headerProgressFill}
+            style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+          />
+        </div>
+
+        <div className={styles.sheetHandle} aria-hidden="true" />
+
         <div className={styles.topline}>
           <p className={styles.progress} aria-live="polite">
             {t("progress", { current: step + 1, total: steps.length })}
@@ -92,37 +101,50 @@ export function Tutorial({
             type="button"
             variant="ghost"
             disabled={pending}
+            className={styles.skipButton}
             onClick={() => void finish()}
           >
             {t("skip")}
           </Button>
         </div>
-        <div className={styles.illustration}>
-          <OccasionIcon kind={icons[step]} />
+
+        <div className={styles.cardContent}>
+          <div className={styles.illustrationWrapper} data-step={step}>
+            <div className={styles.halo} aria-hidden="true" />
+            <div key={step} className={styles.illustration}>
+              <OccasionIcon kind={icons[step]} />
+            </div>
+          </div>
+
+          <h2
+            id="tutorial-title"
+            ref={heading}
+            tabIndex={-1}
+            className={styles.title}
+          >
+            {t(`${steps[step]}Title`)}
+          </h2>
+
+          <p id="tutorial-description" className={styles.description}>
+            {t(`${steps[step]}Description`)}
+          </p>
+
+          <div className={styles.dots} aria-hidden="true">
+            {steps.map((key, index) => (
+              <span key={key} data-active={index === step} />
+            ))}
+          </div>
         </div>
-        <h2
-          id="tutorial-title"
-          ref={heading}
-          tabIndex={-1}
-          className={styles.title}
-        >
-          {t(`${steps[step]}Title`)}
-        </h2>
-        <p id="tutorial-description" className={styles.description}>
-          {t(`${steps[step]}Description`)}
-        </p>
-        <div className={styles.dots} aria-hidden="true">
-          {steps.map((key, index) => (
-            <span key={key} data-active={index === step} />
-          ))}
-        </div>
-        {error && <p role="alert">{t("saveError")}</p>}
+
+        {error && <p role="alert" className={styles.errorText}>{t("saveError")}</p>}
+
         <div className={styles.actions}>
           {step > 0 && (
             <Button
               type="button"
               variant="secondary"
               disabled={pending}
+              className={styles.backButton}
               onClick={() => setStep(step - 1)}
             >
               {t("back")}
@@ -132,6 +154,7 @@ export function Tutorial({
             type="button"
             fullWidth
             disabled={pending}
+            className={styles.nextButton}
             onClick={() =>
               step === steps.length - 1 ? void finish(true) : setStep(step + 1)
             }
@@ -147,12 +170,14 @@ export function Tutorial({
             )}
           </Button>
         </div>
+
         {step === steps.length - 1 && (
           <Button
             type="button"
             variant="ghost"
             fullWidth
             disabled={pending}
+            className={styles.exploreButton}
             onClick={() => void finish()}
           >
             {t("explore")}
