@@ -6,6 +6,7 @@ import { GiftImage } from "@/components/wishlist/GiftDetails";
 import { Link } from "@/i18n/routing";
 import { getTranslations, getLocale } from "next-intl/server";
 import { ReserveButton } from "@/components/wishlist/ReserveButton";
+import { FavoriteButton } from "@/components/wishlist/FavoriteButton";
 import {
   Card,
   CardHeader,
@@ -60,6 +61,7 @@ export default async function Page() {
               </Link>
             </CardContent>
             <CardFooter>
+              <FavoriteButton itemId={item.id} isFavorite={item.isFavorite} />
               {item.isGroupGift ? (
                 <Link href={`/dashboard/wishlists/${item.wishlist.id}`}>
                   {t("contribute")}
@@ -67,8 +69,8 @@ export default async function Page() {
               ) : (
                 <ReserveButton
                   itemId={item.id}
-                  isReserved={false}
-                  reservedByMe={false}
+                  isReserved={item.isReserved}
+                  reservedByMe={item.reservedByMe}
                 />
               )}
             </CardFooter>

@@ -1,0 +1,15 @@
+.badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge[data-today] {
+  color: var(--primary);
+  border-color: currentColor;
+}

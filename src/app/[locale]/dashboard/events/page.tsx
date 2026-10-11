@@ -1,5 +1,6 @@
 import { FamilyActions } from "@/components/family/FamilyActions";
 import { EventDate } from "@/components/events/EventDate";
+import { EventCountdown } from "@/components/events/EventCountdown";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import styles from "./page.module.css";
 import { Link } from "@/i18n/routing";
@@ -80,6 +81,7 @@ export default async function EventsPage({
                     <EventDate date={event.date} locale={locale} />
                     <div className="stack">
                       <CardTitle>{event.name}</CardTitle>
+                      <EventCountdown date={event.date} />
                       <span className="visual-badge">{event.family.name}</span>
                     </div>
                   </div>

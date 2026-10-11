@@ -1,4 +1,5 @@
 "use server";
+import { FamilyRole } from "@/lib/domain-values";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { fields, familySchema, emailSchema } from "@/lib/validation";
@@ -19,7 +20,7 @@ export async function createFamily(form: FormData) {
     data: {
       ...parsed.data,
       ownerId: session.user.id,
-      members: { create: { userId: session.user.id, role: "ADMIN" } },
+      members: { create: { userId: session.user.id, role: FamilyRole.ADMIN } },
     },
   });
   refreshWishlists();
@@ -69,7 +70,9 @@ export async function renewInvitation(id: string) {
   const invitation = await prisma.invitation.findFirst({
     where: {
       id,
-      family: { members: { some: { userId: session.user.id, role: "ADMIN" } } },
+      family: {
+        members: { some: { userId: session.user.id, role: FamilyRole.ADMIN } },
+      },
     },
     select: { familyId: true, email: true },
   });

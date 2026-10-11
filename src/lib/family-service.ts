@@ -1,3 +1,4 @@
+import { FamilyRole } from "./domain-values";
 import type { PrismaClient } from "@wishi/prisma-client";
 export type FamilyOperation = "leave" | "remove" | "promote" | "transfer";
 export async function manageFamily(
@@ -15,7 +16,7 @@ export async function manageFamily(
         members: {
           some: {
             userId: actorId,
-            ...(operation === "leave" ? {} : { role: "ADMIN" }),
+            ...(operation === "leave" ? {} : { role: FamilyRole.ADMIN }),
           },
         },
       },
@@ -35,7 +36,7 @@ export async function manageFamily(
         return { error: "forbidden" };
       await tx.familyMember.update({
         where: { id: target.id },
-        data: { role: "ADMIN" },
+        data: { role: FamilyRole.ADMIN },
       });
       await tx.family.update({
         where: { id: familyId },
@@ -43,21 +44,22 @@ export async function manageFamily(
       });
       await tx.familyMember.update({
         where: { userId_familyId: { userId: actorId, familyId } },
-        data: { role: "MEMBER" },
+        data: { role: FamilyRole.MEMBER },
       });
       return { success: true };
     }
     if (operation === "promote") {
       await tx.familyMember.update({
         where: { id: target.id },
-        data: { role: "ADMIN" },
+        data: { role: FamilyRole.ADMIN },
       });
       return { success: true };
     }
     if (target.userId === family.ownerId) return { error: "transferFirst" };
     if (
-      target.role === "ADMIN" &&
-      family.members.filter((member) => member.role === "ADMIN").length <= 1
+      target.role === FamilyRole.ADMIN &&
+      family.members.filter((member) => member.role === FamilyRole.ADMIN)
+        .length <= 1
     )
       return { error: "lastAdmin" };
     if (operation === "remove" && target.userId === actorId)

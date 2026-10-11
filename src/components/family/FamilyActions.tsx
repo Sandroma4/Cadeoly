@@ -24,7 +24,11 @@ export function FamilyActions({ join = false }: { join?: boolean }) {
     <div className="family-actions">
       <Button onClick={() => open("create")}>{family("createFamily")}</Button>
       {join && (
-        <Button variant="secondary" onClick={() => open("join")}>
+        <Button
+          variant="secondary"
+          className="join-family-action"
+          onClick={() => open("join")}
+        >
           {t("join")}
         </Button>
       )}

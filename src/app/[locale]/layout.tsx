@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import "@/app/globals.css";
 import { AppRegistration } from "@/components/ui/InstallApp";
+import { QuickUndo } from "@/components/ui/QuickUndo";
+import { Toast } from "@/components/ui/Toast";
+import { Confetti } from "@/components/ui/Confetti";
 
 export const metadata = {
   title: "Cadéoly — Listes de cadeaux",
@@ -33,7 +36,10 @@ export default async function RootLayout({
   }
 
   const messages = await getMessages();
-  const choice = (await cookies()).get("wishi-theme")?.value;
+  const preferences = await cookies();
+  const choice =
+    preferences.get("cadeoly-theme")?.value ??
+    preferences.get("wishi-theme")?.value;
   const theme = choice === "light" || choice === "dark" ? choice : "system";
   const nativeAndroid = (await headers())
     .get("user-agent")
@@ -53,6 +59,9 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <AppRegistration />
           {children}
+          <QuickUndo />
+          <Toast />
+          <Confetti />
         </NextIntlClientProvider>
       </body>
     </html>

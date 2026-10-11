@@ -1,9 +1,15 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { reserveItem, cancelReservation } from "@/app/actions/item";
+import { reserveItem } from "@/app/actions/item";
+import {
+  cancelReservationWithUndo,
+  restoreReservation,
+} from "@/app/actions/reservation-preparation";
+import { offerQuickUndo } from "@/components/ui/QuickUndo";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { notify } from "@/components/ui/Toast";
 export function ReserveButton({
   itemId,
   isReserved,
@@ -21,14 +27,22 @@ export function ReserveButton({
   const t = useTranslations("wishlist");
   const errors = useTranslations("errors");
   const sharing = useTranslations("sharing");
+  const notices = useTranslations("notifications");
   async function click() {
     setPending(true);
     setError("");
     try {
       const result = reservedByMe
-        ? await cancelReservation(itemId)
+        ? await cancelReservationWithUndo(itemId)
         : await reserveItem(itemId, token);
       if (result.error) setError(errors(result.error));
+      else if ("undo" in result && result.undo) {
+        const snapshot = result.undo;
+        offerQuickUndo({
+          message: "reservationCancelled",
+          undo: () => restoreReservation(itemId, snapshot),
+        });
+      } else if (!reservedByMe) notify(notices("reserved"));
       router.refresh();
     } catch {
       setError(errors("unexpected"));

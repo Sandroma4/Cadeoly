@@ -1,5 +1,5 @@
 "use client";
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 export function ListBrowser({
   lists,
@@ -16,6 +16,11 @@ export function ListBrowser({
   const searchId = useId();
   const t = useTranslations("listNavigation");
   const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInput = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (searchOpen) searchInput.current?.focus();
+  }, [searchOpen]);
   const normalize = (text: string) =>
     text
       .normalize("NFD")
@@ -27,10 +32,38 @@ export function ListBrowser({
     ),
   );
   return (
-    <div className="stack">
+    <div className="stack list-browser">
       <div className="list-toolbar">
         {filters}
-        <div className="list-search">
+        <button
+          type="button"
+          className="list-search-toggle"
+          aria-label={t("search")}
+          aria-expanded={searchOpen}
+          aria-controls={`${searchId}-panel`}
+          onClick={() => {
+            if (searchOpen) setQuery("");
+            setSearchOpen(!searchOpen);
+          }}
+        >
+          <svg
+            aria-hidden="true"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+          >
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path d="m16 16 4 4" />
+          </svg>
+        </button>
+        <div
+          id={`${searchId}-panel`}
+          className={`list-search${searchOpen ? " list-search-open" : ""}`}
+        >
           <div className="list-search-field">
             <svg
               aria-hidden="true"
@@ -46,6 +79,7 @@ export function ListBrowser({
               <path d="m16 16 4 4" />
             </svg>
             <input
+              ref={searchInput}
               id={searchId}
               type="search"
               aria-label={t("search")}

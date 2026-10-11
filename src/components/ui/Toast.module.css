@@ -1,0 +1,40 @@
+.region {
+  position: fixed;
+  top: max(4.5rem, env(safe-area-inset-top));
+  inset-inline: 1rem;
+  margin-inline: auto;
+  max-width: 28rem;
+  z-index: 110;
+  pointer-events: none;
+}
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem 0.65rem 1rem;
+  border: 1px solid var(--brand-foreground);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+}
+.check {
+  color: var(--brand-foreground);
+  font-weight: 700;
+}
+.notice > span:nth-child(2) {
+  flex: 1;
+}
+.notice > button {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 1.5rem;
+  cursor: pointer;
+}

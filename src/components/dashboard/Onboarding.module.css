@@ -1,0 +1,75 @@
+.panel {
+  display: grid;
+  gap: 0.85rem;
+}
+.panel p {
+  margin: 0;
+}
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1 1 12rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--card) 70%, var(--background));
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+.steps a {
+  font-weight: 600;
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: color 0.15s ease;
+}
+.steps a:hover {
+  color: var(--brand-foreground);
+  text-decoration: underline;
+}
+.marker {
+  display: grid;
+  place-items: center;
+  min-width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: var(--brand-foreground);
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.status {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.help {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  line-height: 1.35;
+}
+@media (max-width: 768px) {
+  .panel {
+    gap: 0.65rem;
+  }
+  .steps {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .steps li {
+    flex: 1 1 auto;
+    padding: 0.45rem 0.65rem;
+  }
+}
+

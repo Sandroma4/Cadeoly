@@ -20,7 +20,7 @@ const path = require("node:path");
     }
   }
   console.log(
-    "Accepté par Resend ne signifie pas livré en boîte de réception. Aucun destinataire, lien ou secret enregistré.",
+    "Accepté par le fournisseur ne signifie pas livré en boîte de réception. Aucun destinataire, lien ou secret enregistré.",
   );
 })().catch(() => {
   console.error("Suivi email illisible.");

@@ -1,0 +1,71 @@
+.container {
+  width: min(100%, 1040px);
+  margin-inline: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.intro {
+  text-align: center;
+}
+.intro h1 {
+  margin-block: 0.75rem;
+}
+.intro p,
+.help,
+.signup p {
+  color: var(--muted-foreground);
+}
+.container > .tabs {
+  align-self: center;
+  justify-content: center;
+}
+.icon {
+  color: var(--brand-foreground);
+}
+.members {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.members li {
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius);
+  background: var(--secondary);
+}
+.signup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.signup > a {
+  align-self: center;
+}
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .intro h1 {
+    font-size: 1.5rem;
+  }
+  .container > .tabs a {
+    padding-inline: 0.65rem;
+    font-size: 0.875rem;
+  }
+}

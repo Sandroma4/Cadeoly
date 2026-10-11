@@ -18,6 +18,12 @@ model User {
   locale         String?             @default("fr")
   password       String? // Hashed password
   sessionVersion Int                 @default(0)
+  tutorialCompletedAt DateTime?
+  emailRemindersEnabled Boolean     @default(false)
+  emailReminderDays Int              @default(3)
+  reminderDeliveries ReminderDelivery[]
+  giftBudgets GiftBudget[]
+  favorites GiftFavorite[]
   passwordReset  PasswordResetToken?
 
   accounts Account[]
@@ -33,6 +39,26 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model GiftBudget {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scope String @default("ALL")
+  currency String
+  amountCents Int
+  updatedAt DateTime @updatedAt
+  @@unique([userId, scope, currency])
+}
+
+model ReminderDelivery {
+  id String @id
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leaseUntil DateTime
+  sentAt DateTime?
+  @@index([userId])
 }
 
 model Account {
@@ -169,6 +195,8 @@ model Wishlist {
 }
 
 model WishlistItem {
+  position Int @default(0)
+  favorites GiftFavorite[]
   alternativeUrls String @default("")
   isGroupGift   Boolean        @default(false)
   contributions Contribution[]
@@ -213,6 +241,15 @@ model Recipient {
 }
 
 model Reservation {
+  guestFirstName String?
+  guestEmail String?
+  guestSessionHash String?
+  personalMessage String?
+  messageReleasedAt DateTime?
+  managementTokenHash String? @unique
+  managementExpiresAt DateTime?
+  recapSentAt DateTime?
+  preparationStatus String @default("RESERVED")
   accessTokenHash String?
   id              String  @id @default(cuid())
   quantity        Int     @default(1)
@@ -220,8 +257,8 @@ model Reservation {
   itemId String       @unique
   item   WishlistItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -242,6 +279,17 @@ model Contribution {
 
   @@unique([itemId, userId])
   @@index([userId])
+}
+
+model GiftFavorite {
+  id String @id @default(cuid())
+  userId String
+  itemId String
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item WishlistItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  @@unique([userId, itemId])
+  @@index([itemId])
 }
 
 model Feedback {

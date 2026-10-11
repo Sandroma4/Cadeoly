@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "./Button";
+import { socialShareUrl, type SocialChannel } from "@/lib/social-sharing";
+import { notify } from "./Toast";
 export function ShareLink({
   href,
   title,
@@ -16,6 +18,20 @@ export function ShareLink({
   const [failed, setFailed] = useState(false);
   const [qr, setQr] = useState<{ href: string; image: string } | null>(null);
   const [pending, setPending] = useState(false);
+  function shareTo(channel: SocialChannel) {
+    const url = new URL(href, window.location.origin).toString();
+    const link = document.createElement("a");
+    link.href = socialShareUrl(
+      channel,
+      title,
+      t("message", { title, url }),
+      /iPad|iPhone|iPod/.test(navigator.userAgent),
+    );
+    link.rel = "noopener noreferrer";
+    link.referrerPolicy = "no-referrer";
+    if (channel === "whatsapp") link.target = "_blank";
+    link.click();
+  }
   async function perform(kind: "copy" | "share" | "qr") {
     setPending(true);
     setMessage("");
@@ -37,6 +53,7 @@ export function ShareLink({
       } else {
         await navigator.clipboard.writeText(url);
         setMessage(t("copied"));
+        notify(t("copied"));
       }
     } catch (error) {
       if (!(error instanceof DOMException && error.name === "AbortError")) {
@@ -77,6 +94,19 @@ export function ShareLink({
         >
           {t("qr")}
         </Button>
+      </div>
+      <div className="button-row" role="group" aria-label={t("sendVia")}>
+        {(["whatsapp", "sms", "email"] as const).map((channel) => (
+          <Button
+            key={channel}
+            type="button"
+            variant="secondary"
+            disabled={pending}
+            onClick={() => shareTo(channel)}
+          >
+            {t(channel)}
+          </Button>
+        ))}
       </div>
       {failed && (
         <input

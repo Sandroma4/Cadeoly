@@ -1,10 +1,12 @@
 import { EventDate } from "@/components/events/EventDate";
+import { EventCountdown } from "@/components/events/EventCountdown";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { getEvent } from "@/app/actions/event";
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { EventEditor } from "@/components/events/EventEditor";
+import { EventDuplicateForm } from "@/components/events/EventDuplicateForm";
 import { Card, CardContent } from "@/components/ui/Card";
 export default async function EventPage({
   params,
@@ -26,6 +28,7 @@ export default async function EventPage({
         <EventDate date={event.date} locale={locale} />
         <h1>{event.name}</h1>
       </div>
+      <EventCountdown date={event.date} />
       <p>
         {new Intl.DateTimeFormat(locale, {
           dateStyle: "long",
@@ -34,6 +37,10 @@ export default async function EventPage({
         · {event.family.name}
       </p>
       {event.description && <p>{event.description}</p>}
+      <a href={`/api/events/${encodeURIComponent(id)}/calendar`} download>
+        {t("downloadCalendar")}
+      </a>
+      <EventDuplicateForm event={{ id: event.id, name: event.name }} />
       <h2>{t("wishlists")}</h2>
       <p>{flow("eventListsHelp")}</p>
       <Link

@@ -1,0 +1,182 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
+import { completeTutorial } from "@/app/actions/tutorial";
+import { Button } from "@/components/ui/Button";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
+import styles from "./Tutorial.module.css";
+
+const Replay = createContext<(() => void) | null>(null);
+const steps = ["welcome", "list", "share", "reserve"] as const;
+const icons = ["gift", "gift", "people", "giving"] as const;
+
+export function Tutorial({
+  completed,
+  children,
+}: {
+  completed: boolean;
+  children: ReactNode;
+}) {
+  const t = useTranslations("tutorial");
+  const router = useRouter();
+  const dialog = useRef<HTMLDialogElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const [step, setStep] = useState(0);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!completed && !dialog.current?.open) {
+      dialog.current?.showModal();
+      heading.current?.focus();
+    }
+  }, [completed]);
+  useEffect(() => {
+    if (dialog.current?.open) heading.current?.focus();
+  }, [step]);
+
+  function replay() {
+    setStep(0);
+    setError(false);
+    dialog.current?.showModal();
+    heading.current?.focus();
+  }
+
+  async function finish(createList = false) {
+    if (pending) return;
+    setPending(true);
+    setError(false);
+    try {
+      const result = await completeTutorial();
+      if (result.error) {
+        setError(true);
+        return;
+      }
+      dialog.current?.close();
+      if (createList) router.push("/dashboard/wishlists/create");
+    } catch {
+      setError(true);
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <Replay.Provider value={replay}>
+      {children}
+      <dialog
+        ref={dialog}
+        className={styles.dialog}
+        aria-labelledby="tutorial-title"
+        aria-describedby="tutorial-description"
+        aria-busy={pending}
+        onCancel={(event) => {
+          event.preventDefault();
+          void finish();
+        }}
+      >
+        <div className={styles.topline}>
+          <p className={styles.progress} aria-live="polite">
+            {t("progress", { current: step + 1, total: steps.length })}
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={pending}
+            onClick={() => void finish()}
+          >
+            {t("skip")}
+          </Button>
+        </div>
+        <div className={styles.illustration}>
+          <OccasionIcon kind={icons[step]} />
+        </div>
+        <h2
+          id="tutorial-title"
+          ref={heading}
+          tabIndex={-1}
+          className={styles.title}
+        >
+          {t(`${steps[step]}Title`)}
+        </h2>
+        <p id="tutorial-description" className={styles.description}>
+          {t(`${steps[step]}Description`)}
+        </p>
+        <div className={styles.dots} aria-hidden="true">
+          {steps.map((key, index) => (
+            <span key={key} data-active={index === step} />
+          ))}
+        </div>
+        {error && <p role="alert">{t("saveError")}</p>}
+        <div className={styles.actions}>
+          {step > 0 && (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={pending}
+              onClick={() => setStep(step - 1)}
+            >
+              {t("back")}
+            </Button>
+          )}
+          <Button
+            type="button"
+            fullWidth
+            disabled={pending}
+            onClick={() =>
+              step === steps.length - 1 ? void finish(true) : setStep(step + 1)
+            }
+          >
+            {t(
+              pending
+                ? "saving"
+                : step === 0
+                  ? "discover"
+                  : step === steps.length - 1
+                    ? "createList"
+                    : "next",
+            )}
+          </Button>
+        </div>
+        {step === steps.length - 1 && (
+          <Button
+            type="button"
+            variant="ghost"
+            fullWidth
+            disabled={pending}
+            onClick={() => void finish()}
+          >
+            {t("explore")}
+          </Button>
+        )}
+      </dialog>
+    </Replay.Provider>
+  );
+}
+
+export function TutorialReplay() {
+  const replay = useContext(Replay);
+  const t = useTranslations("tutorial");
+  return (
+    <button
+      type="button"
+      className={styles.replay}
+      onClick={(event) => {
+        const menu = event.currentTarget.closest("details");
+        if (menu) menu.open = false;
+        replay?.();
+      }}
+    >
+      {t("replay")}
+    </button>
+  );
+}

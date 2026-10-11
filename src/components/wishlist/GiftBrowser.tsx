@@ -1,57 +1,149 @@
 "use client";
-import { useId, useState, type ReactNode } from "react";
+import { Priority } from "@/lib/domain-values";
+import {
+  useId,
+  useState,
+  useOptimistic,
+  useTransition,
+  useRef,
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   selectGifts,
+  defaultGiftFilters,
   giftTotals,
   type SearchableGift,
   type GiftFilters,
+  type GiftPagination,
 } from "@/lib/gift-search";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { paginateGifts } from "@/lib/gift-search";
-const initial: GiftFilters = {
-  query: "",
-  maxPrice: "",
-  priority: "all",
-  status: "all",
-  sort: "recent",
-};
+import {
+  readGiftView,
+  subscribeGiftView,
+  setGiftView,
+  serverGiftView,
+} from "@/lib/gift-view";
+const initial = defaultGiftFilters;
 export function GiftBrowser({
   gifts,
   owner,
+  pagination,
 }: {
   gifts: (SearchableGift & { card: ReactNode })[];
   owner: boolean;
+  pagination?: GiftPagination;
 }) {
   const t = useTranslations("giftSearch");
   const p = useTranslations("improvements");
   const [page, setPage] = useState(1);
   const flow = useTranslations("uiFlow");
   const w = useTranslations("wishlist");
+  const viewText = useTranslations("giftView");
+  const view = useSyncExternalStore(
+    subscribeGiftView,
+    readGiftView,
+    serverGiftView,
+  );
   const locale = useLocale();
   const id = useId();
-  const [filters, setFilters] = useState(initial);
-  const change = (key: keyof GiftFilters, value: string) => {
-    setPage(1);
-    setFilters((current) => ({ ...current, [key]: value }));
-  };
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [localFilters, setFilters] = useState(initial);
+  const [filters, setOptimisticFilters] = useOptimistic(
+    pagination?.filters || localFilters,
+  );
+  const navigationVersion = useRef(0);
+  useEffect(
+    () => () => {
+      navigationVersion.current++;
+    },
+    [],
+  );
+  const navigate = useCallback(
+    (next: GiftFilters, page = 1, delay = 0) => {
+      const version = ++navigationVersion.current;
+      startTransition(async () => {
+        setOptimisticFilters(next);
+        if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+        if (version !== navigationVersion.current) return;
+        const url = new URL(window.location.href);
+        for (const [key, value] of Object.entries({
+          q: next.query,
+          maxPrice: next.maxPrice,
+          priority: next.priority,
+          status: next.status,
+          sort: next.sort,
+        })) {
+          const isDefault =
+            ((key === "priority" || key === "status") && value === "all") ||
+            (key === "sort" && value === initial.sort);
+          if (value && !isDefault) url.searchParams.set(key, value);
+          else url.searchParams.delete(key);
+        }
+        if (page > 1) url.searchParams.set("page", String(page));
+        else url.searchParams.delete("page");
+        startTransition(() => {
+          router.replace(url.pathname + url.search + url.hash, { scroll: false });
+        });
+      });
+    },
+    [router, setOptimisticFilters],
+  );
+  const change = useCallback(
+    (key: keyof GiftFilters, value: string) => {
+      if (pagination) {
+        navigate({ ...filters, [key]: value }, 1, key === "query" ? 300 : 0);
+        return;
+      }
+      setPage(1);
+      setFilters((current) => ({ ...current, [key]: value }));
+    },
+    [filters, navigate, pagination],
+  );
   const mixedCurrencies =
+    pagination?.mixedCurrencies ??
     new Set(
       gifts
         .filter((gift) => gift.priceCents !== null)
         .map((gift) => gift.currency || "EUR"),
     ).size > 1;
-  const visible = selectGifts(
-    gifts,
-    mixedCurrencies ? { ...filters, maxPrice: "" } : filters,
-    owner,
-    locale,
-  );
-  const { totals, unpriced } = giftTotals(visible);
-  const paged = paginateGifts(visible, page);
+  const visible = pagination
+    ? gifts
+    : selectGifts(
+        gifts,
+        mixedCurrencies ? { ...filters, maxPrice: "" } : filters,
+        owner,
+        locale,
+      );
+  const { totals, unpriced } = pagination || giftTotals(visible);
+  const paged = pagination
+    ? { items: gifts, page: pagination.page, pages: pagination.pages }
+    : paginateGifts(visible, page);
   return (
-    <div className="stack gift-browser">
+    <div className="stack gift-browser" aria-busy={pending}>
+      <div
+        className="button-row gift-view-controls"
+        role="group"
+        aria-label={viewText("label")}
+      >
+        {(["photos", "compact"] as const).map((mode) => (
+          <Button
+            key={mode}
+            variant="secondary"
+            aria-pressed={view === mode}
+            onClick={() => setGiftView(mode)}
+          >
+            {viewText(mode)}
+          </Button>
+        ))}
+      </div>
       <div className="gift-summary">
         <p>
           {t("total")}:{" "}
@@ -95,13 +187,68 @@ export function GiftBrowser({
           </div>
         </div>
       </div>
+      <div
+        className="button-row quick-budget-filters"
+        role="group"
+        aria-label={w("quickBudget")}
+      >
+        {!mixedCurrencies &&
+          [
+            { label: w("allBudgets"), value: "" },
+            { label: "< 25 €", value: "25" },
+            { label: "< 50 €", value: "50" },
+            { label: "< 100 €", value: "100" },
+          ].map((pill) => (
+            <Button
+              key={pill.value}
+              type="button"
+              variant={
+                filters.maxPrice === pill.value ? "primary" : "secondary"
+              }
+              className="budget-pill"
+              onClick={() => change("maxPrice", pill.value)}
+            >
+              {pill.label}
+            </Button>
+          ))}
+        <Button
+          type="button"
+          variant={filters.priority === "ESSENTIAL" ? "primary" : "secondary"}
+          className="budget-pill"
+          aria-pressed={filters.priority === "ESSENTIAL"}
+          onClick={() =>
+            change(
+              "priority",
+              filters.priority === "ESSENTIAL" ? "all" : "ESSENTIAL",
+            )
+          }
+        >
+          {t("quickEssential")}
+        </Button>
+        {!owner && (
+          <Button
+            type="button"
+            variant={filters.status === "available" ? "primary" : "secondary"}
+            className="budget-pill"
+            aria-pressed={filters.status === "available"}
+            onClick={() =>
+              change(
+                "status",
+                filters.status === "available" ? "all" : "available",
+              )
+            }
+          >
+            {t("available")}
+          </Button>
+        )}
+      </div>
       <details className="form-options list-detail-options gift-filter-panel">
         <summary>
           {flow("sortAndFilters")}{" "}
           {(filters.maxPrice ||
             filters.priority !== "all" ||
             filters.status !== "all" ||
-            filters.sort !== "recent") && (
+            filters.sort !== initial.sort) && (
             <span>· {flow("filtersActive")}</span>
           )}
         </summary>
@@ -113,13 +260,18 @@ export function GiftBrowser({
               value={filters.sort}
               onChange={(e) => change("sort", e.target.value)}
             >
-              {["recent", "priority", "priceAsc", "priceDesc", "name"].map(
-                (value) => (
-                  <option key={value} value={value}>
-                    {t(value)}
-                  </option>
-                ),
-              )}
+              {[
+                "manual",
+                "recent",
+                "priority",
+                "priceAsc",
+                "priceDesc",
+                "name",
+              ].map((value) => (
+                <option key={value} value={value}>
+                  {t(value)}
+                </option>
+              ))}
             </select>
           </div>
           {!mixedCurrencies && (
@@ -127,6 +279,7 @@ export function GiftBrowser({
               id={id + "-budget"}
               label={t("budget", {
                 currency:
+                  pagination?.currency ||
                   gifts.find((gift) => gift.priceCents !== null)?.currency ||
                   "EUR",
               })}
@@ -145,7 +298,7 @@ export function GiftBrowser({
               onChange={(e) => change("priority", e.target.value)}
             >
               <option value="all">{t("allPriorities")}</option>
-              {["LOW", "NORMAL", "HIGH", "ESSENTIAL"].map((value) => (
+              {Object.values(Priority).map((value) => (
                 <option key={value} value={value}>
                   {w("priority" + value[0] + value.slice(1).toLowerCase())}
                 </option>
@@ -199,6 +352,10 @@ export function GiftBrowser({
           <Button
             variant="secondary"
             onClick={() => {
+              if (pagination) {
+                navigate(initial);
+                return;
+              }
               setFilters(initial);
               setPage(1);
             }}
@@ -208,10 +365,15 @@ export function GiftBrowser({
         </div>
       </details>
       <p role="status" className="result-count">
-        {t("shown", { count: paged.items.length, total: gifts.length })}
+        {t("shown", {
+          count: paged.items.length,
+          total: pagination?.total ?? gifts.length,
+        })}
       </p>
       {!visible.length && <p>{t("noResults")}</p>}
-      <div className="gift-grid">
+      <div
+        className={`gift-grid${view === "compact" ? " gift-grid-compact" : ""}`}
+      >
         {paged.items.map((gift) => (
           <div key={gift.id}>{gift.card}</div>
         ))}
@@ -223,8 +385,12 @@ export function GiftBrowser({
         >
           <Button
             variant="secondary"
-            disabled={paged.page === 1}
-            onClick={() => setPage(paged.page - 1)}
+            disabled={pending || paged.page === 1}
+            onClick={() =>
+              pagination
+                ? navigate(filters, paged.page - 1)
+                : setPage(paged.page - 1)
+            }
           >
             {p("previous")}
           </Button>
@@ -233,8 +399,12 @@ export function GiftBrowser({
           </p>
           <Button
             variant="secondary"
-            disabled={paged.page === paged.pages}
-            onClick={() => setPage(paged.page + 1)}
+            disabled={pending || paged.page === paged.pages}
+            onClick={() =>
+              pagination
+                ? navigate(filters, paged.page + 1)
+                : setPage(paged.page + 1)
+            }
           >
             {p("next")}
           </Button>

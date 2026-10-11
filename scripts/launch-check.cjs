@@ -28,12 +28,12 @@ async function main() {
   try {
     const mail = mailConfiguration();
     add(
-      "Configuration email réelle présente (domaine à vérifier chez Resend)",
+      "Configuration email réelle présente (autorisation Gmail ou domaine Resend à vérifier)",
       !mail.file && !process.env.MAIL_FROM?.includes("@resend.dev"),
     );
   } catch {
     add(
-      "Configuration email réelle présente (domaine à vérifier chez Resend)",
+      "Configuration email réelle présente (autorisation Gmail ou domaine Resend à vérifier)",
       false,
     );
   }

@@ -34,14 +34,21 @@ export default async function WishlistsPage({
   const nav = await getTranslations("listNavigation");
   return (
     <div className={`${styles.container} wishlist-page`}>
-      <div className={styles.header}>
-        <h1>{t("myWishlists")}</h1>
+      <header className={styles.header}>
+        <div>
+          <h1>{t("myWishlists")}</h1>
+          <p className="page-intro">{tw("intro")}</p>
+        </div>
         {(wishlists.length > 0 || view !== "active") && (
-          <Link className="primary-link" href="/dashboard/wishlists/create">
-            {t("newWishlist")}
+          <Link
+            className={`primary-link ${styles.newWishlist}`}
+            href="/dashboard/wishlists/create"
+            aria-label={t("newWishlist")}
+          >
+            <span className={styles.newWishlistLabel}>{t("newWishlist")}</span>
           </Link>
         )}
-      </div>
+      </header>
 
       {wishlists.length === 0 && (
         <nav

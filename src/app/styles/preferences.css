@@ -1,0 +1,256 @@
+.theme-switcher.theme-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  width: 100%;
+}
+.theme-buttons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 0.4rem 0.25rem;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.theme-buttons button:hover {
+  color: var(--foreground);
+  background: var(--secondary);
+}
+.theme-buttons button[aria-pressed="true"] {
+  color: var(--brand-foreground);
+  border-color: var(--brand-foreground);
+  background: color-mix(in srgb, var(--brand-foreground) 12%, var(--card));
+  font-weight: 600;
+}
+.theme-buttons button:focus-visible {
+  outline: 2px solid var(--brand-foreground);
+  outline-offset: 2px;
+}
+
+.install-app-button,
+.install-app-help > summary {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0.5rem;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--brand-foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+}
+.install-app-help p {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+.install-app-button:focus-visible,
+.install-app-help > summary:focus-visible {
+  outline: 2px solid var(--brand-foreground);
+  outline-offset: 2px;
+}
+
+.options-mobile-label {
+  display: none;
+}
+@media (max-width: 768px) {
+  .options-mobile-label {
+    display: inline;
+  }
+  .options-desktop-label {
+    display: none;
+  }
+}
+html[data-native="android"],
+html[data-native="android"] body {
+  height: 100%;
+}
+
+.wishlist-page .result-count,
+.wishlist-page .list-meta {
+  color: color-mix(in srgb, var(--foreground) 80%, var(--card));
+}
+.wishlist-page nav.button-row a[aria-current="page"],
+.wishlist-page nav.button-row a[aria-current="page"]:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+/* Collapsible Gift Budget Dropdown */
+.gift-budget-card {
+  overflow: visible;
+}
+.gift-budget-dropdown {
+  width: 100%;
+}
+.gift-budget-dropdown > summary.gift-budget-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  list-style: none;
+  min-height: 44px;
+}
+.gift-budget-dropdown > summary.gift-budget-summary::-webkit-details-marker {
+  display: none;
+}
+.gift-budget-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.gift-budget-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: var(--brand-foreground);
+  flex-shrink: 0;
+}
+.gift-budget-summary-left h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+}
+.gift-budget-summary-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+.gift-budget-badge {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: var(--secondary);
+  color: var(--brand-foreground);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+.gift-budget-chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+  margin-right: 0.25rem;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gift-budget-dropdown[open] .gift-budget-chevron {
+  transform: rotate(225deg);
+}
+.gift-budget-body {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.gift-budget-dropdown:not([open]) .gift-budget-body {
+  display: none;
+}
+
+/* Compact mobile controls without reducing touch targets. */
+@media (max-width: 768px) {
+  .list-browser,
+  .gift-budget,
+  .gift-budget .stack {
+    gap: 0.75rem;
+  }
+  .list-browser .list-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .list-browser .list-toolbar > nav.segmented-filters {
+    flex: 1;
+    min-width: 0;
+  }
+  .list-browser .list-search {
+    width: 100%;
+  }
+  .list-browser nav.segmented-filters a {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.8125rem;
+  }
+  .list-search-toggle,
+  .budget-help-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--secondary);
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .list-search-toggle:hover {
+    background: var(--card);
+    color: var(--foreground);
+  }
+  .list-search-toggle[aria-expanded="true"] {
+    background: var(--card);
+    color: var(--brand-foreground);
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+  .budget-help-toggle {
+    border: 0;
+    font-size: 1.25rem;
+  }
+  .list-browser .list-search,
+  .budget-help {
+    display: none;
+  }
+  .list-browser .list-search-open {
+    display: flex;
+    width: 100%;
+  }
+  .budget-help-open {
+    display: flex;
+  }
+  .budget-help {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+  .dashboard-actions {
+    display: none;
+  }
+  .dashboard-actions > a {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  .onboarding-panel {
+    padding: 0.75rem 1rem;
+  }
+  .onboarding-panel > summary {
+    padding-block: 0.5rem;
+  }
+  .wishlist-browser-grid {
+    gap: 0.75rem;
+  }
+}

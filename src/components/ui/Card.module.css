@@ -69,3 +69,16 @@ button .card:hover {
 .card > .content:first-child {
   padding-top: 1.25rem;
 }
+
+@media (max-width: 768px) {
+  .header,
+  .footer {
+    padding: 1rem;
+  }
+  .content {
+    padding: 0 1rem 1rem;
+  }
+  .card > .content:first-child {
+    padding-top: 1rem;
+  }
+}

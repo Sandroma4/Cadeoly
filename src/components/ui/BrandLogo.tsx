@@ -1,5 +1,5 @@
 import styles from "./BrandLogo.module.css";
-export function BrandLogo() {
+export function BrandLogo({ iconOnly = false }: { iconOnly?: boolean }) {
   return (
     <span className={styles.logo}>
       <svg
@@ -20,7 +20,7 @@ export function BrandLogo() {
           strokeLinejoin="round"
         />
       </svg>
-      <span>Cadéoly</span>
+      {!iconOnly && <span>Cadéoly</span>}
     </span>
   );
 }

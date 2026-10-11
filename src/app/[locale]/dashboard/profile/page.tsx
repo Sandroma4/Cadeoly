@@ -17,6 +17,8 @@ export default async function ProfilePage() {
       name: true,
       email: true,
       locale: true,
+      emailRemindersEnabled: true,
+      emailReminderDays: true,
       password: true,
       accounts: { where: { provider: "google" }, select: { id: true } },
     },
@@ -37,6 +39,8 @@ export default async function ProfilePage() {
         name={user.name || ""}
         email={user.email || ""}
         locale={user.locale || "fr"}
+        emailRemindersEnabled={user.emailRemindersEnabled}
+        emailReminderDays={user.emailReminderDays}
       />
       {googleAuthEnabled() && (
         <section className="stack">

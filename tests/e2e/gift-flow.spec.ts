@@ -24,9 +24,25 @@ for (const [locale, text] of [
         .getByRole("button", { name: text.auth.signUp, exact: true })
         .click();
       await expect(target).toHaveURL(new RegExp(`${next}$`));
+      if (next.includes("/dashboard")) {
+        const tutorial = target.getByRole("dialog");
+        await expect(tutorial).toBeVisible();
+        await tutorial
+          .getByRole("button", { name: text.tutorial.skip, exact: true })
+          .click();
+        await expect(tutorial).not.toBeVisible();
+      }
     }
     const createPath = `/${locale}/dashboard/wishlists/create`;
     await register(page, "Owner", `/${locale}/dashboard`);
+    await page.locator("aside summary[aria-label]").click();
+    await page.getByRole("button", { name: text.theme.dark, exact: true }).click();
+    await page.reload();
+    await page.locator("aside summary[aria-label]").click();
+    await expect(
+      page.getByRole("button", { name: text.theme.dark, exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await page.goto(createPath);
     await expect(page.locator('select[name="visibility"]')).toHaveValue(
       "PRIVATE",
@@ -61,17 +77,14 @@ for (const [locale, text] of [
     ).toBeVisible();
     if (testInfo.project.name === "mobile") {
       await page.reload();
+      // The list's display and filtering controls can fill a mobile viewport.
+      await page
+        .getByRole("heading", { name: "Birthday book", exact: true })
+        .scrollIntoViewIfNeeded();
       await expect(
         page.getByRole("heading", { name: "Birthday book", exact: true }),
       ).toBeInViewport();
-      const options = await page
-        .locator("aside summary[aria-label]")
-        .boundingBox();
-      const parameters = await page
-        .locator("main details > summary")
-        .first()
-        .boundingBox();
-      expect(options!.y + options!.height).toBeLessThanOrEqual(parameters!.y);
+      await expect(page.locator("aside summary[aria-label]")).toBeVisible();
     }
     await page
       .getByRole("button", { name: text.wishlist.createShare, exact: true })

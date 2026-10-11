@@ -4,6 +4,13 @@
   gap: 1.5rem;
 }
 
+@media (max-width: 600px) {
+  .container > :global(nav.segmented-filters) {
+    align-self: stretch;
+    width: 100%;
+  }
+}
+
 .header {
   display: flex;
   justify-content: space-between;

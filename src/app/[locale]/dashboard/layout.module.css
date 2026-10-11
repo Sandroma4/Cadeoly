@@ -12,7 +12,7 @@
 
 /* Sidebar - Desktop */
 .sidebar {
-  width: 216px;
+  width: 240px;
   background-color: var(--card);
   border-right: 1px solid var(--border);
   display: flex;
@@ -625,7 +625,8 @@
   }
   .nav {
     height: 60px;
-    flex: 4 1 0;
+    flex: 1 1 0;
+    width: 100%;
     gap: 0;
     overflow: visible;
   }
@@ -642,14 +643,6 @@
   .navItem[aria-current="page"] {
     box-shadow: none;
     color: var(--brand-foreground);
-  }
-  .settings {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  .settings > summary {
-    height: 56px;
-    font-size: 0.65rem;
   }
   .main {
     height: calc(100% - 60px - env(safe-area-inset-bottom));
@@ -697,13 +690,35 @@
   .settings {
     display: block;
     position: fixed;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: 0.875rem;
+    right: 0.875rem;
     width: 44px;
+    height: 44px;
     z-index: 60;
   }
   .main .content {
-    padding-top: 4.25rem;
+    padding-top: 0.875rem;
+  }
+  .content > * > header {
+    align-items: flex-start;
+    text-align: left;
+    padding-right: 48px;
+    padding-left: 0;
+  }
+  .content :global(h1) {
+    text-align: left;
+  }
+  .content > * > header > h1,
+  .content > * > header > div > h1 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.25;
+    text-align: left;
   }
   .settings > summary {
     width: 44px;
@@ -711,7 +726,17 @@
     min-height: 44px;
     border: 1px solid var(--border);
     border-radius: 0.75rem;
-    background: var(--card);
+    background: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .settings > summary:hover,
+  .settings[open] > summary {
+    background: var(--secondary);
+    border-color: var(--brand-foreground);
   }
   .settings > summary > span,
   .settings > summary::after {

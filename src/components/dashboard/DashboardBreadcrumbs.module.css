@@ -1,0 +1,40 @@
+.navigation {
+  margin-block-end: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .navigation {
+    margin-block-end: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+.navigation ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.navigation li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.navigation li + li::before {
+  content: "/";
+  opacity: 0.6;
+}
+
+.navigation a:hover {
+  text-decoration: underline;
+}
+
+.navigation [aria-current] {
+  color: var(--foreground);
+}

@@ -23,15 +23,20 @@ export function AuthForm({
   passwordChanged = false,
   googleEnabled = false,
   oauthError,
+  initialName,
+  initialEmail,
 }: {
   register?: boolean;
   next: string;
   passwordChanged?: boolean;
   googleEnabled?: boolean;
   oauthError?: "link" | "denied" | "failed";
+  initialName?: string;
+  initialEmail?: string;
 }) {
   const t = useTranslations("auth");
   const google = useTranslations("googleAuth");
+  const guest = useTranslations("guest");
   const recovery = useTranslations("recovery");
   const errors = useTranslations("errors");
   const locale = useLocale();
@@ -114,6 +119,7 @@ export function AuthForm({
               <Input
                 id="name"
                 name="name"
+                defaultValue={initialName}
                 label={t("fullName")}
                 autoComplete="name"
                 maxLength={120}
@@ -123,6 +129,7 @@ export function AuthForm({
             <Input
               id="email"
               name="email"
+              defaultValue={initialEmail}
               type="email"
               label={t("email")}
               autoComplete="email"
@@ -155,6 +162,9 @@ export function AuthForm({
           </PreservedForm>
         </CardContent>
         <CardFooter className="stack">
+          <Link href="/guest" className="secondary-link">
+            {guest("continue")}
+          </Link>
           {!register && (
             <Link href="/forgot-password">{t("forgotPassword")}</Link>
           )}

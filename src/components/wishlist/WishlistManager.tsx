@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/Button";
 import { ShareLink } from "@/components/ui/ShareLink";
 export function WishlistManager({
   id,
+  name,
   visibility,
   token,
 }: {
   id: string;
+  name: string;
   visibility: string;
   token: string | null;
 }) {
@@ -61,7 +63,7 @@ export function WishlistManager({
       )}
       {visibility === "PRIVATE" && <p>{flow("privateSharing")}</p>}
       {visibility === "PUBLIC" && (
-        <ShareLink href={"/" + locale + "/lists/" + id} title="Cadéoly" />
+        <ShareLink href={"/" + locale + "/lists/" + id} title={name} />
       )}
       {visibility === "LINK" && (
         <>
@@ -84,7 +86,7 @@ export function WishlistManager({
               </Button>
             )}
           </div>
-          {link && <ShareLink key={link} href={link} title="Cadéoly" />}
+          {link && <ShareLink key={link} href={link} title={name} />}
         </>
       )}
       {message && <p role="status">{message}</p>}

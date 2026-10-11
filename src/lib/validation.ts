@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Visibility, Priority } from "./domain-values";
 
 const text = z.string().trim().min(1).max(120);
 const description = z.string().trim().max(2000).default("");
@@ -45,7 +46,7 @@ export const wishlistSchema = z.object({
     .transform((v) => v || null),
   name: text,
   description,
-  visibility: z.enum(["PRIVATE", "FAMILY", "LINK", "PUBLIC"]),
+  visibility: z.enum(Visibility),
   eventId: z
     .string()
     .max(100)
@@ -122,7 +123,7 @@ export const itemSchema = z.object({
     .transform((value) =>
       value === "" ? null : Math.round(Number(value) * 100),
     ),
-  priority: z.enum(["LOW", "NORMAL", "HIGH", "ESSENTIAL"]),
+  priority: z.enum(Priority),
 });
 export const familySchema = z.object({ name: text, description });
 export const eventSchema = familySchema.extend({

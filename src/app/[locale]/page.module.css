@@ -111,9 +111,7 @@
 }
 
 .brand {
-  margin-bottom: 1.5rem;
-  font-size: 1.35rem;
-  font-weight: 700;
+  color: var(--brand-foreground);
 }
 .illustration {
   display: grid;
@@ -121,13 +119,11 @@
   width: 88px;
   height: 88px;
   border-radius: 24px;
-  background: var(--accent);
-  color: var(--accent-foreground);
   margin-bottom: 1.25rem;
 }
 .illustration svg {
-  width: 48px;
-  height: 48px;
+  width: 88px;
+  height: 88px;
 }
 .header {
   max-width: 560px;

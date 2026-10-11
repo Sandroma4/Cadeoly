@@ -11,10 +11,13 @@ const iconPaths = {
   calendar:
     "M6 5h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3ZM7 3v4m10-4v4M3 11h18m-13 5h2m4 0h2",
   mail: "M3 5h18v14H3ZM3 5l9 7 9-7",
+  sparkles:
+    "m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z",
 };
 const destinations = [
   ["/dashboard", "navHome", "home"],
   ["/dashboard/wishlists", "myWishlists", "gift"],
+  ["/dashboard/gift-ideas", "navGiftIdeas", "sparkles"],
   ["/dashboard/reservations", "myReservations", "bag"],
   ["/dashboard/family", "navFamily", "people"],
   ["/dashboard/events", "navEvents", "calendar"],
@@ -30,12 +33,14 @@ export function DashboardNavigation() {
           href === "/dashboard"
             ? path === href
             : path === href || path.startsWith(href + "/");
+        const isAuxiliary =
+          href === "/dashboard/feedback" || href === "/dashboard/gift-ideas";
         return (
           <Link
             key={href}
             href={href}
             prefetch={true}
-            className={`${styles.navItem} ${href === "/dashboard/feedback" ? `${styles.mobileAuxiliary} ${styles.supportLink}` : ""}`}
+            className={`${styles.navItem} ${isAuxiliary ? styles.mobileAuxiliary : ""} ${href === "/dashboard/feedback" ? styles.supportLink : ""}`}
             aria-current={active ? "page" : undefined}
           >
             <span aria-hidden="true">

@@ -1,0 +1,103 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 0.25rem);
+  padding: 0.45rem 0.75rem;
+}
+
+.searchField input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.searchField input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.pillsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.pillsLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  margin-right: 0.25rem;
+}
+
+.filterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterPill:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+}
+
+.filterPillActive {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+  font-weight: 600;
+}
+
+.countBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 0.1rem 0.4rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+}
+
+.filterPillActive .countBadge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.emptyFilter {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--muted-foreground);
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}

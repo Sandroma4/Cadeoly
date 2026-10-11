@@ -5,16 +5,18 @@ import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 export default async function Home() {
   const t = await getTranslations("home");
+  const guest = await getTranslations("guest");
   return (
     <main className={styles.container}>
-      <div className={styles.brand}>
-        <BrandLogo />
-      </div>
       <div className={styles.illustration} aria-hidden="true">
-        <OccasionIcon kind="gift" />
+        <BrandLogo iconOnly />
       </div>
       <header className={styles.header}>
-        <h1>{t("title")}</h1>
+        <h1>
+          {t.rich("title", {
+            brand: (chunks) => <span className={styles.brand}>{chunks}</span>,
+          })}
+        </h1>
         <p>{t("description")}</p>
       </header>
       <section className={styles.content}>
@@ -23,6 +25,9 @@ export default async function Home() {
         </Link>
         <Link href="/login" className={styles.secondaryButton}>
           {t("signIn")}
+        </Link>
+        <Link href="/guest" className={styles.secondaryButton}>
+          {guest("continue")}
         </Link>
       </section>
       <section className={styles.benefits} aria-label={t("benefits")}>

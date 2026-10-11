@@ -1,15 +1,18 @@
 "use server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import type { ActionResult } from "@/lib/action-result";
+import { reportBusinessEvent } from "@/lib/observability";
 import { fields, registrationSchema } from "@/lib/validation";
 import { auth } from "@/auth";
 import { refreshWishlists } from "@/lib/refresh";
 import { z } from "zod";
+import { parseEmailReminderSettings } from "@/lib/email-reminder-settings";
 import {
   allowAccountAttempt,
   changeAccountPassword,
 } from "@/lib/account-service";
-export async function registerUser(form: FormData) {
+export async function registerUser(form: FormData): Promise<ActionResult> {
   const parsed = registrationSchema.safeParse(fields(form));
   if (!parsed.success) return { error: "registrationInvalid" };
   const { name, email, password } = parsed.data;
@@ -37,6 +40,7 @@ export async function registerUser(form: FormData) {
     await prisma.user.create({
       data: { name, email, password: await bcrypt.hash(password, 12) },
     });
+    reportBusinessEvent("signup");
     return { success: true };
   } catch (error) {
     if (
@@ -80,9 +84,15 @@ export async function updateProfile(form: FormData) {
     })
     .safeParse(fields(form));
   if (!parsed.success) return { error: "invalidFields" };
+  let reminders;
+  try {
+    reminders = parseEmailReminderSettings(form);
+  } catch {
+    return { error: "invalidFields" };
+  }
   await prisma.user.update({
     where: { id: session.user.id },
-    data: parsed.data,
+    data: { ...parsed.data, ...reminders },
   });
   refreshWishlists();
   return { success: true };

@@ -11,15 +11,18 @@ import { ListLifecycle } from "@/components/wishlist/ListLifecycle";
 import { getTrashedGifts } from "@/app/actions/item";
 import { GiftTrash } from "@/components/wishlist/GiftTrash";
 import { ownerPreview } from "@/lib/convenience";
+import { giftPageOptions } from "@/lib/gift-search";
+import { PrintListButton } from "@/components/wishlist/PrintListButton";
 export default async function WishlistDetailsPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ from?: string; preview?: string }>;
+  params: Promise<{ id: string; locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { id } = await params;
-  const wishlist = await getWishlistById(id);
+  const { id, locale } = await params;
+  const query = await searchParams;
+  const wishlist = await getWishlistById(id, giftPageOptions(query, locale));
   if (!wishlist) notFound();
   const preview = wishlist.isOwner && (await searchParams).preview === "1";
   const recipients = wishlist.isOwner
@@ -73,6 +76,7 @@ export default async function WishlistDetailsPage({
           </svg>
           {nav(wishlist.isOwner ? "back" : "backFamily")}
         </Link>
+        <PrintListButton />
         {wishlist.canEdit && !preview && (
           <details
             id="list-settings"
@@ -172,13 +176,16 @@ export default async function WishlistDetailsPage({
       {wishlist.canEdit && !preview && (
         <section id="list-share">
           <WishlistManager
+            name={wishlist.name}
             id={id}
             visibility={wishlist.visibility}
             token={token}
           />
         </section>
       )}
-      {wishlist.canEdit && !preview && <GiftTrash gifts={await getTrashedGifts(id)} />}
+      {wishlist.canEdit && !preview && (
+        <GiftTrash gifts={await getTrashedGifts(id)} />
+      )}
     </div>
   );
 }

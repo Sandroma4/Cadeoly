@@ -1,10 +1,11 @@
 import type { PrismaClient } from "@wishi/prisma-client";
+import type { ActionResult } from "./action-result";
 export async function changeGiftState(
   db: PrismaClient,
   id: string,
   ownerId: string,
   restore = false,
-) {
+): Promise<ActionResult> {
   const result = await db.wishlistItem.updateMany({
     where: {
       id,

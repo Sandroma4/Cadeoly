@@ -2,6 +2,7 @@ import { mkdir, writeFile, rename } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { emailSchema } from "./validation";
+import type { ReminderMail } from "./email-reminders";
 import { gmailConfiguration, sendGmailMail } from "./gmail-mail";
 async function recordDelivery(
   outcome: "accepted" | "failed",
@@ -36,7 +37,10 @@ export function mailConfiguration() {
   const local = ["localhost", "127.0.0.1", "[::1]"].includes(base.hostname);
   const file = process.env.MAIL_TRANSPORT === "file";
   const gmail = process.env.MAIL_TRANSPORT === "gmail";
-  if (process.env.MAIL_TRANSPORT && !["file", "gmail", "resend"].includes(process.env.MAIL_TRANSPORT))
+  if (
+    process.env.MAIL_TRANSPORT &&
+    !["file", "gmail", "resend"].includes(process.env.MAIL_TRANSPORT)
+  )
     throw new Error("emailUnavailable");
   if (
     base.username ||
@@ -47,7 +51,11 @@ export function mailConfiguration() {
   )
     throw new Error("emailUnavailable");
   if (gmail) gmailConfiguration();
-  if (!file && !gmail && (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM))
+  if (
+    !file &&
+    !gmail &&
+    (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM)
+  )
     throw new Error("emailUnavailable");
   if (!file) {
     const from = process.env.MAIL_FROM!.trim();
@@ -87,16 +95,47 @@ export async function sendResetMail(
       ? `Choose a new password using this link (valid for 30 minutes, once only):\n${url}\n\nIf you did not request this, ignore this email.`
       : `Choisissez un nouveau mot de passe avec ce lien (valable 30 minutes, une seule fois) :\n${url}\n\nSi vous n’êtes pas à l’origine de cette demande, ignorez cet email.`,
   };
+  return deliverMail(message, file);
+}
+export async function sendReminderMail(reminder: ReminderMail) {
+  const { base, file } = mailConfiguration();
+  const english = reminder.locale === "en";
+  const locale = english ? "en" : "fr";
+  const url = new URL(`/${locale}${reminder.href}`, base).toString();
+  const settings = new URL(`/${locale}/dashboard/profile`, base).toString();
+  const date = reminder.due.toLocaleDateString(english ? "en-GB" : "fr-FR", {
+    timeZone: "Europe/Paris",
+  });
+  return deliverMail(
+    {
+      from: process.env.MAIL_FROM || "Cadéoly <local@example.test>",
+      to: reminder.email,
+      subject: english ? "Your Cadéoly reminder" : "Votre rappel Cadéoly",
+      text: english
+        ? `${reminder.title} — ${date}\n${url}\n\nChange or disable email reminders in your profile:\n${settings}`
+        : `${reminder.title} — ${date}\n${url}\n\nModifiez ou désactivez les rappels par email dans votre profil :\n${settings}`,
+    },
+    file,
+    reminder.idempotencyKey,
+  );
+}
+export async function deliverMail(
+  message: { from: string; to: string; subject: string; text: string },
+  file: boolean,
+  idempotencyKey?: string,
+) {
   if (file) {
     const directory = path.resolve(
       /* turbopackIgnore: true */ process.env.EMAIL_OUTBOX_DIR || ".local/mail",
     );
     await mkdir(directory, { recursive: true });
     await writeFile(
-      path.join(directory, randomUUID() + ".json"),
+      path.join(directory, (idempotencyKey || randomUUID()) + ".json"),
       JSON.stringify(message, null, 2),
       { flag: "wx", mode: 0o600 },
-    );
+    ).catch((error: NodeJS.ErrnoException) => {
+      if (!idempotencyKey || error.code !== "EEXIST") throw error;
+    });
     return;
   }
   if (process.env.MAIL_TRANSPORT === "gmail") {
@@ -116,8 +155,9 @@ export async function sendResetMail(
       headers: {
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
+        ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
       },
-      body: JSON.stringify({ ...message, to: [email] }),
+      body: JSON.stringify({ ...message, to: [message.to] }),
       signal: AbortSignal.timeout(15000),
     });
   } catch {

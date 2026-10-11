@@ -4,8 +4,11 @@ import type { readReminders } from "@/lib/reminders";
 export async function Reminders({
   reminders,
 }: {
-  reminders: Awaited<ReturnType<typeof readReminders>>;
+  reminders:
+    | Awaited<ReturnType<typeof readReminders>>
+    | ReturnType<typeof readReminders>;
 }) {
+  reminders = await reminders;
   const [t, locale] = await Promise.all([
     getTranslations("improvements"),
     getLocale(),
@@ -19,6 +22,17 @@ export async function Reminders({
     !reminders.events.length &&
     !reminders.gifts.length &&
     !reminders.lists.length;
+  if (empty)
+    return (
+      <section
+        className="reminder-panel reminder-empty"
+        aria-labelledby="reminders-heading"
+      >
+        <h2 id="reminders-heading">{t("reminders")}</h2>
+        <p>{t("noReminders")}</p>
+        <Link href="/dashboard/reservations">{t("myReservations")} →</Link>
+      </section>
+    );
   return (
     <section
       className={`stack reminder-panel${empty ? " reminder-empty" : ""}`}
@@ -51,8 +65,13 @@ export async function Reminders({
           <li key={gift.id}>
             <Link href={gift.href}>{gift.title}</Link>
             <span>
-              {t("reservedGift", { name: gift.recipient })} ·{" "}
-              {gift.due ? date(gift.due) : t("noDate")}
+              {t(
+                gift.kind === "contribution"
+                  ? "contributedGift"
+                  : "reservedGift",
+                { name: gift.recipient },
+              )}{" "}
+              · {gift.due ? date(gift.due) : t("noDate")}
             </span>
           </li>
         ))}

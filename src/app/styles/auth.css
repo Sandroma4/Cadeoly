@@ -1,0 +1,35 @@
+.google-entry {
+  margin-bottom: 1rem;
+}
+.google-signin button {
+  width: 100%;
+  min-height: 52px;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #1f1f1f;
+  border-color: #747775;
+  background: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+}
+.google-signin button:hover:not(:disabled) {
+  background: #f2f2f2;
+  box-shadow: var(--shadow-lg);
+}
+.google-signin button:focus-visible {
+  outline: 3px solid var(--brand-foreground);
+  outline-offset: 3px;
+}
+.google-signin svg {
+  flex-shrink: 0;
+}
+.auth-divider {
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+.oauth-error {
+  color: var(--destructive);
+  margin-bottom: 1rem;
+}

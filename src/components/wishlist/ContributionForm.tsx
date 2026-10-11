@@ -9,6 +9,8 @@ import {
 } from "@/app/actions/contribution";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { GiftFunding } from "./GiftFunding";
+import { notify } from "@/components/ui/Toast";
 export function ContributionForm({
   itemId,
   mine = 0,
@@ -16,6 +18,8 @@ export function ContributionForm({
   target,
   token,
   cancelOnly = false,
+  currency = "EUR",
+  showProgress = true,
 }: {
   itemId: string;
   mine?: number;
@@ -23,6 +27,8 @@ export function ContributionForm({
   target?: number;
   token?: string;
   cancelOnly?: boolean;
+  currency?: string | null;
+  showProgress?: boolean;
 }) {
   const t = useTranslations("contributions"),
     errors = useTranslations("errors"),
@@ -30,10 +36,11 @@ export function ContributionForm({
     router = useRouter();
   const [pending, setPending] = useState(false),
     [message, setMessage] = useState("");
+  const notices = useTranslations("notifications");
   const money = (cents: number) =>
     new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: "EUR",
+      currency: currency || "EUR",
     }).format(cents / 100);
   async function perform(amount?: string) {
     setPending(true);
@@ -46,6 +53,13 @@ export function ContributionForm({
       if ("error" in result && result.error) setMessage(errors(result.error));
       else {
         setMessage(t(amount === undefined ? "cancelled" : "saved"));
+        notify(
+          notices(
+            amount === undefined
+              ? "contributionCancelled"
+              : "contributionSaved",
+          ),
+        );
         router.refresh();
       }
     } catch {
@@ -57,21 +71,8 @@ export function ContributionForm({
   return (
     <section className="stack" aria-busy={pending}>
       <p>{t("help")}</p>
-      {total !== undefined && target !== undefined && (
-        <div className="stack">
-          <p>{t("progress", { total: money(total), target: money(target) })}</p>
-          {target > 0 && (
-            <progress
-              className="gift-progress"
-              value={Math.min(total, target)}
-              max={target}
-              aria-label={t("progress", {
-                total: money(total),
-                target: money(target),
-              })}
-            />
-          )}
-        </div>
+      {showProgress && total !== undefined && target !== undefined && (
+        <GiftFunding total={total} target={target} currency={currency} />
       )}
       {!!mine && <p>{t("mine", { amount: money(mine) })}</p>}
       {!cancelOnly &&

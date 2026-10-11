@@ -1,0 +1,173 @@
+:root {
+  --background-light: #fcf9f5;
+  --background-dark: #15121b;
+  --foreground-light: #282338;
+  --foreground-dark: #fafafa;
+  --card-light: #ffffff;
+  --card-dark: #262030;
+  --card-foreground-light: #282338;
+  --card-foreground-dark: #fafafa;
+  --primary-light: #6543be;
+  --primary-dark: #795bd3;
+  --brand-foreground-light: #6543be;
+  --brand-foreground-dark: #bda5ff;
+  --primary-hover-light: #52339f;
+  --primary-hover-dark: #7050c5;
+  --secondary-light: #f3edf8;
+  --secondary-dark: #27272a;
+  --secondary-foreground-light: #475569;
+  --secondary-foreground-dark: #b8b8c3;
+  --muted-light: #f1f5f9;
+  --muted-dark: #1f1f22;
+  --muted-foreground-light: #64748b;
+  --muted-foreground-dark: #b8b8c3;
+  --accent-light: #fce8d8;
+  --accent-dark: #392b28;
+  --accent-foreground-light: #75462f;
+  --accent-foreground-dark: #f5c8aa;
+  --border-light: #e9e0d8;
+  --border-dark: rgba(255, 255, 255, 0.08);
+  --ring-light: rgba(79, 70, 229, 0.3);
+  --ring-dark: rgba(99, 102, 241, 0.4);
+  --destructive-light: #b91c1c;
+  --destructive-dark: #fca5a5;
+  --shadow-sm-color-light: rgb(0 0 0 / 0.05);
+  --shadow-sm-color-dark: rgb(0 0 0 / 0.3);
+  --shadow-md-color-light: rgb(0 0 0 / 0.1);
+  --shadow-md-color-dark: rgb(0 0 0 / 0.4);
+  --shadow-lg-color-light: rgb(0 0 0 / 0.1);
+  --shadow-lg-color-dark: rgb(0 0 0 / 0.5);
+  color-scheme: light dark;
+  --background: light-dark(var(--background-light), var(--background-dark));
+  --foreground: light-dark(var(--foreground-light), var(--foreground-dark));
+  --card: light-dark(var(--card-light), var(--card-dark));
+  --card-foreground: light-dark(
+    var(--card-foreground-light),
+    var(--card-foreground-dark)
+  );
+  --primary: light-dark(var(--primary-light), var(--primary-dark));
+  --brand-foreground: light-dark(
+    var(--brand-foreground-light),
+    var(--brand-foreground-dark)
+  );
+  --primary-hover: light-dark(
+    var(--primary-hover-light),
+    var(--primary-hover-dark)
+  );
+  --secondary: light-dark(var(--secondary-light), var(--secondary-dark));
+  --secondary-foreground: light-dark(
+    var(--secondary-foreground-light),
+    var(--secondary-foreground-dark)
+  );
+  --muted: light-dark(var(--muted-light), var(--muted-dark));
+  --muted-foreground: light-dark(
+    var(--muted-foreground-light),
+    var(--muted-foreground-dark)
+  );
+  --accent: light-dark(var(--accent-light), var(--accent-dark));
+  --accent-foreground: light-dark(
+    var(--accent-foreground-light),
+    var(--accent-foreground-dark)
+  );
+  --border: light-dark(var(--border-light), var(--border-dark));
+  --radius: 1rem;
+  --ring: light-dark(var(--ring-light), var(--ring-dark));
+  --destructive: light-dark(var(--destructive-light), var(--destructive-dark));
+  --shadow-sm-color: light-dark(
+    var(--shadow-sm-color-light),
+    var(--shadow-sm-color-dark)
+  );
+  --shadow-md-color: light-dark(
+    var(--shadow-md-color-light),
+    var(--shadow-md-color-dark)
+  );
+  --shadow-lg-color: light-dark(
+    var(--shadow-lg-color-light),
+    var(--shadow-lg-color-dark)
+  );
+  --shadow-sm: 0 1px 2px 0 var(--shadow-sm-color);
+  --shadow-md:
+    0 4px 6px -1px var(--shadow-md-color), 0 2px 4px -2px var(--shadow-md-color);
+  --shadow-lg:
+    0 10px 15px -3px var(--shadow-lg-color),
+    0 4px 6px -4px var(--shadow-lg-color);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Preserve the browser baseline supported by Next.js before light-dark(). */
+@supports not (color: light-dark(white, black)) {
+  :root {
+    color-scheme: light;
+    --background: var(--background-light);
+    --foreground: var(--foreground-light);
+    --card: var(--card-light);
+    --card-foreground: var(--card-foreground-light);
+    --primary: var(--primary-light);
+    --brand-foreground: var(--brand-foreground-light);
+    --primary-hover: var(--primary-hover-light);
+    --secondary: var(--secondary-light);
+    --secondary-foreground: var(--secondary-foreground-light);
+    --muted: var(--muted-light);
+    --muted-foreground: var(--muted-foreground-light);
+    --accent: var(--accent-light);
+    --accent-foreground: var(--accent-foreground-light);
+    --border: var(--border-light);
+    --ring: var(--ring-light);
+    --destructive: var(--destructive-light);
+    --shadow-sm-color: var(--shadow-sm-color-light);
+    --shadow-md-color: var(--shadow-md-color-light);
+    --shadow-lg-color: var(--shadow-lg-color-light);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]):not([data-theme="dark"]) {
+      color-scheme: dark;
+      --background: var(--background-dark);
+      --foreground: var(--foreground-dark);
+      --card: var(--card-dark);
+      --card-foreground: var(--card-foreground-dark);
+      --primary: var(--primary-dark);
+      --brand-foreground: var(--brand-foreground-dark);
+      --primary-hover: var(--primary-hover-dark);
+      --secondary: var(--secondary-dark);
+      --secondary-foreground: var(--secondary-foreground-dark);
+      --muted: var(--muted-dark);
+      --muted-foreground: var(--muted-foreground-dark);
+      --accent: var(--accent-dark);
+      --accent-foreground: var(--accent-foreground-dark);
+      --border: var(--border-dark);
+      --ring: var(--ring-dark);
+      --destructive: var(--destructive-dark);
+      --shadow-sm-color: var(--shadow-sm-color-dark);
+      --shadow-md-color: var(--shadow-md-color-dark);
+      --shadow-lg-color: var(--shadow-lg-color-dark);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --background: var(--background-dark);
+    --foreground: var(--foreground-dark);
+    --card: var(--card-dark);
+    --card-foreground: var(--card-foreground-dark);
+    --primary: var(--primary-dark);
+    --brand-foreground: var(--brand-foreground-dark);
+    --primary-hover: var(--primary-hover-dark);
+    --secondary: var(--secondary-dark);
+    --secondary-foreground: var(--secondary-foreground-dark);
+    --muted: var(--muted-dark);
+    --muted-foreground: var(--muted-foreground-dark);
+    --accent: var(--accent-dark);
+    --accent-foreground: var(--accent-foreground-dark);
+    --border: var(--border-dark);
+    --ring: var(--ring-dark);
+    --destructive: var(--destructive-dark);
+    --shadow-sm-color: var(--shadow-sm-color-dark);
+    --shadow-md-color: var(--shadow-md-color-dark);
+    --shadow-lg-color: var(--shadow-lg-color-dark);
+  }
+}

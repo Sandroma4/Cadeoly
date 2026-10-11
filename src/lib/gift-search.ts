@@ -1,5 +1,6 @@
 export type SearchableGift = {
   id: string;
+  position?: number;
   title: string;
   description?: string | null;
   size?: string | null;
@@ -13,7 +14,10 @@ export type SearchableGift = {
 };
 export function paginateGifts<T>(items: T[], requested: number, size = 24) {
   const pages = Math.max(1, Math.ceil(items.length / size));
-  const page = Math.min(pages, Math.max(1, Number.isFinite(requested) ? Math.trunc(requested) : 1));
+  const page = Math.min(
+    pages,
+    Math.max(1, Number.isFinite(requested) ? Math.trunc(requested) : 1),
+  );
   return { page, pages, items: items.slice((page - 1) * size, page * size) };
 }
 export type GiftFilters = {
@@ -23,6 +27,58 @@ export type GiftFilters = {
   status: string;
   sort: string;
 };
+export const defaultGiftFilters: GiftFilters = {
+  query: "",
+  maxPrice: "",
+  priority: "all",
+  status: "all",
+  sort: "manual",
+};
+export type GiftPageOptions = {
+  page?: number;
+  locale?: string;
+  filters?: Partial<GiftFilters>;
+};
+export type GiftPagination = {
+  page: number;
+  pages: number;
+  total: number;
+  matched: number;
+  filters: GiftFilters;
+  totals: Record<string, number>;
+  unpriced: number;
+  mixedCurrencies: boolean;
+  currency: string;
+};
+export function giftPageOptions(
+  input: Record<string, string | string[] | undefined>,
+  locale: string,
+): GiftPageOptions & { filters: GiftFilters; page: number } {
+  const value = (key: string) =>
+    typeof input[key] === "string" ? (input[key] as string) : "";
+  const supported = (key: string, values: string[], fallback: string) =>
+    values.includes(value(key)) ? value(key) : fallback;
+  const requested = Number(value("page"));
+  return {
+    page: Number.isFinite(requested) ? Math.max(1, Math.trunc(requested)) : 1,
+    locale,
+    filters: {
+      query: value("q").slice(0, 120),
+      maxPrice: value("maxPrice").slice(0, 12),
+      priority: supported(
+        "priority",
+        ["LOW", "NORMAL", "HIGH", "ESSENTIAL"],
+        "all",
+      ),
+      status: supported("status", ["available", "mine"], "all"),
+      sort: supported(
+        "sort",
+        ["manual", "recent", "priority", "priceAsc", "priceDesc", "name"],
+        "manual",
+      ),
+    },
+  };
+}
 const normalize = (value: string) =>
   value.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
 export function selectGifts<T extends SearchableGift>(
@@ -64,6 +120,7 @@ export function selectGifts<T extends SearchableGift>(
     LOW: 1,
   };
   return selected.sort((a, b) => {
+    if (filters.sort === "manual") return (a.position || 0) - (b.position || 0);
     if (filters.sort === "name") return collator.compare(a.title, b.title);
     if (filters.sort === "priority")
       return (rank[b.priority] || 0) - (rank[a.priority] || 0);

@@ -18,7 +18,7 @@ export function ThemeSwitcher({ initial = "system" }: { initial?: string }) {
           title={t(value)}
           onClick={() => {
             document.documentElement.dataset.theme = value;
-            document.cookie = `wishi-theme=${value}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+            document.cookie = `cadeoly-theme=${value}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
             setTheme(value);
           }}
         >

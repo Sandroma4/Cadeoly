@@ -15,7 +15,9 @@ export default function LanguageSwitcher() {
     if (locale === nextLocale) return;
 
     startTransition(() => {
-      router.replace(pathname, { locale: nextLocale });
+      router.replace(pathname + window.location.search + window.location.hash, {
+        locale: nextLocale,
+      });
     });
   }
 

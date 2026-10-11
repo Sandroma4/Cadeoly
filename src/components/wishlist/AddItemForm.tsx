@@ -3,29 +3,24 @@ import { PreservedForm } from "@/components/ui/PreservedForm";
 import { useEffect, useRef, useState } from "react";
 import { previewProduct } from "@/app/actions/product-preview";
 import { useRouter } from "@/i18n/routing";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   createWishlistItem,
   updateWishlistItem,
   deleteWishlistItem,
+  restoreWishlistItem,
 } from "@/app/actions/item";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
-type Gift = {
-  id: string;
-  title: string;
-  description: string | null;
-  url: string | null;
-  priceCents: number | null;
-  priority: string;
-  image: string | null;
-  size: string | null;
-  color: string | null;
-  model: string | null;
-  isGroupGift?: boolean;
-  alternativeUrls?: string;
-};
+import { offerQuickUndo } from "@/components/ui/QuickUndo";
+import { notify } from "@/components/ui/Toast";
+import type { Gift } from "./gift-editor-types";
+import { ItemModeChooser } from "./ItemModeChooser";
+import { ItemFormFields } from "./ItemFormFields";
+import { ItemPreview } from "./ItemPreview";
+import { ItemActions } from "./ItemActions";
+
 export function AddItemForm({
   wishlistId,
   item,
@@ -38,8 +33,9 @@ export function AddItemForm({
   initialTitle?: string;
 }) {
   const t = useTranslations("wishlist");
-  const locale = useLocale();
+  const currency = item?.currency || "EUR";
   const flow = useTranslations("uiFlow");
+  const notices = useTranslations("notifications");
   const [mode, setMode] = useState<"link" | "manual" | null>(
     item ? "manual" : initialUrl ? "link" : initialTitle ? "manual" : null,
   );
@@ -170,17 +166,19 @@ export function AddItemForm({
         : await createWishlistItem(form);
       if (result.error) {
         setError(errors(result.error));
-        setFieldErrors(
+        const invalidFields =
           "fields" in result
             ? result.fields || []
             : result.error === "groupPriceRequired"
               ? ["price"]
               : result.error === "duplicateGift"
                 ? ["url"]
-                : [],
-        );
+                : [];
+        setFieldErrors(invalidFields);
+        if (invalidFields.includes("url")) setMode("link");
       } else {
         formRef.current?.dispatchEvent(new Event("draft-clear"));
+        notify(notices(item ? "giftUpdated" : "giftAdded"));
         setLastMode(mode || "manual");
         setSuccess(flow("giftSaved"));
         setDirty(false);
@@ -206,7 +204,13 @@ export function AddItemForm({
     try {
       const result = await deleteWishlistItem(item.id);
       if (result.error) setError(errors(result.error));
-      else router.refresh();
+      else {
+        offerQuickUndo({
+          message: "giftDeleted",
+          undo: () => restoreWishlistItem(item.id),
+        });
+        router.refresh();
+      }
     } catch {
       setError(errors("unexpected"));
     } finally {
@@ -215,96 +219,26 @@ export function AddItemForm({
   }
   if (!open)
     return (
-      <div className="stack">
-        <div className="button-row">
-          <Button
-            disabled={pending}
-            onClick={() => {
-              setSuccess("");
-              if (!item && success) setMode(lastMode);
-              setOpen(true);
-            }}
-          >
-            {item ? c("edit") : success ? flow("addAnother") : t("addItem")}
-          </Button>
-          {item && (
-            <Button
-              disabled={pending}
-              variant="ghost"
-              className="gift-remove"
-              onClick={remove}
-            >
-              {trash("move")}
-            </Button>
-          )}
-        </div>
-        {error && <p role="alert">{error}</p>}
-        {success && (
-          <>
-            <p role="status">{success}</p>
-            <a className="secondary-link" href="#list-gifts">
-              {flow("viewMyList")}
-            </a>
-          </>
-        )}
-      </div>
+      <ItemActions
+        item={item}
+        pending={pending}
+        success={success}
+        error={error}
+        onRemove={remove}
+        onOpen={() => {
+          setSuccess("");
+          if (!item && success) setMode(lastMode);
+          setOpen(true);
+        }}
+      />
     );
   if (!mode)
     return (
-      <Card className="gift-editor">
-        <CardContent>
-          <div ref={chooserRef} className="gift-choice-panel">
-            <h2>{t("addItem")}</h2>
-            <p>{flow("chooseMode")}</p>
-            <div className="gift-mode-choices">
-              <button
-                type="button"
-                className="gift-mode-choice"
-                onClick={() => setMode("link")}
-              >
-                <svg
-                  aria-hidden="true"
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                >
-                  <path d="m10 13 4-4m-6 7-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 1 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" />
-                </svg>
-                <strong>{flow("fromLink")}</strong>
-                <span>{flow("linkModeHelp")}</span>
-              </button>
-              <button
-                type="button"
-                className="gift-mode-choice"
-                onClick={() => setMode("manual")}
-              >
-                <svg
-                  aria-hidden="true"
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m15 4 5 5-11 11-6 1 1-6L15 4Zm-2 2 5 5" />
-                </svg>
-                <strong>{flow("manual")}</strong>
-                <span>{flow("manualModeHelp")}</span>
-              </button>
-            </div>
-            <Button variant="ghost" onClick={cancel}>
-              {c("cancel")}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <ItemModeChooser
+        chooserRef={chooserRef}
+        onChoose={setMode}
+        onCancel={cancel}
+      />
     );
   const prefix = item?.id || "new";
   return (
@@ -383,93 +317,11 @@ export function AddItemForm({
               <p role="status">{importMessage}</p>
             </div>
           </div>
-          <Input
-            id={prefix + "-title"}
-            name="title"
-            error={fieldError("title")}
-            label={flow("requiredName")}
-            defaultValue={item?.title || initialTitle}
-            maxLength={120}
-            required
+          <ItemFormFields
+            item={item}
+            initialTitle={initialTitle}
+            fieldErrors={fieldErrors}
           />
-          <div className="gift-main-fields">
-            <Input
-              id={prefix + "-price"}
-              name="price"
-              error={fieldError("price")}
-              type="number"
-              min="0"
-              max="9999999.99"
-              step="0.01"
-              label={flow("estimatedPrice")}
-              placeholder="29.90"
-              defaultValue={
-                item?.priceCents == null
-                  ? ""
-                  : (item.priceCents / 100).toFixed(2)
-              }
-            />
-            <div className="gift-priority">
-              <label htmlFor={prefix + "-priority"}>{t("priority")}</label>
-              <select
-                name="priority"
-                id={prefix + "-priority"}
-                defaultValue={item?.priority || "NORMAL"}
-              >
-                {["LOW", "NORMAL", "HIGH", "ESSENTIAL"].map((value) => (
-                  <option key={value} value={value}>
-                    {t("priority" + value[0] + value.slice(1).toLowerCase())}
-                  </option>
-                ))}
-              </select>
-              <p className="form-hint">{flow("priorityHelp")}</p>
-            </div>
-          </div>
-          <details className="form-options list-detail-options">
-            <summary>{flow("optionalDetails")}</summary>
-            <div className="stack">
-              <label htmlFor={prefix + "-alternatives"}>
-                {t("alternativeUrls")}
-              </label>
-              <textarea
-                id={prefix + "-alternatives"}
-                name="alternativeUrls"
-                rows={3}
-                maxLength={10240}
-                defaultValue={item?.alternativeUrls || ""}
-                  aria-invalid={fieldErrors.includes("alternativeUrls")}
-                aria-describedby={prefix + "-alternatives-help"}
-              />
-                <p id={prefix + "-alternatives-help"}>{fieldError("alternativeUrls") || t("alternativeHelp")}</p>
-              <Input
-                id={prefix + "-description"}
-                name="description"
-                error={fieldError("description")}
-                label={t("descriptionGift")}
-                defaultValue={item?.description || ""}
-                maxLength={2000}
-              />
-              {!item ? (
-                <label>
-                  <input type="checkbox" name="isGroupGift" /> {t("groupGift")}
-                </label>
-              ) : (
-                item.isGroupGift && <p>{t("groupGift")}</p>
-              )}
-              {!item && <p>{t("groupHint")}</p>}
-              {(["size", "color", "model"] as const).map((key) => (
-                <Input
-                  key={key}
-                  id={prefix + "-" + key}
-                  name={key}
-                  error={fieldError(key)}
-                  label={t(key)}
-                  maxLength={80}
-                  defaultValue={item?.[key] || ""}
-                />
-              ))}
-            </div>
-          </details>
           <Input
             id={prefix + "-photo"}
             type="file"
@@ -539,44 +391,11 @@ export function AddItemForm({
             </label>
           )}
           {preview && (
-            <section
-              className="gift-preview stack"
-              aria-label={flow("preview")}
-              role="status"
-            >
-              <h4>{flow("preview")}</h4>
-              <strong>{preview.title}</strong>
-              {preview.description && <p>{preview.description}</p>}
-              {preview.price && (
-                <p>
-                  {t("price")}:{" "}
-                  {new Intl.NumberFormat(locale, {
-                    style: "currency",
-                    currency: "EUR",
-                  }).format(Number(preview.price))}
-                </p>
-              )}
-              {preview.url && <p>{preview.url}</p>}
-              <p>
-                {t("priority")}:{" "}
-                {t(
-                  "priority" +
-                    preview.priority[0] +
-                    preview.priority.slice(1).toLowerCase(),
-                )}
-              </p>
-              {["size", "color", "model"].map((key) =>
-                preview[key] ? (
-                  <p key={key}>
-                    {t(key)}: {preview[key]}
-                  </p>
-                ) : null,
-              )}
-              {(item?.isGroupGift || preview.isGroupGift === "on") && (
-                <p>{t("groupGift")}</p>
-              )}
-              <p>{flow("previewHelp")}</p>
-            </section>
+            <ItemPreview
+              preview={preview}
+              currency={currency}
+              isGroupGift={item?.isGroupGift}
+            />
           )}
           <div className="button-row form-actions">
             <Button disabled={pending || importing}>

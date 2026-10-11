@@ -1,5 +1,9 @@
 import type { PrismaClient } from "@wishi/prisma-client";
 import { canReadWishlist, hashShareToken } from "./wishlist-service";
+import {
+  createReadAccessChecker,
+  createFamilyMembershipLoader,
+} from "./read-access-checker";
 export async function contributeGift(
   db: PrismaClient,
   itemId: string,
@@ -77,6 +81,10 @@ export async function cancelContribution(
   return { success: true };
 }
 export async function readMyContributions(db: PrismaClient, userId: string) {
+  const familyOwners = createFamilyMembershipLoader(db, userId);
+  const canRead = createReadAccessChecker((list, token) =>
+    canReadWishlist(db, list, userId, token, familyOwners),
+  );
   const rows = await db.contribution.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -91,11 +99,12 @@ export async function readMyContributions(db: PrismaClient, userId: string) {
         row.accessTokenHash === hashShareToken(list.shareToken)
           ? list.shareToken
           : undefined;
-      const accessible =
-        !row.item.deletedAt && (await canReadWishlist(db, list, userId, token));
+      const accessible = !row.item.deletedAt && (await canRead(list, token));
       return {
         itemId: row.itemId,
         amountCents: row.amountCents,
+        currency: accessible ? row.item.currency : null,
+        occasion: accessible ? list.occasion : null,
         title: accessible ? row.item.title : null,
         token: accessible ? token : undefined,
         href: accessible

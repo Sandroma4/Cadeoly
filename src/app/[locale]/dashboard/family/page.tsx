@@ -28,7 +28,10 @@ export default async function FamilyPage() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>{t("title")}</h1>
+        <div>
+          <h1 className={styles.title}>{t("title")}</h1>
+          <p className="page-intro">{t("intro")}</p>
+        </div>
         {families.length > 0 && <FamilyActions join />}
       </header>
 

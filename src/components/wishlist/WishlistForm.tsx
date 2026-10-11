@@ -1,4 +1,5 @@
 "use client";
+import { Visibility } from "@/lib/domain-values";
 import { PreservedForm } from "@/components/ui/PreservedForm";
 import { useState } from "react";
 import { useRouter } from "@/i18n/routing";
@@ -6,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { createWishlist, updateWishlist } from "@/app/actions/wishlist";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { notify } from "@/components/ui/Toast";
 export function WishlistForm({
   events,
   initial,
@@ -32,6 +34,7 @@ export function WishlistForm({
   };
 }) {
   const t = useTranslations("wishlist");
+  const notices = useTranslations("notifications");
   const flow = useTranslations("uiFlow");
   const help = useTranslations("usageHelp");
   const [visibility, setVisibility] = useState(
@@ -60,12 +63,17 @@ export function WishlistForm({
         setError(errors(result.error));
         setFieldErrors("fields" in result ? result.fields || [] : []);
       } else {
+        notify(notices(initial ? "listUpdated" : "listCreated"));
         document
           .querySelector<HTMLFormElement>(".list-form")
           ?.dispatchEvent(new Event("draft-clear"));
         setSaved(true);
         if ("wishlistId" in result)
-          router.push(quickAdd ? `/quick-add?${new URLSearchParams(quickAdd)}` : "/dashboard/wishlists/" + result.wishlistId);
+          router.push(
+            quickAdd
+              ? `/quick-add?${new URLSearchParams(quickAdd)}`
+              : "/dashboard/wishlists/" + result.wishlistId,
+          );
         router.refresh();
       }
     } catch {
@@ -145,7 +153,7 @@ export function WishlistForm({
         onChange={(event) => setVisibility(event.target.value)}
         aria-describedby="visibility-help"
       >
-        {["PRIVATE", "FAMILY", "LINK", "PUBLIC"].map((value) => (
+        {Object.values(Visibility).map((value) => (
           <option key={value} value={value}>
             {t("visibility" + value[0] + value.slice(1).toLowerCase())}
           </option>

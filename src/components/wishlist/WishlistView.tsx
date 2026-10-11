@@ -1,13 +1,18 @@
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { getLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/routing";
+import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
+import { hashShareToken } from "@/lib/wishlist-service";
 import { MerchantLinks } from "./MerchantLinks";
 import { readWishlist } from "@/lib/wishlist-service";
 import { AddItemForm } from "./AddItemForm";
 import { ReserveButton } from "./ReserveButton";
+import { GuestReservation } from "./GuestReservation";
 import { GiftDetails, GiftImage } from "./GiftDetails";
 import { GiftBrowser } from "./GiftBrowser";
+import { GiftOrderControls } from "./GiftOrderControls";
 import { ContributionForm } from "./ContributionForm";
+import { GiftFunding } from "./GiftFunding";
 import {
   Card,
   CardHeader,
@@ -30,6 +35,40 @@ export async function WishlistView({
   const c = await getTranslations("common");
   const flow = await getTranslations("dailyFlow");
   const locale = await getLocale();
+  const total = wishlist.pagination?.total ?? wishlist.items.length;
+  const guestSession = !loggedIn
+    ? (await cookies()).get("cadeoly-guest")?.value
+    : undefined;
+  const guestReservations = guestSession
+    ? await prisma.reservation.findMany({
+        where: {
+          userId: null,
+          guestSessionHash: hashShareToken(guestSession),
+          managementExpiresAt: { gt: new Date() },
+          itemId: { in: wishlist.items.map((item) => item.id) },
+        },
+        select: { id: true, itemId: true },
+      })
+    : [];
+  const releasedNotes = wishlist.isOwner
+    ? await prisma.reservation.findMany({
+        where: {
+          itemId: { in: wishlist.items.map((item) => item.id) },
+          messageReleasedAt: { not: null },
+          personalMessage: { not: null },
+        },
+        select: { itemId: true, personalMessage: true },
+      })
+    : [];
+  const targetDate = wishlist.event?.date
+    ? new Date(wishlist.event.date)
+    : wishlist.neededBy
+      ? new Date(wishlist.neededBy + "T00:00:00Z")
+      : null;
+  const daysLeft = targetDate
+    ? Math.ceil((targetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+
   return (
     <div className="stack" id="list-gifts">
       <header>
@@ -60,6 +99,23 @@ export async function WishlistView({
           )}
         </div>
       </header>
+      {daysLeft !== null && daysLeft >= 0 && daysLeft <= 30 && (
+        <div
+          className="event-urgency-banner"
+          role="status"
+          style={{
+            padding: "0.75rem 1rem",
+            borderRadius: "var(--radius)",
+            background: "color-mix(in srgb, var(--accent) 15%, var(--card))",
+            border:
+              "1px solid color-mix(in srgb, var(--accent) 35%, var(--border))",
+            fontSize: "0.9rem",
+            fontWeight: 500,
+          }}
+        >
+          {t("eventApproaching", { count: daysLeft })}
+        </div>
+      )}
       {wishlist.description && <p>{wishlist.description}</p>}
       {wishlist.preferences && (
         <p style={{ whiteSpace: "pre-wrap" }}>{wishlist.preferences}</p>
@@ -81,12 +137,14 @@ export async function WishlistView({
             </svg>{" "}
             {t("surprise")}
           </p>
-          {wishlist.canEdit && wishlist.items.length > 0 && (
-            <AddItemForm wishlistId={wishlist.id} />
+          {wishlist.canEdit && total > 0 && (
+            <div id="gift-add-section">
+              <AddItemForm wishlistId={wishlist.id} />
+            </div>
           )}
         </>
       )}
-      {!wishlist.items.length && (
+      {!total && (
         <div className="empty-state wishlist-empty">
           <div className="wishlist-empty-intro">
             <div className="empty-art">
@@ -100,105 +158,204 @@ export async function WishlistView({
           {wishlist.canEdit && <AddItemForm wishlistId={wishlist.id} />}
         </div>
       )}
-      {wishlist.items.length > 0 && (
-        <GiftBrowser
-          owner={wishlist.isOwner}
-          gifts={wishlist.items.map((item) => ({
-            ...item,
-            card: (
-              <Card key={item.id} className="gift-card">
-                <GiftImage gift={item} token={token} />
-                <CardHeader>
-                  <CardTitle>{item.title}</CardTitle>
-                  {item.isGroupGift && (
-                    <p className="visual-badge">{t("groupGift")}</p>
-                  )}
-                  <p className="gift-price">
-                    {item.priceCents !== null
-                      ? new Intl.NumberFormat(locale, {
-                          style: "currency",
-                          currency: item.currency || "EUR",
-                        }).format(item.priceCents / 100)
-                      : ""}{" "}
-                    <span className="visual-badge">
-                      {t(
-                        "priority" +
-                          item.priority[0] +
-                          item.priority.slice(1).toLowerCase(),
-                      )}
-                    </span>
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <GiftDetails gift={item} token={token} showImage={false} />
-                  {item.description && <p>{item.description}</p>}
-                  {item.url &&
-                    (item.url.startsWith("https://") ||
-                      item.url.startsWith("http://")) && (
-                      <a
-                        className="product-link"
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {t("viewProduct")} <span aria-hidden="true">↗</span>
-                      </a>
+      {total > 0 && (
+        <>
+          {wishlist.canEdit &&
+            (!wishlist.pagination ||
+              wishlist.pagination.filters.sort === "manual") && (
+              <p className="form-hint">{t("orderHelp")}</p>
+            )}
+          <GiftBrowser
+            owner={wishlist.isOwner}
+            pagination={wishlist.pagination}
+            gifts={wishlist.items.map((item) => ({
+              ...item,
+              card: (
+                <Card key={item.id} className="gift-card">
+                  <GiftImage gift={item} token={token} />
+                  <CardHeader>
+                    <CardTitle>{item.title}</CardTitle>
+                    {item.isGroupGift && (
+                      <p className="visual-badge gift-group-badge">
+                        {t("groupGift")}
+                      </p>
                     )}
-                  {(item.alternativeUrls || "")
-                    .split("\n")
-                    .filter((url) => /^https?:\/\//.test(url))
-                    .map((url, index) => (
-                      <a
-                        key={url}
-                        className="product-link"
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <p className="gift-price">
+                      {item.priceCents !== null
+                        ? new Intl.NumberFormat(locale, {
+                            style: "currency",
+                            currency: item.currency || "EUR",
+                          }).format(item.priceCents / 100)
+                        : ""}{" "}
+                      <span
+                        className="visual-badge gift-priority"
+                        data-priority={item.priority}
                       >
-                        {t("alternativeLink", { number: index + 1 })} ↗
-                      </a>
-                    ))}
-                </CardContent>
-                <CardFooter>
-                  {previewOnly ? (
-                    <p>{t("previewOnly")}</p>
-                  ) : wishlist.isOwner ? (
-                    wishlist.canEdit && (
-                        <div className="stack"><AddItemForm wishlistId={wishlist.id} item={item} />{(item.url || item.alternativeUrls) && <MerchantLinks itemId={item.id} />}</div>
-                    )
-                  ) : loggedIn && item.isGroupGift ? (
-                    <ContributionForm
-                      key={item.myContributionCents}
-                      itemId={item.id}
-                      mine={item.myContributionCents}
-                      total={item.contributedCents}
-                      target={item.priceCents || 0}
-                      token={token}
-                    />
-                  ) : loggedIn ? (
-                    <ReserveButton
-                      itemId={item.id}
-                      isReserved={item.isReserved}
-                      reservedByMe={item.reservedByMe}
-                      token={token}
-                    />
-                  ) : (
-                    <Link
-                      href={{
-                        pathname: "/login",
-                        query: token
-                          ? { next: "/" + locale + "/share/" + token }
-                          : { next: "/" + locale + "/lists/" + wishlist.id },
-                      }}
-                    >
-                      {t("signInToReserve")}
-                    </Link>
-                  )}
-                </CardFooter>
-              </Card>
-            ),
-          }))}
-        />
+                        {t(
+                          "priority" +
+                            item.priority[0] +
+                            item.priority.slice(1).toLowerCase(),
+                        )}
+                      </span>
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    {releasedNotes.find((row) => row.itemId === item.id)
+                      ?.personalMessage && (
+                      <blockquote style={{ whiteSpace: "pre-wrap" }}>
+                        {
+                          releasedNotes.find((row) => row.itemId === item.id)
+                            ?.personalMessage
+                        }
+                      </blockquote>
+                    )}
+                    {!wishlist.isOwner && !previewOnly && (
+                      <p
+                        className="gift-availability"
+                        data-reserved={item.isReserved}
+                      >
+                        {t(item.isReserved ? "reserved" : "available")}
+                      </p>
+                    )}
+                    {!wishlist.isOwner && !previewOnly && item.isGroupGift && (
+                      <GiftFunding
+                        total={item.contributedCents}
+                        target={item.priceCents}
+                        currency={item.currency}
+                      />
+                    )}
+                    {(item.size ||
+                      item.color ||
+                      item.model ||
+                      item.description ||
+                      item.alternativeUrls) && (
+                      <details className="gift-details-panel">
+                        <summary>{t("details")}</summary>
+                        <div className="stack">
+                          <GiftDetails
+                            gift={item}
+                            token={token}
+                            showImage={false}
+                          />
+                          {item.description && (
+                            <p className="gift-description">
+                              {item.description}
+                            </p>
+                          )}
+                          {(item.alternativeUrls || "")
+                            .split("\n")
+                            .filter((url) => /^https?:\/\//.test(url))
+                            .map((url, index) => (
+                              <a
+                                key={url}
+                                className="product-link"
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {t("alternativeLink", { number: index + 1 })} ↗
+                              </a>
+                            ))}
+                        </div>
+                      </details>
+                    )}
+                    {item.url &&
+                      (item.url.startsWith("https://") ||
+                        item.url.startsWith("http://")) && (
+                        <a
+                          className="product-link"
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {t("viewProduct")} <span aria-hidden="true">↗</span>
+                        </a>
+                      )}
+                  </CardContent>
+                  <CardFooter>
+                    {previewOnly ? (
+                      <p>{t("previewOnly")}</p>
+                    ) : wishlist.isOwner ? (
+                      wishlist.canEdit && (
+                        <div className="stack">
+                          {(!wishlist.pagination ||
+                            wishlist.pagination.filters.sort === "manual") && (
+                            <GiftOrderControls
+                              itemId={item.id}
+                              title={item.title}
+                              canMoveUp={Boolean(item.canMoveUp)}
+                              canMoveDown={Boolean(item.canMoveDown)}
+                            />
+                          )}
+                          <AddItemForm wishlistId={wishlist.id} item={item} />
+                          {(item.url || item.alternativeUrls) && (
+                            <details className="gift-details-panel">
+                              <summary>{t("linkTools")}</summary>
+                              <MerchantLinks itemId={item.id} />
+                            </details>
+                          )}
+                        </div>
+                      )
+                    ) : loggedIn && item.isGroupGift ? (
+                      <ContributionForm
+                        key={item.myContributionCents}
+                        itemId={item.id}
+                        mine={item.myContributionCents}
+                        total={item.contributedCents}
+                        target={item.priceCents || 0}
+                        currency={item.currency}
+                        showProgress={false}
+                        token={token}
+                      />
+                    ) : loggedIn ? (
+                      <ReserveButton
+                        itemId={item.id}
+                        isReserved={item.isReserved}
+                        reservedByMe={item.reservedByMe}
+                        token={token}
+                      />
+                    ) : (
+                      <GuestReservation
+                        wishlistId={wishlist.id}
+                        itemId={item.id}
+                        token={token}
+                        reserved={item.isReserved}
+                        group={item.isGroupGift}
+                        managementId={
+                          guestReservations.find(
+                            (row) => row.itemId === item.id,
+                          )?.id
+                        }
+                      />
+                    )}
+                  </CardFooter>
+                </Card>
+              ),
+            }))}
+          />
+        </>
+      )}
+      {wishlist.canEdit && total > 0 && !previewOnly && (
+        <a
+          href="#gift-add-section"
+          className="mobile-fab"
+          aria-label={t("addItem")}
+          title={t("addItem")}
+        >
+          <svg
+            aria-hidden="true"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </a>
       )}
     </div>
   );
