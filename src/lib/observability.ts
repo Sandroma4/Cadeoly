@@ -56,7 +56,15 @@ export function reportSlowOperation(operation: "database", durationMs: number) {
 }
 
 export function reportBusinessEvent(
-  event: "signup" | "wishlist_created" | "gift_reserved",
+  event:
+    | "signup"
+    | "wishlist_created"
+    | "gift_reserved"
+    | "guest_list_started"
+    | "guest_list_edited"
+    | "guest_list_recovered"
+    | "guest_lists_kept"
+    | "guest_access_email_sent",
 ) {
   // Aggregate one-count events in the existing log pipeline; no personal data.
   console.info(

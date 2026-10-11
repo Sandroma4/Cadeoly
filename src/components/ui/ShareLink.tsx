@@ -8,10 +8,12 @@ export function ShareLink({
   href,
   title,
   help,
+  compact = false,
 }: {
   href: string;
   title: string;
   help?: string;
+  compact?: boolean;
 }) {
   const t = useTranslations("sharing");
   const [message, setMessage] = useState("");
@@ -86,28 +88,32 @@ export function ShareLink({
         >
           {t("share")}
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={pending}
-          onClick={() => perform("qr")}
-        >
-          {t("qr")}
-        </Button>
-      </div>
-      <div className="button-row" role="group" aria-label={t("sendVia")}>
-        {(["whatsapp", "sms", "email"] as const).map((channel) => (
+        {!compact && (
           <Button
-            key={channel}
             type="button"
             variant="secondary"
             disabled={pending}
-            onClick={() => shareTo(channel)}
+            onClick={() => perform("qr")}
           >
-            {t(channel)}
+            {t("qr")}
           </Button>
-        ))}
+        )}
       </div>
+      {!compact && (
+        <div className="button-row" role="group" aria-label={t("sendVia")}>
+          {(["whatsapp", "sms", "email"] as const).map((channel) => (
+            <Button
+              key={channel}
+              type="button"
+              variant="secondary"
+              disabled={pending}
+              onClick={() => shareTo(channel)}
+            >
+              {t(channel)}
+            </Button>
+          ))}
+        </div>
+      )}
       {failed && (
         <input
           aria-label={t("link")}

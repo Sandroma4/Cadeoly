@@ -17,6 +17,8 @@ model User {
   image          String?
   locale         String?             @default("fr")
   password       String? // Hashed password
+  guestTokenHash String? @unique
+  guestExpiresAt DateTime?
   sessionVersion Int                 @default(0)
   tutorialCompletedAt DateTime?
   emailRemindersEnabled Boolean     @default(false)

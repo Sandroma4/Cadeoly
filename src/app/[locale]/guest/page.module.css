@@ -13,6 +13,7 @@
   gap: 1rem;
 }
 .topbarControls {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -30,7 +31,7 @@
 .signup p {
   color: var(--muted-foreground);
 }
-.container > .tabs {
+.container .tabs {
   align-self: center;
   justify-content: center;
 }
@@ -61,17 +62,343 @@
 }
 .signup > a {
   align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
     gap: 1rem;
   }
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+  }
+  .topbarControls {
+    gap: 0.5rem;
+  }
+  .topbarControls > a {
+    grid-column: 2;
+    grid-row: 1;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .container .topbar .topbarControls button {
+    min-width: 44px;
+    min-height: 44px;
+  }
   .intro h1 {
     font-size: 1.5rem;
   }
-  .container > .tabs a {
-    padding-inline: 0.65rem;
+  .container .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 0.25rem;
+  }
+  .container .tabs a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 0.375rem;
     font-size: 0.875rem;
+  }
+  .signup {
+    padding: 1rem;
+  }
+  .signup h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+  .signup > span {
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.5;
+    text-wrap: balance;
+  }
+  .signup > a {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 3rem;
+  padding-block: 2rem;
+}
+.eyebrow {
+  color: var(--brand-foreground);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.heroCopy h1 {
+  max-width: 14ch;
+  margin-block: 1rem;
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+.heroLead {
+  max-width: 40ch;
+  color: var(--muted-foreground);
+  font-size: 1.075rem;
+  line-height: 1.65;
+}
+.steps {
+  display: grid;
+  gap: 0.625rem;
+  margin: 1.5rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+}
+.steps li::marker {
+  color: var(--brand-foreground);
+  font-weight: 700;
+}
+.startPanel,
+.sharePanel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  background: var(--card);
+}
+.startPanel {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.startPanel h2 {
+  margin-block: 0.75rem 1.25rem;
+  font-size: 1.35rem;
+  text-wrap: balance;
+}
+.startIcon {
+  display: flex;
+  color: var(--brand-foreground);
+}
+.reassurance,
+.invitationNote {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.reassurance {
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+.example {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+.example > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--brand-foreground);
+}
+.exampleContent {
+  display: grid;
+  gap: 1.5rem;
+  padding-top: 1rem;
+}
+.returning {
+  display: grid;
+  gap: 1rem;
+}
+.returning h1 {
+  margin-top: 0.25rem;
+  font-size: 1.25rem;
+}
+.savedLists {
+  display: grid;
+  gap: 0.75rem;
+}
+.savedList {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--foreground);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.savedList h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+.listPreview {
+  margin-block: 0.375rem;
+  font-size: 0.95rem;
+}
+.returning > a {
+  justify-self: start;
+}
+.preferences {
+  position: static;
+}
+.preferences > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 1.25rem;
+}
+.preferences > summary::-webkit-details-marker,
+.example > summary::-webkit-details-marker {
+  display: none;
+}
+.preferencesPanel {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  box-shadow: 0 8px 24px #0003;
+}
+.whenOpen,
+.example[open] > summary .whenClosed {
+  display: none;
+}
+.example[open] > summary .whenOpen {
+  display: inline;
+}
+.chevron {
+  transition: transform 150ms;
+}
+.example[open] > summary .chevron {
+  transform: rotate(180deg);
+}
+.demoNotice {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.demoCard > :first-child {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.5rem;
+}
+.demoCard .icon svg {
+  width: 28px;
+  height: 28px;
+}
+.demoCard > :last-child {
+  padding: 0.5rem 1rem 1rem;
+}
+.savedList small {
+  display: block;
+  color: var(--muted-foreground);
+}
+.savedList > span:last-child {
+  color: var(--brand-foreground);
+  font-size: 0.875rem;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.workspace > * {
+  min-width: 0;
+}
+.sharePanel {
+  display: grid;
+  gap: 1rem;
+}
+.sharePanel h2,
+.accountOffer h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.sharePanel > p,
+.accountOffer p,
+.notice {
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+.sharePanel details > summary {
+  cursor: pointer;
+  padding-block: 0.5rem;
+}
+.accountOffer {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+@media (max-width: 768px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    padding-block: 0.5rem;
+  }
+  .heroCopy h1 {
+    max-width: 18ch;
+    font-size: clamp(1.875rem, 8vw, 2.5rem);
+    margin-block: 0.75rem;
+  }
+  .heroLead {
+    font-size: 0.95rem;
+    margin-bottom: 0;
+  }
+  .steps {
+    display: none;
+  }
+  .startPanel,
+  .sharePanel {
+    padding: 1rem;
+  }
+  .startPanel h2 {
+    font-size: 1.125rem;
+    margin-block: 0.5rem 1rem;
+  }
+  .startPanel h2,
+  .startIcon {
+    display: none;
+  }
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .savedList {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .savedList > a {
+    width: 100%;
   }
 }

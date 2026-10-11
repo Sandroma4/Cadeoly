@@ -2,15 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/Card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import styles from "@/app/[locale]/guest/page.module.css";
@@ -22,7 +15,7 @@ interface DemoItem {
   status: "available" | "reserved" | "group";
 }
 
-export function GuestInteractiveDemo({ locale }: { locale: string }) {
+export function GuestInteractiveDemo() {
   const t = useTranslations("guest");
   const home = useTranslations("home");
 
@@ -34,12 +27,14 @@ export function GuestInteractiveDemo({ locale }: { locale: string }) {
 
   const [newTitle, setNewTitle] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   function toggleReserve(id: string) {
     setItems((prev) =>
       prev.map((item) => {
         if (item.id !== id) return item;
-        const nextStatus = item.status === "available" ? "reserved" : "available";
+        const nextStatus =
+          item.status === "available" ? "reserved" : "available";
         if (nextStatus === "reserved") {
           setFeedback(t("demoReservedSuccess"));
         } else {
@@ -72,7 +67,8 @@ export function GuestInteractiveDemo({ locale }: { locale: string }) {
             padding: "0.85rem 1rem",
             borderRadius: "var(--radius)",
             background: "color-mix(in srgb, var(--primary) 12%, var(--card))",
-            border: "1px solid color-mix(in srgb, var(--primary) 30%, var(--border))",
+            border:
+              "1px solid color-mix(in srgb, var(--primary) 30%, var(--border))",
             color: "var(--foreground)",
             fontWeight: 500,
             fontSize: "0.9rem",
@@ -83,48 +79,49 @@ export function GuestInteractiveDemo({ locale }: { locale: string }) {
       )}
 
       {/* Simulator: Add gift */}
-      <form
-        onSubmit={handleAddItem}
-        style={{
-          display: "flex",
-          gap: "0.5rem",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-          padding: "1rem",
-          background: "var(--secondary)",
-          borderRadius: "var(--radius)",
-          border: "1px solid var(--border)",
-        }}
-      >
-        <div style={{ flex: "1 1 200px" }}>
-          <Input
-            label={t("demoAddTitle")}
-            placeholder={t("demoAddPlaceholder")}
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            maxLength={100}
-          />
-        </div>
-        <Button type="submit" variant="secondary">
-          {t("demoAddButton")}
-        </Button>
-      </form>
+      {expanded && (
+        <form
+          onSubmit={handleAddItem}
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            alignItems: "flex-end",
+            flexWrap: "wrap",
+            padding: "1rem",
+            background: "var(--secondary)",
+            borderRadius: "var(--radius)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div style={{ flex: "1 1 200px" }}>
+            <Input
+              label={t("demoAddTitle")}
+              placeholder={t("demoAddPlaceholder")}
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              maxLength={100}
+            />
+          </div>
+          <Button type="submit" variant="secondary">
+            {t("demoAddButton")}
+          </Button>
+        </form>
+      )}
 
       {/* Gifts grid */}
       <div className="gift-grid">
-        {items.map((item) => {
+        {items.slice(0, expanded ? items.length : 1).map((item) => {
           const title = item.titleKey ? home(item.titleKey) : item.customTitle;
           const isReserved = item.status === "reserved";
           const isGroup = item.status === "group";
 
           return (
-            <Card key={item.id}>
+            <Card key={item.id} className={styles.demoCard}>
               <CardHeader>
                 <div className={styles.icon}>
                   <OccasionIcon kind="gift" />
                 </div>
                 <CardTitle>{title}</CardTitle>
-                <CardDescription>{home("exampleTitle")}</CardDescription>
               </CardHeader>
               <CardContent className="stack" style={{ gap: "0.75rem" }}>
                 <span className="visual-badge">
@@ -152,6 +149,13 @@ export function GuestInteractiveDemo({ locale }: { locale: string }) {
           );
         })}
       </div>
+      <Button
+        variant="ghost"
+        aria-expanded={expanded}
+        onClick={() => setExpanded(!expanded)}
+      >
+        {t(expanded ? "demoShowLess" : "demoExplore")}
+      </Button>
     </div>
   );
 }

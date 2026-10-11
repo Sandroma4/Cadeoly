@@ -14,29 +14,18 @@ import { readOnboarding } from "@/lib/onboarding";
 import { Suspense } from "react";
 import { EventCountdown } from "@/components/events/EventCountdown";
 export default async function DashboardPage() {
-  const [
-    t,
-    w,
-    c,
-    improvements,
-    convenience,
-    locale,
-    events,
-    lists,
-    familyLists,
-    session,
-  ] = await Promise.all([
-    getTranslations("dashboard"),
-    getTranslations("wishlist"),
-    getTranslations("common"),
-    getTranslations("improvements"),
-    getTranslations("convenience"),
-    getLocale(),
-    getEvents(false, 3),
-    getMyWishlists("active", 3),
-    getFamilyWishlists(undefined, 5),
-    auth(),
-  ]);
+  const [t, w, c, convenience, locale, events, lists, familyLists, session] =
+    await Promise.all([
+      getTranslations("dashboard"),
+      getTranslations("wishlist"),
+      getTranslations("common"),
+      getTranslations("convenience"),
+      getLocale(),
+      getEvents(false, 3),
+      getMyWishlists("active", 3),
+      getFamilyWishlists(undefined, 5),
+      auth(),
+    ]);
   const user = session?.user?.id
     ? await prisma.user.findUnique({
         where: { id: session.user.id },
@@ -54,41 +43,13 @@ export default async function DashboardPage() {
       <header className={styles.greeting}>
         <h1>
           {t("hello", {
-            name: user?.name?.trim().split(/\s+/)[0] || c("unknown"),
+            name:
+              user?.name?.trim().split(/\s+/)[0] ||
+              (await getTranslations("guestAccount"))("guestName"),
           })}
         </h1>
         <p>{t("intro")}</p>
       </header>
-      {onboarding && (
-        <Suspense fallback={null}>
-          <Onboarding progress={onboarding} />
-        </Suspense>
-      )}
-      <div className="button-row dashboard-actions">
-        <Link className="primary-link" href="/quick-add">
-          {convenience("quickAdd")}
-        </Link>
-        <Link
-          className="dashboard-secondary-action"
-          href="/dashboard/gift-ideas"
-        >
-          {convenience("ideas")}
-        </Link>
-      </div>
-      <div className={styles.overview}>
-        {reminders && (
-          <Suspense
-            fallback={
-              <section className="reminder-panel" aria-busy="true">
-                <h2>{improvements("reminders")}</h2>
-                <p role="status">{improvements("loadingReminders")}</p>
-              </section>
-            }
-          >
-            <Reminders reminders={reminders} />
-          </Suspense>
-        )}
-      </div>
       <div className={styles.grid}>
         <Card className={`${styles.summaryCard} ${styles.listsCard}`}>
           <CardHeader>
@@ -123,6 +84,34 @@ export default async function DashboardPage() {
             </Link>
           </CardContent>
         </Card>
+      </div>
+      {onboarding && (
+        <Suspense fallback={null}>
+          <Onboarding progress={onboarding} userId={session!.user!.id!} />
+        </Suspense>
+      )}
+      <div className="button-row dashboard-actions">
+        <Link
+          className="primary-link"
+          href={
+            session?.user?.id ? "/quick-add" : "/dashboard/wishlists/create"
+          }
+        >
+          {convenience("quickAdd")}
+        </Link>
+        <Link
+          className="dashboard-secondary-action"
+          href="/dashboard/gift-ideas"
+        >
+          {convenience("ideas")}
+        </Link>
+      </div>
+      {reminders && (
+        <Suspense fallback={null}>
+          <Reminders reminders={reminders} />
+        </Suspense>
+      )}
+      <div className={styles.grid}>
         <Card className={styles.summaryCard}>
           <CardHeader>
             <CardTitle>{t("upcomingEvents")}</CardTitle>

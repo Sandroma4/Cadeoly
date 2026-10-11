@@ -21,9 +21,11 @@ const icons = ["gift", "list", "people", "giving"] as const;
 
 export function Tutorial({
   completed,
+  guestMode = false,
   children,
 }: {
   completed: boolean;
+  guestMode?: boolean;
   children: ReactNode;
 }) {
   const t = useTranslations("tutorial");
@@ -56,8 +58,8 @@ export function Tutorial({
     setPending(true);
     setError(false);
     try {
-      const result = await completeTutorial();
-      if (result.error) {
+      const result = guestMode ? { success: true } : await completeTutorial();
+      if ("error" in result && result.error) {
         setError(true);
         return;
       }
@@ -136,7 +138,11 @@ export function Tutorial({
           </div>
         </div>
 
-        {error && <p role="alert" className={styles.errorText}>{t("saveError")}</p>}
+        {error && (
+          <p role="alert" className={styles.errorText}>
+            {t("saveError")}
+          </p>
+        )}
 
         <div className={styles.actions}>
           {step > 0 && (

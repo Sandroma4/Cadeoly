@@ -682,17 +682,21 @@
 }
 
 @media (max-width: 768px) {
+  .settings[data-section-root="false"] {
+    display: none;
+  }
   .settings {
     display: block;
-    position: fixed;
-    top: calc(0.875rem + env(safe-area-inset-top, 0px));
-    right: calc(0.875rem + env(safe-area-inset-right, 0px));
+    position: absolute;
+    top: 0.875rem;
+    right: 0.5rem;
     width: 44px;
     height: 44px;
     z-index: 60;
   }
   .main .content {
     padding-top: 0.875rem;
+    position: relative;
   }
   .content > * > header {
     align-items: flex-start;
@@ -739,14 +743,25 @@
     display: none;
   }
   .settings .settingsPanel {
-    position: fixed;
-    top: calc(52px + env(safe-area-inset-top, 0px));
+    position: absolute;
+    top: 100%;
+    margin-top: 0.5rem;
     bottom: auto !important;
-    right: calc(0.75rem + env(safe-area-inset-right, 0px));
+    right: 0;
     left: auto;
     width: min(240px, calc(100vw - 1.5rem));
+    max-width: none;
     max-height: calc(100dvh - 96px);
     z-index: 70;
+  }
+  .settingsPanel :global(.theme-buttons) {
+    display: flex;
+  }
+  .settingsPanel :global(.theme-buttons) button {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    justify-content: center;
   }
 }
 

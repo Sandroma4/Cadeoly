@@ -1,18 +1,10 @@
 "use server";
-import { randomBytes } from "node:crypto";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { hashShareToken } from "@/lib/wishlist-service";
-import {
-  reserveGuestGift,
-  managementToken,
-} from "@/lib/guest-reservation-service";
-import {
-  guestCookieOptions,
-  guestReservationAccess,
-} from "@/lib/guest-reservation-access";
+import { managementToken } from "@/lib/guest-reservation-service";
+import { guestReservationAccess } from "@/lib/guest-reservation-access";
 import { allowAccountAttempt } from "@/lib/account-service";
 import { deliverMail, mailConfiguration } from "@/lib/reset-mail";
 import { refreshWishlists } from "@/lib/refresh";
@@ -83,35 +75,8 @@ async function sendRecap(id: string, locale: string) {
     return false;
   }
 }
-export async function reserveAsGuest(
-  itemId: string,
-  token: string | undefined,
-  input: unknown,
-  locale: string,
-) {
-  if (await auth()) return { error: "forbidden" };
-  const email =
-    typeof input === "object" && input && "email" in input
-      ? String(input.email).trim().toLowerCase()
-      : "";
-  if (!(await allowed(email, "guest-reserve"))) return { error: "rateLimited" };
-  const jar = await cookies();
-  let session = jar.get("cadeoly-guest")?.value;
-  if (!session || !/^[A-Za-z0-9_-]{43}$/.test(session))
-    session = randomBytes(32).toString("base64url");
-  jar.set("cadeoly-guest", session, guestCookieOptions);
-  const result = await reserveGuestGift(
-    prisma,
-    itemId,
-    token,
-    input,
-    hashShareToken(session),
-    process.env.AUTH_SECRET!,
-  );
-  if ("error" in result) return result;
-  const sent = await sendRecap(result.id, locale);
-  refreshWishlists();
-  return { id: result.id, sent };
+export async function reserveAsGuest() {
+  return { error: "unauthorized" };
 }
 export async function manageGuestReservation(
   id: string,

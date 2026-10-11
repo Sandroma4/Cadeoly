@@ -1,17 +1,17 @@
 "use server";
-import { auth } from "@/auth";
+import { listOwnerId } from "@/lib/action-auth";
 import { prisma } from "@/lib/prisma";
 import { parseProduct, readPublicResource } from "@/lib/product-preview";
 import sharp from "sharp";
 const attempts = new Map<string, number>();
 export async function previewProduct(wishlistId: string, url: string) {
-  const session = await auth();
-  if (!session?.user?.id) return { error: true };
+  const userId = await listOwnerId();
+  if (!userId) return { error: true };
   if (
     !(await prisma.wishlist.findFirst({
       where: {
         id: wishlistId,
-        ownerId: session.user.id,
+        ownerId: userId,
         archivedAt: null,
         deletedAt: null,
       },
@@ -19,7 +19,7 @@ export async function previewProduct(wishlistId: string, url: string) {
     }))
   )
     return { error: true };
-  const user = session.user.id;
+  const user = userId;
   if ((attempts.get(user) || 0) > Date.now() - 10000) return { error: true };
   if (attempts.size > 1000)
     for (const [key, time] of attempts)

@@ -1,7 +1,6 @@
 "use server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
-import { withAuth } from "@/lib/action-auth";
+import { withAuth, withListOwner, listOwnerId } from "@/lib/action-auth";
 import type { ActionResult } from "@/lib/action-result";
 import { fields, itemSchema } from "@/lib/validation";
 import { refreshWishlists } from "@/lib/refresh";
@@ -19,7 +18,7 @@ async function upload(form: FormData) {
 export async function createWishlistItem(
   form: FormData,
 ): Promise<ActionResult> {
-  return withAuth(async (userId): Promise<ActionResult> => {
+  return withListOwner(async (userId): Promise<ActionResult> => {
     const parsed = itemSchema.safeParse(fields(form));
     const wishlistId = String(form.get("wishlistId") || "");
     if (!parsed.success)
@@ -72,7 +71,7 @@ export async function updateWishlistItem(
   id: string,
   form: FormData,
 ): Promise<ActionResult> {
-  return withAuth(async (userId): Promise<ActionResult> => {
+  return withListOwner(async (userId): Promise<ActionResult> => {
     const parsed = itemSchema.safeParse(fields(form));
     if (!parsed.success)
       return {
@@ -154,23 +153,28 @@ async function setGiftState(
   id: string,
   restore: boolean,
 ): Promise<ActionResult> {
-  return withAuth(async (userId): Promise<ActionResult> => {
+  return withListOwner(async (userId): Promise<ActionResult> => {
     const result = await changeGiftState(prisma, id, userId, restore);
     refreshWishlists();
     return result;
   });
 }
 export async function getTrashedGifts(wishlistId: string) {
-  const session = await auth();
-  return session?.user?.id
-    ? readTrashedGifts(prisma, wishlistId, session.user.id)
-    : [];
+  const userId = await listOwnerId();
+  return userId ? readTrashedGifts(prisma, wishlistId, userId) : [];
 }
 export async function reserveItem(
   id: string,
   token?: string,
 ): Promise<ActionResult> {
   return withAuth(async (userId): Promise<ActionResult> => {
+    if (
+      !(await prisma.wishlistItem.findFirst({
+        where: { id, wishlist: { owner: { guestTokenHash: null } } },
+        select: { id: true },
+      }))
+    )
+      return { error: "forbidden" };
     const result = await reserveGift(prisma, id, userId, token);
     refreshWishlists();
     return result;

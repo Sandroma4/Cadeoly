@@ -37,10 +37,11 @@ for (const [locale, m] of [
       await expect(target.getByRole("dialog")).not.toBeVisible();
     }
     await register(page, `owner-${suffix}@example.test`);
-    const onboarding = page.getByRole("region", { name: m.onboarding.title });
+    const onboarding = page.locator('details[class*="disclosure"]');
     await expect(onboarding).toContainText(
-      t("onboarding.progress", { count: 0 }),
+      t("onboarding.compactProgress", { count: 0 }),
     );
+    await onboarding.locator("summary").click();
     await onboarding
       .getByRole("link", { name: new RegExp(m.onboarding.list) })
       .click();
@@ -103,9 +104,7 @@ for (const [locale, m] of [
     ).id;
     const listUrl = `/${locale}/dashboard/wishlists/${listId}`;
     await page.goto(`/${locale}/dashboard`);
-    await expect(onboarding).toContainText(
-      t("onboarding.progress", { count: 2 }),
-    );
+    await expect(onboarding).toHaveCount(0);
     await page.goto(listUrl);
     await page.locator("#list-settings > summary").click();
     await page.locator('select[name="visibility"]').selectOption("LINK");

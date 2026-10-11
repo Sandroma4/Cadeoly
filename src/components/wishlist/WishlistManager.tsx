@@ -10,13 +10,16 @@ export function WishlistManager({
   name,
   visibility,
   token,
+  guestMode = false,
 }: {
+  guestMode?: boolean;
   id: string;
   name: string;
   visibility: string;
   token: string | null;
 }) {
   const t = useTranslations("wishlist");
+  const account = useTranslations("guestAccount");
   const help = useTranslations("usageHelp");
   const flow = useTranslations("dailyFlow");
   const errors = useTranslations("errors");
@@ -43,6 +46,31 @@ export function WishlistManager({
       setPending(false);
     }
   }
+  if (guestMode)
+    return (
+      <section className="stack gift-preview wishlist-sharing">
+        <h2>{flow("sharingTitle")}</h2>
+        <p>{account("sharingHelp")}</p>
+        <Link
+          className="primary-link"
+          href={{
+            pathname: "/register",
+            query: { next: `/${locale}/dashboard/wishlists/${id}` },
+          }}
+        >
+          {account("unlockSharing")}
+        </Link>
+        <Link
+          className="secondary-link"
+          href={{
+            pathname: "/login",
+            query: { next: `/${locale}/dashboard/wishlists/${id}` },
+          }}
+        >
+          {account("signIn")}
+        </Link>
+      </section>
+    );
   return (
     <section
       className="stack gift-preview wishlist-sharing"

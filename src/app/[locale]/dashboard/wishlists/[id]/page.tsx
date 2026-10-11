@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -22,6 +23,7 @@ export default async function WishlistDetailsPage({
 }) {
   const { id, locale } = await params;
   const query = await searchParams;
+  const guestMode = !(await auth())?.user?.id;
   const wishlist = await getWishlistById(id, giftPageOptions(query, locale));
   if (!wishlist) notFound();
   const preview = wishlist.isOwner && (await searchParams).preview === "1";
@@ -109,6 +111,7 @@ export default async function WishlistDetailsPage({
                   wishlist.visibility,
                   wishlist.eventId,
                 ])}
+                guestMode={guestMode}
                 events={events}
                 initial={wishlist}
                 recipients={recipients}
@@ -166,7 +169,7 @@ export default async function WishlistDetailsPage({
       )}
       <WishlistView
         wishlist={preview ? ownerPreview(wishlist) : wishlist}
-        loggedIn
+        loggedIn={!guestMode}
         previewOnly={preview}
       />
 
@@ -176,6 +179,7 @@ export default async function WishlistDetailsPage({
       {wishlist.canEdit && !preview && (
         <section id="list-share">
           <WishlistManager
+            guestMode={guestMode}
             name={wishlist.name}
             id={id}
             visibility={wishlist.visibility}

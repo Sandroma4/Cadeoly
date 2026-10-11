@@ -35,10 +35,18 @@ for (const [locale, text] of [
     }
     const createPath = `/${locale}/dashboard/wishlists/create`;
     await register(page, "Owner", `/${locale}/dashboard`);
-    await page.locator("aside summary[aria-label]").click();
-    await page.getByRole("button", { name: text.theme.dark, exact: true }).click();
+    if (testInfo.project.name === "mobile")
+      await page
+        .locator(`summary[aria-label="${text.dashboard.displaySettings}"]`)
+        .click();
+    await page
+      .getByRole("button", { name: text.theme.dark, exact: true })
+      .click();
     await page.reload();
-    await page.locator("aside summary[aria-label]").click();
+    if (testInfo.project.name === "mobile")
+      await page
+        .locator(`summary[aria-label="${text.dashboard.displaySettings}"]`)
+        .click();
     await expect(
       page.getByRole("button", { name: text.theme.dark, exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
@@ -49,7 +57,9 @@ for (const [locale, text] of [
     );
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
     if (testInfo.project.name === "mobile") {
-      await expect(page.locator("aside summary[aria-label]")).toBeVisible();
+      await expect(
+        page.locator(`summary[aria-label="${text.dashboard.displaySettings}"]`),
+      ).not.toBeVisible();
     }
     await page.locator('input[name="name"]').fill(`Gifts ${suffix}`);
     await page.locator('select[name="visibility"]').selectOption("LINK");
@@ -84,7 +94,9 @@ for (const [locale, text] of [
       await expect(
         page.getByRole("heading", { name: "Birthday book", exact: true }),
       ).toBeInViewport();
-      await expect(page.locator("aside summary[aria-label]")).toBeVisible();
+      await expect(
+        page.locator(`summary[aria-label="${text.dashboard.displaySettings}"]`),
+      ).not.toBeVisible();
     }
     await page
       .getByRole("button", { name: text.wishlist.createShare, exact: true })
@@ -116,7 +128,7 @@ for (const [locale, text] of [
       await expect(
         giver.getByRole("button", { name: text.wishlist.reserve, exact: true }),
       ).toHaveCount(0);
-      await expect(giver.getByRole("status")).toHaveText(
+      await expect(giver.locator(".result-count")).toHaveText(
         locale === "fr" ? "1 cadeau affiché sur 1" : "1 gift shown of 1",
       );
       await register(giver, "Giver", href);

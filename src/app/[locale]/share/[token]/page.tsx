@@ -1,10 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getSharedWishlist } from "@/app/actions/wishlist";
 import { auth } from "@/auth";
 import { WishlistView } from "@/components/wishlist/WishlistView";
 import { PublicListHeader } from "@/components/wishlist/PublicListHeader";
 import { giftPageOptions } from "@/lib/gift-search";
 import type { Metadata } from "next";
+import { currentGuestOwner } from "@/lib/guest-list-access";
 
 export async function generateMetadata({
   params,
@@ -53,6 +54,8 @@ export default async function SharedPage({
     giftPageOptions(await searchParams, locale),
   );
   if (!wishlist) notFound();
+  if (wishlist.isOwner && (await currentGuestOwner())?.id === wishlist.ownerId)
+    redirect(`/${locale}/guest/lists/${wishlist.id}`);
   const session = await auth();
   return (
     <main className="public-container">

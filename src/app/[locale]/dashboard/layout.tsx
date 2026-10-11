@@ -16,6 +16,8 @@ import { OptionsMenu } from "@/components/dashboard/OptionsMenu";
 import { Tutorial, TutorialReplay } from "@/components/dashboard/Tutorial";
 import { InstallApp } from "@/components/ui/InstallApp";
 import { QuickOptions } from "@/components/ui/QuickOptions";
+import { currentGuestOwner } from "@/lib/guest-list-access";
+import { GuestFeatureGate } from "@/components/dashboard/GuestFeatureGate";
 import { returnPath } from "@/lib/return-path";
 export default async function DashboardLayout({
   children,
@@ -31,11 +33,15 @@ export default async function DashboardLayout({
   );
   const login = "/" + locale + "/login?next=" + encodeURIComponent(destination);
   const session = await auth();
-  if (!session?.user?.id) redirect(login);
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { name: true, tutorialCompletedAt: true },
-  });
+  const guestMode = !session?.user?.id;
+  const guest = guestMode ? await currentGuestOwner() : null;
+  const account = await getTranslations("guestAccount");
+  const user = session?.user?.id
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true, tutorialCompletedAt: true },
+      })
+    : { name: account("guestName"), tutorialCompletedAt: new Date() };
   if (!user) redirect(login);
   const t = await getTranslations("dashboard");
   const preferences = await cookies();
@@ -44,8 +50,11 @@ export default async function DashboardLayout({
     preferences.get("wishi-theme")?.value;
   const theme = choice === "light" || choice === "dark" ? choice : "system";
   return (
-    <DraftScope userId={session.user.id}>
-      <Tutorial completed={Boolean(user.tutorialCompletedAt)}>
+    <DraftScope userId={session?.user?.id || guest?.id || "guest"}>
+      <Tutorial
+        guestMode={guestMode}
+        completed={Boolean(user.tutorialCompletedAt)}
+      >
         <div className={styles.dashboard}>
           <a className="skip-link" href="#dashboard-content">
             {(await getTranslations("improvements"))("skip")}
@@ -87,6 +96,7 @@ export default async function DashboardLayout({
               <OptionsMenu
                 className={styles.settings}
                 label={t("displaySettings")}
+                mobilePortal
               >
                 <div className={styles.settingsPanel}>
                   <Link
@@ -110,13 +120,17 @@ export default async function DashboardLayout({
                       ›
                     </span>
                   </Link>
-                  <div className={`${styles.optionsGroup} ${styles.mobileOnly}`}>
+                  <div
+                    className={`${styles.optionsGroup} ${styles.mobileOnly}`}
+                  >
                     <span className={styles.optionsLabel}>
                       {t("optionsLanguage")}
                     </span>
                     <LanguageSwitcher />
                   </div>
-                  <div className={`${styles.optionsGroup} ${styles.mobileOnly}`}>
+                  <div
+                    className={`${styles.optionsGroup} ${styles.mobileOnly}`}
+                  >
                     <span className={styles.optionsLabel}>
                       {t("optionsAppearance")}
                     </span>
@@ -159,7 +173,9 @@ export default async function DashboardLayout({
                     >
                       <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
                     </svg>
-                    <span>{(await getTranslations("convenience"))("ideas")}</span>
+                    <span>
+                      {(await getTranslations("convenience"))("ideas")}
+                    </span>
                   </Link>
                   <Link href="/dashboard/search">
                     <svg
@@ -176,10 +192,18 @@ export default async function DashboardLayout({
                       <circle cx="11" cy="11" r="8" />
                       <path d="m21 21-4.3-4.3" />
                     </svg>
-                    <span>{(await getTranslations("globalSearch"))("title")}</span>
+                    <span>
+                      {(await getTranslations("globalSearch"))("title")}
+                    </span>
                   </Link>
                   <div className={styles.optionsLogout}>
-                    <SignOutButton />
+                    {guestMode ? (
+                      <Link href={login}>
+                        {(await getTranslations("auth"))("signIn")}
+                      </Link>
+                    ) : (
+                      <SignOutButton />
+                    )}
                   </div>
                 </div>
               </OptionsMenu>
@@ -194,9 +218,11 @@ export default async function DashboardLayout({
             </div>
           </aside>
           <main id="dashboard-content" tabIndex={-1} className={styles.main}>
-            <div className={styles.content}>
+            <div id="dashboard-scroll" className={styles.content}>
               <DashboardBreadcrumbs />
-              {children}
+              <GuestFeatureGate guestMode={guestMode}>
+                {children}
+              </GuestFeatureGate>
             </div>
           </main>
         </div>

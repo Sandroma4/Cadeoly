@@ -1,13 +1,13 @@
 "use server";
-import { auth } from "@/auth";
+import { listOwnerId } from "@/lib/action-auth";
 import { prisma } from "@/lib/prisma";
 import { refreshWishlists } from "@/lib/refresh";
 import { moveGift } from "@/lib/gift-order-service";
 
 export async function moveWishlistGift(id: string, direction: "up" | "down") {
-  const session = await auth();
-  if (!session?.user?.id) return { error: "unauthorized" };
-  const result = await moveGift(prisma, id, session.user.id, direction);
+  const userId = await listOwnerId();
+  if (!userId) return { error: "unauthorized" };
+  const result = await moveGift(prisma, id, userId, direction);
   refreshWishlists();
   return result;
 }

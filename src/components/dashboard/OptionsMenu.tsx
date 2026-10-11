@@ -1,7 +1,22 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "@/i18n/routing";
+
+const MOBILE_BREAKPOINT = 768;
+const mobileQuery = `(max-width: ${MOBILE_BREAKPOINT}px)`;
+function subscribeMobile(onChange: () => void) {
+  const query = window.matchMedia(mobileQuery);
+  query.addEventListener("change", onChange);
+  // A client navigation can mount the layout and menu in the same commit.
+  queueMicrotask(onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+const mobileSnapshot = () =>
+  window.matchMedia(mobileQuery).matches &&
+  Boolean(document.getElementById("dashboard-scroll"));
+const serverMobileSnapshot = () => false;
 
 export function OptionsMenu({
   label,
@@ -9,15 +24,23 @@ export function OptionsMenu({
   mobileLabel,
   children,
   more = false,
+  mobilePortal = false,
 }: {
   label: string;
   className: string;
   mobileLabel?: string;
   children: ReactNode;
   more?: boolean;
+  mobilePortal?: boolean;
 }) {
   const pathname = usePathname();
   const ref = useRef<HTMLDetailsElement>(null);
+  const isMobile = useSyncExternalStore(
+    subscribeMobile,
+    mobileSnapshot,
+    serverMobileSnapshot,
+  );
+
   useEffect(() => {
     function outside(event: PointerEvent) {
       if (
@@ -40,11 +63,15 @@ export function OptionsMenu({
       document.removeEventListener("keydown", escape);
     };
   }, []);
-  return (
+
+  const element = (
     <details
       ref={ref}
       className={className}
       data-home={pathname === "/dashboard" ? "true" : undefined}
+      data-section-root={
+        /^\/dashboard(?:\/[^/]+)?$/.test(pathname) ? "true" : "false"
+      }
       onClick={(event) => {
         if ((event.target as HTMLElement).closest("a") && ref.current)
           ref.current.open = false;
@@ -86,4 +113,10 @@ export function OptionsMenu({
       {children}
     </details>
   );
+
+  if (isMobile && mobilePortal) {
+    const scrollContainer = document.getElementById("dashboard-scroll");
+    if (scrollContainer) return createPortal(element, scrollContainer);
+  }
+  return element;
 }

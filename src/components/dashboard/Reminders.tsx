@@ -22,27 +22,14 @@ export async function Reminders({
     !reminders.events.length &&
     !reminders.gifts.length &&
     !reminders.lists.length;
-  if (empty)
-    return (
-      <section
-        className="reminder-panel reminder-empty"
-        aria-labelledby="reminders-heading"
-      >
-        <h2 id="reminders-heading">{t("reminders")}</h2>
-        <p>{t("noReminders")}</p>
-        <Link href="/dashboard/reservations">{t("myReservations")} →</Link>
-      </section>
-    );
+  if (empty) return null;
   return (
     <section
-      className={`stack reminder-panel${empty ? " reminder-empty" : ""}`}
+      className="stack reminder-panel"
       aria-labelledby="reminders-heading"
     >
       <h2 id="reminders-heading">{t("reminders")}</h2>
       <p className="reminder-help">{t("reminderHelp")}</p>
-      {!reminders.events.length &&
-        !reminders.gifts.length &&
-        !reminders.lists.length && <p>{t("noReminders")}</p>}
       <ul className="reminder-list">
         {reminders.lists.map((list) => (
           <li key={list.id}>

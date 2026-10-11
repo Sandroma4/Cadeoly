@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { notify } from "@/components/ui/Toast";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
+import { nextOccasionDate } from "@/lib/occasion-date";
 export function WishlistForm({
   events,
   initial,
@@ -16,7 +17,9 @@ export function WishlistForm({
   hasFamily = true,
   recipients = [],
   quickAdd,
+  guestMode = false,
 }: {
+  guestMode?: boolean;
   events: { id: string; name: string }[];
   defaultEventId?: string;
   hasFamily?: boolean;
@@ -35,11 +38,14 @@ export function WishlistForm({
   };
 }) {
   const t = useTranslations("wishlist");
+  const accountText = useTranslations("guestAccount");
   const notices = useTranslations("notifications");
   const flow = useTranslations("uiFlow");
   const help = useTranslations("usageHelp");
   const [visibility, setVisibility] = useState(
-    initial?.visibility || (hasFamily ? "FAMILY" : "PRIVATE"),
+    guestMode
+      ? "PRIVATE"
+      : initial?.visibility || (hasFamily ? "FAMILY" : "PRIVATE"),
   );
   const [saved, setSaved] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
@@ -87,7 +93,10 @@ export function WishlistForm({
     <PreservedForm
       draftKey={`wishlist:${initial?.id || "new"}`}
       onDraftRestore={(values) => {
-        if (["PRIVATE", "FAMILY", "LINK", "PUBLIC"].includes(values.visibility))
+        if (
+          !guestMode &&
+          ["PRIVATE", "FAMILY", "LINK", "PUBLIC"].includes(values.visibility)
+        )
           setVisibility(values.visibility);
       }}
       action={submit}
@@ -110,31 +119,49 @@ export function WishlistForm({
       <div className="list-form-grid-2">
         {!initial && (
           <label className="list-form-field">
-            <span className="field-label-row">
-              <span className="field-icon-bullet" aria-hidden="true">
-                🎨
-              </span>
-              {t("template")}
-            </span>
+            <span className="field-label-row">{t("template")}</span>
             <select
               onChange={(event) => {
                 const kind = event.target.value;
                 const form = event.currentTarget.form;
                 if (!form || !kind) return;
-                const name = form.elements.namedItem("name") as HTMLInputElement;
+                const name = form.elements.namedItem(
+                  "name",
+                ) as HTMLInputElement;
                 if (name.value && !window.confirm(t("replaceTemplate"))) return;
                 name.value = t("template" + kind);
                 const occasion = form.elements.namedItem(
                   "occasion",
                 ) as HTMLInputElement;
                 occasion.value = name.value;
+                const neededBy = form.elements.namedItem(
+                  "neededBy",
+                ) as HTMLInputElement;
+                neededBy.value = nextOccasionDate(kind);
                 form.dispatchEvent(new Event("input", { bubbles: true }));
               }}
               defaultValue=""
             >
               <option value="">{t("blankTemplate")}</option>
-              {["Birthday", "Christmas", "Birth"].map((kind) => (
+              {[
+                "Birthday",
+                "Christmas",
+                "Easter",
+                "SaintNicholas",
+                "Wedding",
+                "Birth",
+              ].map((kind) => (
                 <option key={kind} value={kind}>
+                  {
+                    {
+                      Birthday: "🎂",
+                      Christmas: "🎄",
+                      Easter: "🐣",
+                      SaintNicholas: "🎅",
+                      Wedding: "💍",
+                      Birth: "👶",
+                    }[kind]
+                  }{" "}
                   {t("template" + kind)}
                 </option>
               ))}
@@ -142,12 +169,7 @@ export function WishlistForm({
           </label>
         )}
         <label className="list-form-field">
-          <span className="field-label-row">
-            <span className="field-icon-bullet" aria-hidden="true">
-              👤
-            </span>
-            {t("recipient")}
-          </span>
+          <span className="field-label-row">{t("recipient")}</span>
           <select name="recipientId" defaultValue={initial?.recipientId || ""}>
             <option value="">{t("myself")}</option>
             {recipients.map((r) => (
@@ -174,18 +196,7 @@ export function WishlistForm({
 
       <div className="list-form-field">
         <label htmlFor="visibility">
-          <span className="field-label-row">
-            <span className="field-icon-bullet" aria-hidden="true">
-              {visibility === "FAMILY"
-                ? "👨‍👩‍👧"
-                : visibility === "LINK"
-                  ? "🔗"
-                  : visibility === "PUBLIC"
-                    ? "🌍"
-                    : "🔒"}
-            </span>
-            {t("visibility")}
-          </span>
+          <span className="field-label-row">{t("visibility")}</span>
         </label>
         <select
           id="visibility"
@@ -195,7 +206,11 @@ export function WishlistForm({
           aria-describedby="visibility-help"
         >
           {Object.values(Visibility).map((value) => (
-            <option key={value} value={value}>
+            <option
+              key={value}
+              value={value}
+              disabled={guestMode && value !== "PRIVATE"}
+            >
               {t("visibility" + value[0] + value.slice(1).toLowerCase())}
             </option>
           ))}
@@ -204,9 +219,6 @@ export function WishlistForm({
           <span className="callout-dot" aria-hidden="true" />
           <span>{help(visibility.toLowerCase() + "Help")}</span>
         </div>
-        {!initial && !hasFamily && (
-          <p className="form-hint">{help("noFamilyHelp")}</p>
-        )}
       </div>
 
       <details
@@ -216,12 +228,18 @@ export function WishlistForm({
         <summary className="styled-summary">
           <span className="summary-title-row">
             <span className="summary-icon" aria-hidden="true">
-              ⚙️
+              ⚙
             </span>
             <span>{flow("moreOptions")}</span>
           </span>
         </summary>
         <div className="stack options-content">
+          {guestMode && (
+            <p className="form-hint">{accountText("sharingHelp")}</p>
+          )}
+          {!initial && !hasFamily && (
+            <p className="form-hint">{help("noFamilyHelp")}</p>
+          )}
           <Input
             id="list-description"
             name="description"
@@ -247,12 +265,7 @@ export function WishlistForm({
             />
           </div>
           <label htmlFor="list-preferences" className="list-form-field">
-            <span className="field-label-row">
-              <span className="field-icon-bullet" aria-hidden="true">
-                💡
-              </span>
-              {t("preferences")}
-            </span>
+            <span className="field-label-row">{t("preferences")}</span>
             <textarea
               id="list-preferences"
               name="preferences"
@@ -267,12 +280,7 @@ export function WishlistForm({
             {fieldError("preferences") || t("preferencesHint")}
           </p>
           <label htmlFor="list-event" className="list-form-field">
-            <span className="field-label-row">
-              <span className="field-icon-bullet" aria-hidden="true">
-                📅
-              </span>
-              {t("event")}
-            </span>
+            <span className="field-label-row">{t("event")}</span>
             <select
               id="list-event"
               name="eventId"
@@ -289,15 +297,7 @@ export function WishlistForm({
         </div>
       </details>
 
-      <div className="draft-badge" title={flow("draftHelp")}>
-        <span aria-hidden="true">💾</span>
-        <span>{flow("draftHelp")}</span>
-      </div>
-
       <div className="button-row form-actions list-form-actions">
-        <Button type="submit" disabled={pending} className="list-submit-btn">
-          {pending ? c("saving") : c("save")}
-        </Button>
         <Button
           type="button"
           variant="secondary"
@@ -305,6 +305,9 @@ export function WishlistForm({
           className="list-cancel-btn"
         >
           {c("cancel")}
+        </Button>
+        <Button type="submit" disabled={pending} className="list-submit-btn">
+          {pending ? c("saving") : c("save")}
         </Button>
       </div>
     </PreservedForm>

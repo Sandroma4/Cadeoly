@@ -34,6 +34,7 @@ export default async function CreateWishlistPage({
   return (
     <div className="stack focused-page wishlist-create-page">
       <WishlistForm
+        guestMode={!session?.user?.id}
         events={events}
         defaultEventId={defaultEventId}
         hasFamily={families.length > 0}

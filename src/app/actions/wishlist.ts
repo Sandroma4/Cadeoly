@@ -3,7 +3,9 @@ import { randomBytes } from "node:crypto";
 import { reportBusinessEvent } from "@/lib/observability";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import { withAuth } from "@/lib/action-auth";
+import { withAuth, withListOwner, listOwnerId } from "@/lib/action-auth";
+import { saveGuestWishlist } from "./guest-list";
+import { currentGuestOwner } from "@/lib/guest-list-access";
 import type { ActionResult } from "@/lib/action-result";
 import { wishlistSchema, fields } from "@/lib/validation";
 import { refreshWishlists } from "@/lib/refresh";
@@ -31,6 +33,7 @@ async function validRecipient(id: string | null, userId: string) {
 export async function createWishlist(
   form: FormData,
 ): Promise<ActionResult<{ wishlistId: string }>> {
+  if (!(await auth())?.user?.id) return saveGuestWishlist(null, form);
   return withAuth(
     async (userId): Promise<ActionResult<{ wishlistId: string }>> => {
       const parsed = wishlistSchema.safeParse(fields(form));
@@ -57,6 +60,7 @@ export async function updateWishlist(
   id: string,
   form: FormData,
 ): Promise<ActionResult> {
+  if (!(await auth())?.user?.id) return saveGuestWishlist(id, form);
   return withAuth(async (userId): Promise<ActionResult> => {
     const parsed = wishlistSchema.safeParse(fields(form));
     if (!parsed.success)
@@ -88,7 +92,7 @@ export async function setWishlistState(
   id: string,
   operation: "archive" | "trash" | "restore",
 ): Promise<ActionResult> {
-  return withAuth(async (userId): Promise<ActionResult> => {
+  return withListOwner(async (userId): Promise<ActionResult> => {
     if (!["archive", "trash", "restore"].includes(operation))
       return { error: "invalidFields" };
     const result = await changeListState(prisma, id, userId, operation);
@@ -100,7 +104,7 @@ export async function duplicateWishlist(
   id: string,
   name: string,
 ): Promise<ActionResult<{ wishlistId: string }>> {
-  return withAuth(
+  return withListOwner(
     async (userId): Promise<ActionResult<{ wishlistId: string }>> => {
       const result = await duplicateList(prisma, id, userId, name);
       refreshWishlists();
@@ -135,11 +139,11 @@ export async function getMyWishlists(
   view: "active" | "archived" | "trash" = "active",
   limit?: number,
 ) {
-  const session = await auth();
-  if (!session?.user?.id) return [];
+  const userId = await listOwnerId();
+  if (!userId) return [];
   return prisma.wishlist.findMany({
     where: {
-      ownerId: session.user.id,
+      ownerId: userId,
       ...(view === "trash"
         ? { deletedAt: { not: null } }
         : {
@@ -161,9 +165,9 @@ export async function getMyWishlists(
   });
 }
 export async function getWishlistById(id: string, options?: GiftPageOptions) {
-  const session = await auth();
-  if (!session?.user?.id) return null;
-  return readWishlist(prisma, id, session.user.id, undefined, options);
+  const userId = await listOwnerId();
+  if (!userId) return null;
+  return readWishlist(prisma, id, userId, undefined, options);
 }
 export async function getSharedWishlist(
   token: string,
@@ -172,11 +176,23 @@ export async function getSharedWishlist(
   if (!/^[a-f0-9]{64}$/.test(token)) return null;
   const list = await prisma.wishlist.findUnique({
     where: { shareToken: token },
-    select: { id: true, visibility: true },
+    select: {
+      id: true,
+      visibility: true,
+      ownerId: true,
+      owner: { select: { guestTokenHash: true } },
+    },
   });
-  if (!list || list.visibility !== "LINK") return null;
-  const session = await auth();
-  return readWishlist(prisma, list.id, session?.user?.id, token, options);
+  if (!list || list.owner.guestTokenHash || list.visibility !== "LINK")
+    return null;
+  const [session, guest] = await Promise.all([auth(), currentGuestOwner()]);
+  return readWishlist(
+    prisma,
+    list.id,
+    guest && guest.id === list.ownerId ? guest.id : session?.user?.id,
+    token,
+    options,
+  );
 }
 export async function getPublicWishlist(id: string, options?: GiftPageOptions) {
   const list = await prisma.wishlist.findFirst({
