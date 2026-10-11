@@ -2,8 +2,7 @@ import { cookies } from "next/headers";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
-import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import { QuickOptions } from "@/components/ui/QuickOptions";
 
 export async function PublicListHeader() {
   const t = await getTranslations("publicList");
@@ -20,8 +19,7 @@ export async function PublicListHeader() {
           <BrandLogo />
         </Link>
         <div className="public-header-controls">
-          <LanguageSwitcher />
-          <ThemeSwitcher initial={theme} />
+          <QuickOptions initialTheme={theme} compact />
         </div>
       </div>
       <p>{t("help")}</p>

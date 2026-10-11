@@ -1,40 +1,90 @@
 .theme-switcher.theme-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border-radius: 9999px;
+  background: transparent;
+  border: none;
+}
+
+.theme-buttons-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  width: auto;
+}
+
+.theme-buttons:not(.theme-buttons-compact) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.25rem;
   padding: 0.25rem;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
+  background: var(--card);
   width: 100%;
 }
+
 .theme-buttons button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
-  min-height: 44px;
-  padding: 0.4rem 0.25rem;
+  gap: 0.35rem;
   font: inherit;
   font-size: 0.8rem;
   color: var(--muted-foreground);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 0.5rem;
+  border-radius: 9999px;
   cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.theme-buttons-compact button {
+  min-height: 28px;
+  height: 28px;
+  min-width: 28px;
+  width: 28px;
+  padding: 0;
+}
+
+.theme-buttons:not(.theme-buttons-compact) button {
+  min-height: 40px;
+  padding: 0.4rem 0.35rem;
+  border-radius: 0.5rem;
+}
+
 .theme-buttons button:hover {
   color: var(--foreground);
-  background: var(--secondary);
+  background: color-mix(in srgb, var(--secondary) 70%, transparent);
 }
-.theme-buttons button[aria-pressed="true"] {
+
+.theme-buttons button[aria-pressed="true"],
+.theme-buttons button.active {
+  color: var(--foreground);
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+.theme-buttons:not(.theme-buttons-compact) button[aria-pressed="true"],
+.theme-buttons:not(.theme-buttons-compact) button.active {
   color: var(--brand-foreground);
   border-color: var(--brand-foreground);
   background: color-mix(in srgb, var(--brand-foreground) 12%, var(--card));
-  font-weight: 600;
 }
+
+.theme-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .theme-buttons button:focus-visible {
   outline: 2px solid var(--brand-foreground);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
 .install-app-button,

@@ -4,8 +4,7 @@ import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import styles from "./page.module.css";
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
-import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import { QuickOptions } from "@/components/ui/QuickOptions";
 
 export default async function Home() {
   const [t, guest, preferences] = await Promise.all([
@@ -20,8 +19,7 @@ export default async function Home() {
   return (
     <main className={styles.container}>
       <div className={styles.topControls}>
-        <LanguageSwitcher />
-        <ThemeSwitcher initial={theme} />
+        <QuickOptions initialTheme={theme} compact />
       </div>
       <div className={styles.illustration} aria-hidden="true">
         <BrandLogo iconOnly />

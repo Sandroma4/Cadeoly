@@ -72,31 +72,20 @@
   text-underline-offset: 3px;
 }
 
-.desktopControls {
+.sidebarFooter {
+  margin-top: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-top: auto;
+  gap: 0.65rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border);
 }
 
-.desktopControlRow {
+.desktopControls {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-}
-
-.desktopControlRow :global(.theme-switcher) {
-  width: 100%;
-}
-
-.desktopControlRow :global(.theme-buttons button) {
-  min-height: 36px;
-  padding: 0.35rem 0.2rem;
-  font-size: 0.75rem;
-  gap: 0.25rem;
 }
 
 .mobileOnly {
@@ -107,8 +96,14 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding-top: clamp(0.75rem, 1.5vh, 1rem);
-  border-top: 1px solid var(--border);
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--radius);
+  transition: background-color 0.15s ease;
+  min-height: 44px;
+}
+
+.profile:hover {
+  background-color: var(--secondary);
 }
 
 .avatar {
@@ -250,6 +245,10 @@
 
   .desktopControls {
     display: none !important;
+  }
+
+  .sidebarFooter {
+    display: contents;
   }
 
   .mobileOnly {

@@ -5,7 +5,13 @@ import { usePathname, useRouter } from "@/i18n/routing";
 import { useTransition } from "react";
 import styles from "./LanguageSwitcher.module.css";
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({
+  compact = false,
+  className = "",
+}: {
+  compact?: boolean;
+  className?: string;
+}) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -23,7 +29,9 @@ export default function LanguageSwitcher() {
 
   return (
     <div
-      className={`${styles.toggleContainer} ${isPending ? styles.pending : ""}`}
+      className={`${styles.toggleContainer} ${compact ? styles.compact : ""} ${isPending ? styles.pending : ""} ${className}`}
+      role="group"
+      aria-label="Langue"
     >
       <button
         type="button"
@@ -36,8 +44,8 @@ export default function LanguageSwitcher() {
       >
         <svg
           aria-hidden="true"
-          width="24"
-          height="16"
+          width="20"
+          height="14"
           viewBox="0 0 60 40"
           className={styles.flag}
         >
@@ -57,8 +65,8 @@ export default function LanguageSwitcher() {
       >
         <svg
           aria-hidden="true"
-          width="24"
-          height="16"
+          width="20"
+          height="14"
           viewBox="0 0 60 40"
           className={styles.flag}
         >

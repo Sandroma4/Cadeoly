@@ -1,11 +1,19 @@
 .toggleContainer {
   display: inline-flex;
+  align-items: center;
+  gap: 2px;
   background-color: var(--card);
   border: 1px solid var(--border);
   border-radius: 9999px;
   padding: 0.25rem;
-  align-items: center;
   transition: opacity 0.2s ease;
+}
+
+.toggleContainer.compact {
+  background: transparent;
+  border: none;
+  padding: 0;
+  gap: 2px;
 }
 
 .toggleContainer.pending {
@@ -17,38 +25,54 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
+  gap: 0.35rem;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--muted-foreground);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  padding: 0.35rem 0.85rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
+}
+
+.compact .toggleBtn {
+  min-height: 28px;
+  height: 28px;
+  min-width: 28px;
+  width: 28px;
+  padding: 0;
 }
 
 .flag {
   display: block;
   border-radius: 2px;
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 15%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 .toggleBtn.active {
   background-color: var(--primary);
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.compact .toggleBtn.active {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .toggleBtn:hover:not(.active) {
   color: var(--foreground);
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: color-mix(in srgb, var(--secondary) 70%, transparent);
 }
 
 .toggleBtn:focus-visible {
-  box-shadow:
-    0 0 0 2px var(--background),
-    0 0 0 4px var(--primary);
+  outline: 2px solid var(--brand-foreground);
+  outline-offset: 1px;
 }

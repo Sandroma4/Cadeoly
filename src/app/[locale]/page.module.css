@@ -17,11 +17,6 @@
   margin-bottom: 0.5rem;
   flex-wrap: wrap;
 }
-.topControls :global(.theme-buttons button) {
-  min-height: 38px;
-  padding: 0.35rem 0.45rem;
-  font-size: 0.8rem;
-}
 .benefits {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

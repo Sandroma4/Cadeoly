@@ -1,0 +1,27 @@
+.dock {
+  display: inline-flex;
+  align-items: center;
+  background: color-mix(in srgb, var(--card) 85%, var(--background));
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  padding: 3px 4px;
+  gap: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.dock:hover {
+  border-color: color-mix(in srgb, var(--brand-foreground) 40%, var(--border));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.divider {
+  width: 1px;
+  height: 14px;
+  background-color: var(--border);
+  margin-inline: 3px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}

@@ -13,8 +13,7 @@ import {
 import styles from "./page.module.css";
 import { auth } from "@/auth";
 import { GuestInteractiveDemo } from "@/components/guest/GuestInteractiveDemo";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
-import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import { QuickOptions } from "@/components/ui/QuickOptions";
 
 export default async function GuestPage({
   searchParams,
@@ -43,8 +42,7 @@ export default async function GuestPage({
           <BrandLogo />
         </Link>
         <div className={styles.topbarControls}>
-          <LanguageSwitcher />
-          <ThemeSwitcher initial={theme} />
+          <QuickOptions initialTheme={theme} compact />
           <Link
             href={
               session?.user?.id

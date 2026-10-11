@@ -15,6 +15,7 @@ import { DashboardBreadcrumbs } from "@/components/dashboard/DashboardBreadcrumb
 import { OptionsMenu } from "@/components/dashboard/OptionsMenu";
 import { Tutorial, TutorialReplay } from "@/components/dashboard/Tutorial";
 import { InstallApp } from "@/components/ui/InstallApp";
+import { QuickOptions } from "@/components/ui/QuickOptions";
 import { returnPath } from "@/lib/return-path";
 export default async function DashboardLayout({
   children,
@@ -59,78 +60,75 @@ export default async function DashboardLayout({
             <Link className="dashboard-search-link" href="/dashboard/search">
               {(await getTranslations("globalSearch"))("title")}
             </Link>
-            <OptionsMenu
-              className={styles.settings}
-              label={t("displaySettings")}
-            >
-              <div className={styles.settingsPanel}>
-                <Link
-                  href="/dashboard/profile"
-                  className={styles.optionsProfile}
-                >
-                  <svg
-                    aria-hidden="true"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
+            <div className={styles.sidebarFooter}>
+              <div className={styles.desktopControls}>
+                <QuickOptions initialTheme={theme} compact />
+              </div>
+              <OptionsMenu
+                className={styles.settings}
+                label={t("displaySettings")}
+              >
+                <div className={styles.settingsPanel}>
+                  <Link
+                    href="/dashboard/profile"
+                    className={styles.optionsProfile}
                   >
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
-                  </svg>
-                  <span>{t("myProfile")}</span>
-                  <span aria-hidden="true" className={styles.optionsArrow}>
-                    ›
-                  </span>
-                </Link>
-                <div className={`${styles.optionsGroup} ${styles.mobileOnly}`}>
-                  <span className={styles.optionsLabel}>
-                    {t("optionsLanguage")}
-                  </span>
-                  <LanguageSwitcher />
+                    <svg
+                      aria-hidden="true"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <circle cx="12" cy="8" r="4" />
+                      <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                    </svg>
+                    <span>{t("myProfile")}</span>
+                    <span aria-hidden="true" className={styles.optionsArrow}>
+                      ›
+                    </span>
+                  </Link>
+                  <div className={`${styles.optionsGroup} ${styles.mobileOnly}`}>
+                    <span className={styles.optionsLabel}>
+                      {t("optionsLanguage")}
+                    </span>
+                    <LanguageSwitcher />
+                  </div>
+                  <div className={`${styles.optionsGroup} ${styles.mobileOnly}`}>
+                    <span className={styles.optionsLabel}>
+                      {t("optionsAppearance")}
+                    </span>
+                    <ThemeSwitcher initial={theme} />
+                  </div>
+                  <InstallApp />
+                  <div>
+                    <TutorialReplay />
+                  </div>
+                  <Link href="/quick-add">
+                    {(await getTranslations("convenience"))("quickAdd")}
+                  </Link>
+                  <Link href="/dashboard/gift-ideas">
+                    {(await getTranslations("convenience"))("ideas")}
+                  </Link>
+                  <Link href="/dashboard/search">
+                    {(await getTranslations("globalSearch"))("title")}
+                  </Link>
+                  <div className={styles.optionsLogout}>
+                    <SignOutButton />
+                  </div>
                 </div>
-                <div className={`${styles.optionsGroup} ${styles.mobileOnly}`}>
-                  <span className={styles.optionsLabel}>
-                    {t("optionsAppearance")}
-                  </span>
-                  <ThemeSwitcher initial={theme} />
+              </OptionsMenu>
+              <Link href="/dashboard/profile" className={styles.profile}>
+                <div className={styles.avatar}>
+                  {user.name?.[0]?.toUpperCase() || "U"}
                 </div>
-                <InstallApp />
-                <div>
-                  <TutorialReplay />
-                </div>
-                <Link href="/quick-add">
-                  {(await getTranslations("convenience"))("quickAdd")}
-                </Link>
-                <Link href="/dashboard/gift-ideas">
-                  {(await getTranslations("convenience"))("ideas")}
-                </Link>
-                <Link href="/dashboard/search">
-                  {(await getTranslations("globalSearch"))("title")}
-                </Link>
-                <div className={styles.optionsLogout}>
-                  <SignOutButton />
-                </div>
-              </div>
-            </OptionsMenu>
-            <div className={styles.desktopControls}>
-              <div className={styles.desktopControlRow}>
-                <LanguageSwitcher />
-              </div>
-              <div className={styles.desktopControlRow}>
-                <ThemeSwitcher initial={theme} />
-              </div>
+                <span className={styles.userName}>
+                  {user.name || t("myProfile")}
+                </span>
+              </Link>
             </div>
-            <Link href="/dashboard/profile" className={styles.profile}>
-              <div className={styles.avatar}>
-                {user.name?.[0]?.toUpperCase() || "U"}
-              </div>
-              <span className={styles.userName}>
-                {user.name || t("myProfile")}
-              </span>
-            </Link>
           </aside>
           <main id="dashboard-content" tabIndex={-1} className={styles.main}>
             <div className={styles.content}>
