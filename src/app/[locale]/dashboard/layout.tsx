@@ -97,6 +97,7 @@ export default async function DashboardLayout({
                 className={styles.settings}
                 label={t("displaySettings")}
                 mobilePortal
+                mobileAction={<InstallApp className={styles.installControl} />}
               >
                 <div className={styles.settingsPanel}>
                   <Link
@@ -136,7 +137,6 @@ export default async function DashboardLayout({
                     </span>
                     <ThemeSwitcher initial={theme} />
                   </div>
-                  <InstallApp />
                   <div>
                     <TutorialReplay />
                   </div>

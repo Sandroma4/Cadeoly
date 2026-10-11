@@ -1,9 +1,41 @@
 import { test, expect } from "@playwright/test";
+import fr from "../../messages/fr.json";
+import en from "../../messages/en.json";
 
 for (const [locale, label] of [
   ["fr", "Installer Cadéoly"],
   ["en", "Install Cadéoly"],
 ] as const) {
+  test(`${locale}: mobile download icon sits beside settings`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "mobile");
+    const messages = locale === "fr" ? fr : en;
+    await page.goto(`/${locale}/dashboard`);
+    const install = page.locator(
+      "#dashboard-scroll .install-app-help > summary",
+    );
+    const settings = page.getByLabel(messages.dashboard.displaySettings, {
+      exact: true,
+    });
+    await expect(install).toBeVisible();
+    await expect(install).toHaveAttribute("aria-label", label);
+    const iconBox = (await install.boundingBox())!;
+    const gearBox = (await settings.boundingBox())!;
+    expect(iconBox.width).toBe(44);
+    expect(iconBox.height).toBe(44);
+    expect(iconBox.x + iconBox.width).toBeLessThanOrEqual(gearBox.x);
+    expect(Math.abs(iconBox.y - gearBox.y)).toBeLessThan(2);
+    await install.click();
+    await expect(
+      page.locator("#dashboard-scroll .install-app-help p"),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  });
   test(`${locale}: installation is available without an account and hidden after installation`, async ({
     page,
   }) => {

@@ -18,7 +18,7 @@ export function AppRegistration() {
   return null;
 }
 
-export function InstallApp() {
+export function InstallApp({ className = "" }: { className?: string }) {
   const t = useTranslations("installApp");
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
   const [installed, setInstalled] = useState(true);
@@ -52,7 +52,9 @@ export function InstallApp() {
   if (installed) return null;
   return prompt ? (
     <button
-      className="install-app-button"
+      className={`install-app-button ${className}`}
+      aria-label={t("button")}
+      title={t("button")}
       type="button"
       onClick={async () => {
         const choice = prompt;
@@ -73,14 +75,13 @@ export function InstallApp() {
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
-        <path d="M12 18h.01" />
+        <path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4" />
       </svg>
       <span>{t("button")}</span>
     </button>
   ) : (
-    <details className="install-app-help">
-      <summary>
+    <details className={`install-app-help ${className}`}>
+      <summary aria-label={t("button")} title={t("button")}>
         <svg
           aria-hidden="true"
           width="18"
@@ -92,8 +93,7 @@ export function InstallApp() {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
-          <path d="M12 18h.01" />
+          <path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4" />
         </svg>
         <span>{t("button")}</span>
       </summary>

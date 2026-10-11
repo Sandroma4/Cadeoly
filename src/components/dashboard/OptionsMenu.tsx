@@ -25,6 +25,7 @@ export function OptionsMenu({
   children,
   more = false,
   mobilePortal = false,
+  mobileAction,
 }: {
   label: string;
   className: string;
@@ -32,6 +33,7 @@ export function OptionsMenu({
   children: ReactNode;
   more?: boolean;
   mobilePortal?: boolean;
+  mobileAction?: ReactNode;
 }) {
   const pathname = usePathname();
   const ref = useRef<HTMLDetailsElement>(null);
@@ -65,53 +67,57 @@ export function OptionsMenu({
   }, []);
 
   const element = (
-    <details
-      ref={ref}
-      className={className}
-      data-home={pathname === "/dashboard" ? "true" : undefined}
-      data-section-root={
-        /^\/dashboard(?:\/[^/]+)?$/.test(pathname) ? "true" : "false"
-      }
-      onClick={(event) => {
-        if ((event.target as HTMLElement).closest("a") && ref.current)
-          ref.current.open = false;
-      }}
-    >
-      <summary aria-label={label}>
-        <svg
-          aria-hidden="true"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        >
-          {more ? (
-            <path
-              d="M5 12h.01M12 12h.01M19 12h.01"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-          ) : (
-            <>
+    <>
+      {(!isMobile || /^\/dashboard(?:\/[^/]+)?$/.test(pathname)) &&
+        mobileAction}
+      <details
+        ref={ref}
+        className={className}
+        data-home={pathname === "/dashboard" ? "true" : undefined}
+        data-section-root={
+          /^\/dashboard(?:\/[^/]+)?$/.test(pathname) ? "true" : "false"
+        }
+        onClick={(event) => {
+          if ((event.target as HTMLElement).closest("a") && ref.current)
+            ref.current.open = false;
+        }}
+      >
+        <summary aria-label={label}>
+          <svg
+            aria-hidden="true"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+          >
+            {more ? (
               <path
-                d="m10 3-1 3-3 1-2-1-2 4 2 2v2l-2 2 2 4 3-1 2 1 1 3h4l1-3 2-1 3 1 2-4-2-2v-2l2-2-2-4-2 1-3-1-1-3Z"
-                transform="translate(0 -1) scale(.95)"
+                d="M5 12h.01M12 12h.01M19 12h.01"
+                strokeWidth="4"
+                strokeLinecap="round"
               />
-              <circle cx="11.4" cy="11.4" r="3" />
-            </>
+            ) : (
+              <>
+                <path
+                  d="m10 3-1 3-3 1-2-1-2 4 2 2v2l-2 2 2 4 3-1 2 1 1 3h4l1-3 2-1 3 1 2-4-2-2v-2l2-2-2-4-2 1-3-1-1-3Z"
+                  transform="translate(0 -1) scale(.95)"
+                />
+                <circle cx="11.4" cy="11.4" r="3" />
+              </>
+            )}
+          </svg>
+          <span className={mobileLabel ? "options-desktop-label" : undefined}>
+            {label}
+          </span>
+          {mobileLabel && (
+            <span className="options-mobile-label">{mobileLabel}</span>
           )}
-        </svg>
-        <span className={mobileLabel ? "options-desktop-label" : undefined}>
-          {label}
-        </span>
-        {mobileLabel && (
-          <span className="options-mobile-label">{mobileLabel}</span>
-        )}
-      </summary>
-      {children}
-    </details>
+        </summary>
+        {children}
+      </details>
+    </>
   );
 
   if (isMobile && mobilePortal) {
