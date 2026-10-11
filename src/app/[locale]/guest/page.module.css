@@ -10,8 +10,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.topbarControls {
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+.topbarControls :global(.theme-buttons button) {
+  min-height: 38px;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.8rem;
 }
 .intro {
   text-align: center;

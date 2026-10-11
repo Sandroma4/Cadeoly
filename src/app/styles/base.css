@@ -667,10 +667,29 @@ p {
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);
 }
-.public-list-header > a {
-  align-self: flex-start;
+.public-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.public-header-row > a {
+  align-self: center;
   color: var(--brand-foreground);
   font-weight: 700;
+}
+.public-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.public-header-controls .theme-buttons button {
+  min-height: 38px;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.8rem;
 }
 .public-list-header p {
   max-width: 65ch;

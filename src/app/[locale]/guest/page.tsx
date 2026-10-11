@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 import { Link } from "@/i18n/routing";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
@@ -12,6 +13,8 @@ import {
 import styles from "./page.module.css";
 import { auth } from "@/auth";
 import { GuestInteractiveDemo } from "@/components/guest/GuestInteractiveDemo";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
+import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 
 export default async function GuestPage({
   searchParams,
@@ -21,29 +24,38 @@ export default async function GuestPage({
   const requested = (await searchParams).section;
   const section =
     requested === "family" || requested === "events" ? requested : "lists";
-  const [t, home, authText, locale, session] = await Promise.all([
+  const [t, home, authText, locale, session, preferences] = await Promise.all([
     getTranslations("guest"),
     getTranslations("home"),
     getTranslations("auth"),
     getLocale(),
     auth(),
+    cookies(),
   ]);
+  const choice =
+    preferences.get("cadeoly-theme")?.value ??
+    preferences.get("wishi-theme")?.value;
+  const theme = choice === "light" || choice === "dark" ? choice : "system";
   return (
     <main className={styles.container}>
       <header className={styles.topbar}>
         <Link href="/" aria-label={t("home")}>
           <BrandLogo />
         </Link>
-        <Link
-          href={
-            session?.user?.id
-              ? "/dashboard"
-              : { pathname: "/login", query: { next: `/${locale}/guest` } }
-          }
-          className="secondary-link"
-        >
-          {session?.user?.id ? t("myAccount") : authText("signIn")}
-        </Link>
+        <div className={styles.topbarControls}>
+          <LanguageSwitcher />
+          <ThemeSwitcher initial={theme} />
+          <Link
+            href={
+              session?.user?.id
+                ? "/dashboard"
+                : { pathname: "/login", query: { next: `/${locale}/guest` } }
+            }
+            className="secondary-link"
+          >
+            {session?.user?.id ? t("myAccount") : authText("signIn")}
+          </Link>
+        </div>
       </header>
       <div className={styles.intro}>
         <span className="visual-badge">{t("badge")}</span>

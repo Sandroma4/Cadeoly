@@ -1,13 +1,28 @@
+import { cookies } from "next/headers";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import styles from "./page.module.css";
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
+import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+
 export default async function Home() {
-  const t = await getTranslations("home");
-  const guest = await getTranslations("guest");
+  const [t, guest, preferences] = await Promise.all([
+    getTranslations("home"),
+    getTranslations("guest"),
+    cookies(),
+  ]);
+  const choice =
+    preferences.get("cadeoly-theme")?.value ??
+    preferences.get("wishi-theme")?.value;
+  const theme = choice === "light" || choice === "dark" ? choice : "system";
   return (
     <main className={styles.container}>
+      <div className={styles.topControls}>
+        <LanguageSwitcher />
+        <ThemeSwitcher initial={theme} />
+      </div>
       <div className={styles.illustration} aria-hidden="true">
         <BrandLogo iconOnly />
       </div>
