@@ -32,8 +32,7 @@ export default async function CreateWishlistPage({
       })
     : [];
   return (
-    <div className="stack focused-page">
-      <WishlistHelp />
+    <div className="stack focused-page wishlist-create-page">
       <WishlistForm
         events={events}
         defaultEventId={defaultEventId}
@@ -41,6 +40,7 @@ export default async function CreateWishlistPage({
         recipients={recipients}
         quickAdd={shared.url || shared.title ? shared : undefined}
       />
+      <WishlistHelp />
     </div>
   );
 }

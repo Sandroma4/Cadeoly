@@ -788,3 +788,306 @@
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   Create & Edit Wishlist Page Form
+   ========================================================================== */
+.wishlist-create-page {
+  width: 100%;
+  max-width: 700px;
+  margin-inline: auto;
+  padding-block: 1rem 3rem;
+  gap: 1.5rem;
+}
+
+.list-form {
+  width: 100%;
+  max-width: 700px;
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(121, 91, 211, 0.15) 0%,
+      transparent 65%
+    ),
+    var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.75rem;
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  color: var(--foreground);
+  position: relative;
+  overflow: hidden;
+}
+
+/* If inside a parent settings disclosure panel, don't duplicate card style */
+.creation-panel .list-form {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.list-form-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.25rem;
+}
+
+.list-form-badge {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, rgba(121, 91, 211, 0.25), rgba(121, 91, 211, 0.08));
+  border: 1px solid rgba(121, 91, 211, 0.35);
+  color: var(--brand-foreground);
+  box-shadow: 0 0 16px rgba(121, 91, 211, 0.2);
+  flex-shrink: 0;
+}
+
+.list-form-badge svg {
+  width: 28px;
+  height: 28px;
+}
+
+.list-form-title-group h1,
+.list-form-title-group h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: var(--foreground);
+}
+
+.list-form-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+.list-form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: 1rem;
+}
+
+.list-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.field-label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--foreground);
+}
+
+.field-icon-bullet {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.list-form select,
+.list-form textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.list-form select:focus,
+.list-form textarea:focus {
+  border-color: var(--primary);
+  outline: 3px solid var(--brand-foreground);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.visibility-callout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.65rem;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+.callout-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand-foreground);
+  flex-shrink: 0;
+}
+
+.form-options.styled-details {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--secondary);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+  padding: 0;
+  margin-top: 0.5rem;
+}
+
+.form-options.styled-details[open] {
+  border-color: color-mix(in srgb, var(--brand-foreground) 40%, var(--border));
+}
+
+.styled-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.15rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--foreground);
+  list-style: none;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.styled-summary:hover {
+  background: color-mix(in srgb, var(--brand-foreground) 12%, var(--secondary));
+}
+
+.styled-summary::-webkit-details-marker {
+  display: none;
+}
+
+.styled-summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.form-options.styled-details[open] .styled-summary::after {
+  transform: rotate(225deg);
+}
+
+.summary-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.options-content {
+  padding: 1.15rem;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+}
+
+.draft-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--border);
+  font-size: 0.775rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+  margin-top: 0.5rem;
+}
+
+.list-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  margin-top: 0.75rem;
+}
+
+.list-submit-btn {
+  min-width: 140px;
+  min-height: 46px;
+  font-weight: 600 !important;
+  border-radius: 0.85rem !important;
+  box-shadow: 0 4px 14px rgba(101, 67, 190, 0.35);
+}
+
+.list-submit-btn:hover {
+  box-shadow: 0 6px 18px rgba(101, 67, 190, 0.5);
+}
+
+.list-cancel-btn {
+  min-width: 90px;
+  min-height: 46px;
+  border-radius: 0.85rem !important;
+}
+
+/* Usage Help Bottom Card */
+.usage-help {
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: var(--card);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.usage-help:not([open]) {
+  padding-bottom: 0;
+}
+
+.usage-help > summary {
+  padding: 0.85rem 1.15rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.usage-help > summary:hover {
+  color: var(--foreground);
+  background: var(--secondary);
+}
+
+@media (max-width: 600px) {
+  .list-form {
+    padding: 1.15rem;
+    border-radius: 1.25rem;
+  }
+  .list-form-actions {
+    flex-direction: column-reverse;
+  }
+  .list-form-actions > button {
+    width: 100%;
+  }
+}
+

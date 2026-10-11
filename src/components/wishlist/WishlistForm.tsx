@@ -8,6 +8,7 @@ import { createWishlist, updateWishlist } from "@/app/actions/wishlist";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { notify } from "@/components/ui/Toast";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
 export function WishlistForm({
   events,
   initial,
@@ -93,82 +94,134 @@ export function WishlistForm({
       className="stack list-form"
       aria-busy={pending}
     >
-      {initial ? <h2>{t("editTitle")}</h2> : <h1>{t("createTitle")}</h1>}
+      <div className="list-form-header">
+        <div className="list-form-badge" aria-hidden="true">
+          <OccasionIcon kind="gift" />
+        </div>
+        <div className="list-form-title-group">
+          {initial ? <h2>{t("editTitle")}</h2> : <h1>{t("createTitle")}</h1>}
+          <p className="list-form-subtitle">{t("intro")}</p>
+        </div>
+      </div>
+
       {error && <p role="alert">{error}</p>}
       {saved && <p role="status">{flow("listSaved")}</p>}
-      {!initial && (
-        <label>
-          {t("template")}
-          <select
-            onChange={(event) => {
-              const kind = event.target.value;
-              const form = event.currentTarget.form;
-              if (!form || !kind) return;
-              const name = form.elements.namedItem("name") as HTMLInputElement;
-              if (name.value && !window.confirm(t("replaceTemplate"))) return;
-              name.value = t("template" + kind);
-              const occasion = form.elements.namedItem(
-                "occasion",
-              ) as HTMLInputElement;
-              occasion.value = name.value;
-              form.dispatchEvent(new Event("input", { bubbles: true }));
-            }}
-            defaultValue=""
-          >
-            <option value="">{t("blankTemplate")}</option>
-            {["Birthday", "Christmas", "Birth"].map((kind) => (
-              <option key={kind} value={kind}>
-                {t("template" + kind)}
+
+      <div className="list-form-grid-2">
+        {!initial && (
+          <label className="list-form-field">
+            <span className="field-label-row">
+              <span className="field-icon-bullet" aria-hidden="true">
+                🎨
+              </span>
+              {t("template")}
+            </span>
+            <select
+              onChange={(event) => {
+                const kind = event.target.value;
+                const form = event.currentTarget.form;
+                if (!form || !kind) return;
+                const name = form.elements.namedItem("name") as HTMLInputElement;
+                if (name.value && !window.confirm(t("replaceTemplate"))) return;
+                name.value = t("template" + kind);
+                const occasion = form.elements.namedItem(
+                  "occasion",
+                ) as HTMLInputElement;
+                occasion.value = name.value;
+                form.dispatchEvent(new Event("input", { bubbles: true }));
+              }}
+              defaultValue=""
+            >
+              <option value="">{t("blankTemplate")}</option>
+              {["Birthday", "Christmas", "Birth"].map((kind) => (
+                <option key={kind} value={kind}>
+                  {t("template" + kind)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <label className="list-form-field">
+          <span className="field-label-row">
+            <span className="field-icon-bullet" aria-hidden="true">
+              👤
+            </span>
+            {t("recipient")}
+          </span>
+          <select name="recipientId" defaultValue={initial?.recipientId || ""}>
+            <option value="">{t("myself")}</option>
+            {recipients.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
               </option>
             ))}
           </select>
         </label>
-      )}
-      <label>
-        {t("recipient")}
-        <select name="recipientId" defaultValue={initial?.recipientId || ""}>
-          <option value="">{t("myself")}</option>
-          {recipients.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
+      </div>
+
+      <div className="list-form-field">
+        <Input
+          id="list-name"
+          name="name"
+          error={fieldError("name")}
+          label={t("name")}
+          defaultValue={initial?.name}
+          placeholder={t("namePlaceholder")}
+          required
+          maxLength={120}
+        />
+      </div>
+
+      <div className="list-form-field">
+        <label htmlFor="visibility">
+          <span className="field-label-row">
+            <span className="field-icon-bullet" aria-hidden="true">
+              {visibility === "FAMILY"
+                ? "👨‍👩‍👧"
+                : visibility === "LINK"
+                  ? "🔗"
+                  : visibility === "PUBLIC"
+                    ? "🌍"
+                    : "🔒"}
+            </span>
+            {t("visibility")}
+          </span>
+        </label>
+        <select
+          id="visibility"
+          name="visibility"
+          value={visibility}
+          onChange={(event) => setVisibility(event.target.value)}
+          aria-describedby="visibility-help"
+        >
+          {Object.values(Visibility).map((value) => (
+            <option key={value} value={value}>
+              {t("visibility" + value[0] + value.slice(1).toLowerCase())}
             </option>
           ))}
         </select>
-      </label>
-      <p className="form-hint">{flow("draftHelp")}</p>
-      <Input
-        id="list-name"
-        name="name"
-        error={fieldError("name")}
-        label={t("name")}
-        defaultValue={initial?.name}
-        required
-        maxLength={120}
-      />
-      <label htmlFor="visibility">{t("visibility")}</label>
-      <select
-        id="visibility"
-        name="visibility"
-        value={visibility}
-        onChange={(event) => setVisibility(event.target.value)}
-        aria-describedby="visibility-help"
-      >
-        {Object.values(Visibility).map((value) => (
-          <option key={value} value={value}>
-            {t("visibility" + value[0] + value.slice(1).toLowerCase())}
-          </option>
-        ))}
-      </select>
-      <p id="visibility-help">{help(visibility.toLowerCase() + "Help")}</p>
-      {!initial && !hasFamily && (
-        <p className="form-hint">{help("noFamilyHelp")}</p>
-      )}
+        <div id="visibility-help" className="visibility-callout">
+          <span className="callout-dot" aria-hidden="true" />
+          <span>{help(visibility.toLowerCase() + "Help")}</span>
+        </div>
+        {!initial && !hasFamily && (
+          <p className="form-hint">{help("noFamilyHelp")}</p>
+        )}
+      </div>
+
       <details
-        className="form-options"
+        className="form-options styled-details"
         open={defaultEventId ? true : undefined}
       >
-        <summary>{flow("moreOptions")}</summary>
-        <div className="stack">
+        <summary className="styled-summary">
+          <span className="summary-title-row">
+            <span className="summary-icon" aria-hidden="true">
+              ⚙️
+            </span>
+            <span>{flow("moreOptions")}</span>
+          </span>
+        </summary>
+        <div className="stack options-content">
           <Input
             id="list-description"
             name="description"
@@ -177,53 +230,80 @@ export function WishlistForm({
             defaultValue={initial?.description || ""}
             maxLength={2000}
           />
-          <Input
-            name="occasion"
-            error={fieldError("occasion")}
-            label={t("occasion")}
-            defaultValue={initial?.occasion || ""}
-            maxLength={120}
-          />
-          <Input
-            name="neededBy"
-            error={fieldError("neededBy")}
-            label={t("neededBy")}
-            type="date"
-            defaultValue={initial?.neededBy || ""}
-          />
-          <label htmlFor="list-preferences">{t("preferences")}</label>
-          <textarea
-            id="list-preferences"
-            name="preferences"
-            defaultValue={initial?.preferences || ""}
-            maxLength={2000}
-            rows={3}
-            aria-invalid={fieldErrors.includes("preferences")}
-            aria-describedby="preferences-help"
-          />
-          <p id="preferences-help">
+          <div className="list-form-grid-2">
+            <Input
+              name="occasion"
+              error={fieldError("occasion")}
+              label={t("occasion")}
+              defaultValue={initial?.occasion || ""}
+              maxLength={120}
+            />
+            <Input
+              name="neededBy"
+              error={fieldError("neededBy")}
+              label={t("neededBy")}
+              type="date"
+              defaultValue={initial?.neededBy || ""}
+            />
+          </div>
+          <label htmlFor="list-preferences" className="list-form-field">
+            <span className="field-label-row">
+              <span className="field-icon-bullet" aria-hidden="true">
+                💡
+              </span>
+              {t("preferences")}
+            </span>
+            <textarea
+              id="list-preferences"
+              name="preferences"
+              defaultValue={initial?.preferences || ""}
+              maxLength={2000}
+              rows={3}
+              aria-invalid={fieldErrors.includes("preferences")}
+              aria-describedby="preferences-help"
+            />
+          </label>
+          <p id="preferences-help" className="form-hint">
             {fieldError("preferences") || t("preferencesHint")}
           </p>
-          <label htmlFor="list-event">{t("event")}</label>
-          <select
-            id="list-event"
-            name="eventId"
-            defaultValue={initial?.eventId || defaultEventId || ""}
-          >
-            <option value="">{t("noEvent")}</option>
-            {events.map((event) => (
-              <option value={event.id} key={event.id}>
-                {event.name}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="list-event" className="list-form-field">
+            <span className="field-label-row">
+              <span className="field-icon-bullet" aria-hidden="true">
+                📅
+              </span>
+              {t("event")}
+            </span>
+            <select
+              id="list-event"
+              name="eventId"
+              defaultValue={initial?.eventId || defaultEventId || ""}
+            >
+              <option value="">{t("noEvent")}</option>
+              {events.map((event) => (
+                <option value={event.id} key={event.id}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </details>
-      <div className="button-row form-actions">
-        <Button type="submit" disabled={pending}>
+
+      <div className="draft-badge" title={flow("draftHelp")}>
+        <span aria-hidden="true">💾</span>
+        <span>{flow("draftHelp")}</span>
+      </div>
+
+      <div className="button-row form-actions list-form-actions">
+        <Button type="submit" disabled={pending} className="list-submit-btn">
           {pending ? c("saving") : c("save")}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => router.back()}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => router.back()}
+          className="list-cancel-btn"
+        >
           {c("cancel")}
         </Button>
       </div>
