@@ -36,8 +36,8 @@ export function ThemeSwitcher({
           <span className="theme-icon" aria-hidden="true">
             {value === "light" ? (
               <svg
-                width="15"
-                height="15"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -50,8 +50,8 @@ export function ThemeSwitcher({
               </svg>
             ) : value === "dark" ? (
               <svg
-                width="15"
-                height="15"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -63,8 +63,8 @@ export function ThemeSwitcher({
               </svg>
             ) : (
               <svg
-                width="15"
-                height="15"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

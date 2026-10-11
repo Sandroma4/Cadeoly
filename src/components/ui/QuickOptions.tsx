@@ -17,11 +17,15 @@ export function QuickOptions({
     <div
       className={`${styles.dock} ${className}`}
       role="group"
-      aria-label="Préférences"
+      aria-label="Préférences d'affichage et langue"
     >
-      <LanguageSwitcher compact={compact} />
+      <div className={styles.segment}>
+        <LanguageSwitcher compact={compact} />
+      </div>
       <span className={styles.divider} aria-hidden="true" />
-      <ThemeSwitcher initial={initialTheme} compact={compact} />
+      <div className={styles.segment}>
+        <ThemeSwitcher initial={initialTheme} compact={compact} />
+      </div>
     </div>
   );
 }

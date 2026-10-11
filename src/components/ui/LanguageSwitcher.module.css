@@ -41,35 +41,35 @@
 .compact .toggleBtn {
   min-height: 28px;
   height: 28px;
-  min-width: 28px;
-  width: 28px;
-  padding: 0;
+  min-width: 32px;
+  padding: 0 4px;
+  border-radius: 0.5rem;
 }
 
 .flag {
   display: block;
   border-radius: 2px;
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
 }
 
 .toggleBtn.active {
   background-color: var(--primary);
   color: white;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
 .compact .toggleBtn.active {
-  background: var(--card);
-  color: var(--foreground);
-  border-color: color-mix(in srgb, var(--border) 60%, transparent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
 .toggleBtn:hover:not(.active) {
   color: var(--foreground);
-  background-color: color-mix(in srgb, var(--secondary) 70%, transparent);
+  background-color: color-mix(in srgb, var(--secondary) 80%, transparent);
 }
 
 .toggleBtn:focus-visible {

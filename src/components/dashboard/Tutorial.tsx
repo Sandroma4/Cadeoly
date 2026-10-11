@@ -201,7 +201,21 @@ export function TutorialReplay() {
         replay?.();
       }}
     >
-      {t("replay")}
+      <svg
+        aria-hidden="true"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="10 8 16 12 10 16 10 8" />
+      </svg>
+      <span>{t("replay")}</span>
     </button>
   );
 }

@@ -62,11 +62,41 @@ export function InstallApp() {
           setInstalled(true);
       }}
     >
-      {t("button")}
+      <svg
+        aria-hidden="true"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+        <path d="M12 18h.01" />
+      </svg>
+      <span>{t("button")}</span>
     </button>
   ) : (
     <details className="install-app-help">
-      <summary>{t("button")}</summary>
+      <summary>
+        <svg
+          aria-hidden="true"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+          <path d="M12 18h.01" />
+        </svg>
+        <span>{t("button")}</span>
+      </summary>
       <p>{t("help")}</p>
     </details>
   );

@@ -47,6 +47,7 @@
   min-width: 28px;
   width: 28px;
   padding: 0;
+  border-radius: 0.5rem;
 }
 
 .theme-buttons:not(.theme-buttons-compact) button {
@@ -57,15 +58,15 @@
 
 .theme-buttons button:hover {
   color: var(--foreground);
-  background: color-mix(in srgb, var(--secondary) 70%, transparent);
+  background: color-mix(in srgb, var(--secondary) 80%, transparent);
 }
 
-.theme-buttons button[aria-pressed="true"],
-.theme-buttons button.active {
-  color: var(--foreground);
-  background: var(--card);
-  border-color: color-mix(in srgb, var(--border) 60%, transparent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.theme-buttons-compact button[aria-pressed="true"],
+.theme-buttons-compact button.active {
+  color: white;
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
   font-weight: 600;
 }
 
@@ -74,6 +75,7 @@
   color: var(--brand-foreground);
   border-color: var(--brand-foreground);
   background: color-mix(in srgb, var(--brand-foreground) 12%, var(--card));
+  font-weight: 600;
 }
 
 .theme-icon {

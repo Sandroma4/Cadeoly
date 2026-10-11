@@ -57,8 +57,28 @@ export default async function DashboardLayout({
               </h2>
             </div>
             <DashboardNavigation />
-            <Link className="dashboard-search-link" href="/dashboard/search">
-              {(await getTranslations("globalSearch"))("title")}
+            <Link
+              className={`${styles.navItem} dashboard-search-link`}
+              href="/dashboard/search"
+            >
+              <span aria-hidden="true">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+              </span>
+              <span className={styles.navLabel}>
+                {(await getTranslations("globalSearch"))("title")}
+              </span>
             </Link>
             <div className={styles.sidebarFooter}>
               <div className={styles.desktopControls}>
@@ -107,13 +127,56 @@ export default async function DashboardLayout({
                     <TutorialReplay />
                   </div>
                   <Link href="/quick-add">
-                    {(await getTranslations("convenience"))("quickAdd")}
+                    <svg
+                      aria-hidden="true"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 8v8M8 12h8" />
+                    </svg>
+                    <span>
+                      {(await getTranslations("convenience"))("quickAdd")}
+                    </span>
                   </Link>
                   <Link href="/dashboard/gift-ideas">
-                    {(await getTranslations("convenience"))("ideas")}
+                    <svg
+                      aria-hidden="true"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
+                    </svg>
+                    <span>{(await getTranslations("convenience"))("ideas")}</span>
                   </Link>
                   <Link href="/dashboard/search">
-                    {(await getTranslations("globalSearch"))("title")}
+                    <svg
+                      aria-hidden="true"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    <span>{(await getTranslations("globalSearch"))("title")}</span>
                   </Link>
                   <div className={styles.optionsLogout}>
                     <SignOutButton />
