@@ -33,3 +33,9 @@
   color: var(--destructive);
   margin-bottom: 1rem;
 }
+
+.auth-guest-link,
+.auth-container .secondary-link {
+  align-self: center;
+  text-align: center;
+}

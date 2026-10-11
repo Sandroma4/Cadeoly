@@ -162,7 +162,7 @@ export function AuthForm({
           </PreservedForm>
         </CardContent>
         <CardFooter className="stack">
-          <Link href="/guest" className="secondary-link">
+          <Link href="/guest" className="secondary-link auth-guest-link">
             {guest("continue")}
           </Link>
           {!register && (
