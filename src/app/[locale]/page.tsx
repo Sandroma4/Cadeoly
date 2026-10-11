@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { QuickOptions } from "@/components/ui/QuickOptions";
+import { InstallApp } from "@/components/ui/InstallApp";
 
 export default async function Home() {
   const [t, guest, preferences] = await Promise.all([
@@ -42,6 +43,7 @@ export default async function Home() {
         <Link href="/guest" className={styles.secondaryButton}>
           {guest("continue")}
         </Link>
+        <InstallApp />
       </section>
       <section className={styles.benefits} aria-label={t("benefits")}>
         {["wishes", "duplicates", "surprise"].map((key) => (

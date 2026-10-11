@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+import type { Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -8,6 +9,10 @@ import { AppRegistration } from "@/components/ui/InstallApp";
 import { QuickUndo } from "@/components/ui/QuickUndo";
 import { Toast } from "@/components/ui/Toast";
 import { Confetti } from "@/components/ui/Confetti";
+
+export const viewport: Viewport = {
+  themeColor: "#6543be",
+};
 
 export const metadata = {
   title: "Cadéoly — Listes de cadeaux",
