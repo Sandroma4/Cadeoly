@@ -340,23 +340,7 @@
     font-size: 0.8rem;
   }
 }
-.settingsPanel {
-  max-height: calc(100svh - 140px);
-  overflow-y: auto;
-}
 
-/* Account controls share the navigation instead of reserving a header row. */
-.settings {
-  margin-block: 0.75rem;
-  flex-shrink: 0;
-  z-index: 60;
-}
-.settingsPanel {
-  top: auto;
-  bottom: calc(100% + 0.5rem);
-  left: 0;
-  right: auto;
-}
 @media (max-width: 768px) {
   .nav {
     flex: 1;
@@ -516,7 +500,9 @@
   position: absolute;
   bottom: calc(100% + 0.5rem);
   left: 0;
-  width: min(240px, calc(100vw - 1rem));
+  right: 0;
+  width: 100%;
+  max-width: 100%;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 0.875rem;
@@ -764,6 +750,8 @@
     top: 52px;
     bottom: auto;
     right: 0.75rem;
+    left: auto;
+    width: min(240px, calc(100vw - 1.5rem));
   }
 }
 
