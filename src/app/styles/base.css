@@ -185,7 +185,7 @@ nav.segmented-filters a[aria-current="page"],
 }
 @media (max-width: 768px) {
   .dashboard-search-link {
-    display: none;
+    display: none !important;
   }
   .quick-undo {
     bottom: calc(5.5rem + env(safe-area-inset-bottom));

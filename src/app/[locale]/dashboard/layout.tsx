@@ -58,7 +58,7 @@ export default async function DashboardLayout({
             </div>
             <DashboardNavigation />
             <Link
-              className={`${styles.navItem} dashboard-search-link`}
+              className={`${styles.navItem} ${styles.searchLink} dashboard-search-link`}
               href="/dashboard/search"
             >
               <span aria-hidden="true">

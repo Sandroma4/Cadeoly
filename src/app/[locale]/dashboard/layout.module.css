@@ -72,6 +72,10 @@
   text-underline-offset: 3px;
 }
 
+.searchLink {
+  min-height: 48px;
+}
+
 .sidebarFooter {
   margin-top: auto;
   display: flex;
@@ -351,29 +355,9 @@
     flex: 1;
     min-width: 0;
   }
-  .settings {
-    position: static;
-    margin: 0;
-    flex: 0 0 54px;
-  }
-  .settings > summary {
-    padding: 0.25rem;
-    min-height: 48px;
-    border: 0;
-    border-radius: 0;
-    font-size: 0.65rem;
-    justify-content: center;
-  }
-  .settings > summary::after {
-    display: none;
-  }
-  .settingsPanel {
-    position: fixed;
-    left: auto;
-    right: 0.5rem;
-    bottom: calc(72px + env(safe-area-inset-bottom));
-    top: auto;
-    max-height: calc(100dvh - 96px);
+  .searchLink,
+  :global(.dashboard-search-link) {
+    display: none !important;
   }
 }
 
@@ -668,9 +652,6 @@
     padding: 0.875rem;
     scrollbar-gutter: auto;
   }
-  .settingsPanel {
-    bottom: calc(68px + env(safe-area-inset-bottom));
-  }
   .mobileExtras {
     display: flex;
     flex-direction: column;
@@ -698,17 +679,14 @@
   :global(html[data-native="android"]) .main {
     height: calc(100% - 60px);
   }
-  :global(html[data-native="android"]) .settingsPanel {
-    bottom: 68px;
-  }
 }
 
 @media (max-width: 768px) {
   .settings {
     display: block;
     position: fixed;
-    top: 0.875rem;
-    right: 0.875rem;
+    top: calc(0.875rem + env(safe-area-inset-top, 0px));
+    right: calc(0.875rem + env(safe-area-inset-right, 0px));
     width: 44px;
     height: 44px;
     z-index: 60;
@@ -749,6 +727,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
   }
   .settings > summary:hover,
   .settings[open] > summary {
@@ -760,11 +739,14 @@
     display: none;
   }
   .settings .settingsPanel {
-    top: 52px;
-    bottom: auto;
-    right: 0.75rem;
+    position: fixed;
+    top: calc(52px + env(safe-area-inset-top, 0px));
+    bottom: auto !important;
+    right: calc(0.75rem + env(safe-area-inset-right, 0px));
     left: auto;
     width: min(240px, calc(100vw - 1.5rem));
+    max-height: calc(100dvh - 96px);
+    z-index: 70;
   }
 }
 
