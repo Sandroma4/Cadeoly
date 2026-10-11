@@ -1,7 +1,13 @@
 import styles from "./BrandLogo.module.css";
-export function BrandLogo({ iconOnly = false }: { iconOnly?: boolean }) {
+export function BrandLogo({
+  iconOnly = false,
+  className = "",
+}: {
+  iconOnly?: boolean;
+  className?: string;
+}) {
   return (
-    <span className={styles.logo}>
+    <span className={`${styles.logo} ${className}`}>
       <svg
         aria-hidden="true"
         viewBox="0 0 64 64"

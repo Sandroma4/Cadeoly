@@ -11,13 +11,13 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  flex-wrap: wrap;
 }
 .topbarControls {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-wrap: wrap;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 .intro {
   text-align: center;
