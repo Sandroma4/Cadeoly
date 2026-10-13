@@ -32,7 +32,18 @@ export async function getMyFamilies() {
   return prisma.family.findMany({
     where: { members: { some: { userId: session.user.id } } },
     include: {
-      members: { include: { user: { select: { id: true, name: true } } } },
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              profilePhoto: true,
+              profilePhotoVisibility: true,
+            },
+          },
+        },
+      },
       _count: { select: { members: true } },
     },
   });

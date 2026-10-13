@@ -20,17 +20,22 @@ import { ItemModeChooser } from "./ItemModeChooser";
 import { ItemFormFields } from "./ItemFormFields";
 import { ItemPreview } from "./ItemPreview";
 import { ItemActions } from "./ItemActions";
+import { ProductCapture } from "./ProductCapture";
 
 export function AddItemForm({
   wishlistId,
   item,
   initialUrl = "",
   initialTitle = "",
+  initialPrice = "",
+  initialImage = "",
 }: {
   wishlistId: string;
   item?: Gift;
   initialUrl?: string;
   initialTitle?: string;
+  initialPrice?: string;
+  initialImage?: string;
 }) {
   const t = useTranslations("wishlist");
   const currency = item?.currency || "EUR";
@@ -55,6 +60,7 @@ export function AddItemForm({
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState("");
   const [importedPhoto, setImportedPhoto] = useState("");
+  const [capturedImage, setCapturedImage] = useState(initialImage);
   async function importLink() {
     const form = formRef.current;
     if (!form) return;
@@ -79,7 +85,11 @@ export function AddItemForm({
       form.dispatchEvent(new Event("input", { bubbles: true }));
       setImportMessage(
         importText(
-          result.title || result.price || result.photo ? "review" : "failed",
+          result.fromLink
+            ? "fromLink"
+            : result.title || result.price || result.photo
+              ? "review"
+              : "failed",
         ),
       );
     } catch {
@@ -125,6 +135,7 @@ export function AddItemForm({
     setDirty(false);
     setLocalPhoto("");
     setImportedPhoto("");
+    setCapturedImage("");
     setError("");
     photoRead.current++;
   }
@@ -150,17 +161,35 @@ export function AddItemForm({
     setError("");
     setFieldErrors([]);
     form.set("wishlistId", wishlistId);
-    const photo = form.get("photo");
-    if (importedPhoto && !(photo instanceof File && photo.size)) {
-      const bytes = Uint8Array.from(atob(importedPhoto), (letter) =>
-        letter.charCodeAt(0),
-      );
-      form.set(
-        "photo",
-        new File([bytes], "product.webp", { type: "image/webp" }),
-      );
-    }
     try {
+      const photo = form.get("photo");
+      let photoData = importedPhoto;
+      if (
+        capturedImage &&
+        !photoData &&
+        !(photo instanceof File && photo.size)
+      ) {
+        const result = await previewProduct(
+          wishlistId,
+          String(form.get("url") || initialUrl),
+          capturedImage,
+        );
+        if ("error" in result || !result.photo) {
+          setError(importText("capturePhotoFailed"));
+          return;
+        }
+        photoData = result.photo;
+        setImportedPhoto(photoData);
+      }
+      if (photoData && !(photo instanceof File && photo.size)) {
+        const bytes = Uint8Array.from(atob(photoData), (letter) =>
+          letter.charCodeAt(0),
+        );
+        form.set(
+          "photo",
+          new File([bytes], "product.webp", { type: "image/webp" }),
+        );
+      }
       const result = item
         ? await updateWishlistItem(item.id, form)
         : await createWishlistItem(form);
@@ -188,6 +217,7 @@ export function AddItemForm({
         setMode(item ? "manual" : null);
         setOpen(false);
         setImportedPhoto("");
+        setCapturedImage("");
         setImportMessage("");
         router.refresh();
       }
@@ -265,8 +295,7 @@ export function AddItemForm({
           aria-busy={pending || importing}
         >
           <h2>{t(item ? "editGift" : "addItem")}</h2>
-          <p className="form-hint">{flow("optionalHelp")}</p>
-          <p className="form-hint">{flow("draftHelp")}</p>
+          <p className="form-hint">{flow("requiredNameHint")}</p>
           <div
             className="button-row"
             role="group"
@@ -313,13 +342,14 @@ export function AddItemForm({
               >
                 {importText(importing ? "loading" : "button")}
               </Button>
-              <p>{importText("help")}</p>
-              <p role="status">{importMessage}</p>
+              {importMessage && <p role="status">{importMessage}</p>}
             </div>
           </div>
+          {mode === "link" && <ProductCapture />}
           <ItemFormFields
             item={item}
             initialTitle={initialTitle}
+            initialPrice={initialPrice}
             fieldErrors={fieldErrors}
           />
           <Input
@@ -355,12 +385,17 @@ export function AddItemForm({
           <p className="form-hint" id={prefix + "-photo-hint"}>
             {t("photoHint")}
           </p>
-          {(localPhoto || importedPhoto) && (
+          {(localPhoto || importedPhoto || capturedImage) && (
             <div className="stack">
-              {/* Local preview never contacts the merchant from the browser. */}
+              {/* Captured public photos are previewed before downloading on save. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={localPhoto || "data:image/webp;base64," + importedPhoto}
+                src={
+                  localPhoto ||
+                  (importedPhoto
+                    ? "data:image/webp;base64," + importedPhoto
+                    : capturedImage)
+                }
                 width={160}
                 height={160}
                 style={{ objectFit: "contain" }}
@@ -371,6 +406,7 @@ export function AddItemForm({
                 variant="secondary"
                 onClick={() => {
                   setImportedPhoto("");
+                  setCapturedImage("");
                   setLocalPhoto("");
                   photoRead.current++;
                   const input = formRef.current?.elements.namedItem(
@@ -390,6 +426,14 @@ export function AddItemForm({
               <input type="checkbox" name="removePhoto" /> {t("removePhoto")}
             </label>
           )}
+          <details className="form-options list-detail-options gift-form-help">
+            <summary>{flow("fillingHelp")}</summary>
+            <div className="stack">
+              {mode === "link" && <p>{importText("help")}</p>}
+              <p>{flow("priorityHelp")}</p>
+              <p>{flow("draftHelp")}</p>
+            </div>
+          </details>
           {preview && (
             <ItemPreview
               preview={preview}

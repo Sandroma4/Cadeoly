@@ -1,10 +1,20 @@
 "use server";
 import { listOwnerId } from "@/lib/action-auth";
 import { prisma } from "@/lib/prisma";
-import { parseProduct, readPublicResource } from "@/lib/product-preview";
+import {
+  productImageFromUrl,
+  productTitleFromUrl,
+  productUrl,
+  readPublicResource,
+} from "@/lib/product-preview";
+import { readProductPage } from "@/lib/product-preview-rendered";
 import sharp from "sharp";
 const attempts = new Map<string, number>();
-export async function previewProduct(wishlistId: string, url: string) {
+export async function previewProduct(
+  wishlistId: string,
+  url: string,
+  capturedImage?: string,
+) {
   const userId = await listOwnerId();
   if (!userId) return { error: true };
   if (
@@ -26,13 +36,23 @@ export async function previewProduct(wishlistId: string, url: string) {
       if (time < Date.now() - 60000) attempts.delete(key);
   attempts.set(user, Date.now());
   try {
-    const page = await readPublicResource(url, 4 * 1024 * 1024, "html");
-    const data = parseProduct(page.bytes.toString("utf8"), page.url);
+    const page = capturedImage
+      ? {
+          url: productUrl(url).toString(),
+          data: {
+            title: "",
+            price: "",
+            image: productUrl(capturedImage).toString(),
+          },
+        }
+      : await readProductPage(url);
+    const data = page.data;
+    const imageUrl = data.image || productImageFromUrl(page.url);
     let photo = "";
-    if (data.image)
+    if (imageUrl)
       try {
         const image = await readPublicResource(
-          data.image,
+          imageUrl,
           5 * 1024 * 1024,
           "image",
         );
@@ -43,13 +63,23 @@ export async function previewProduct(wishlistId: string, url: string) {
           .toBuffer();
         if (bytes.length <= 700000) photo = bytes.toString("base64");
       } catch {}
-    return { title: data.title, price: data.price, photo };
+    const linkTitle =
+      !data.title && !data.price && !photo ? productTitleFromUrl(url) : "";
+    return {
+      title: data.title || linkTitle,
+      price: data.price,
+      photo,
+      fromLink: Boolean(linkTitle),
+    };
   } catch (error) {
     if (process.env.NODE_ENV !== "production")
       console.warn(
         "Product preview failed:",
         error instanceof Error ? error.message : "unknown",
       );
-    return { error: true };
+    const title = productTitleFromUrl(url);
+    return title
+      ? { title, price: "", photo: "", fromLink: true }
+      : { error: true };
   }
 }

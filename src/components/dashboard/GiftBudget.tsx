@@ -146,7 +146,6 @@ export function GiftBudget({
               id={helpId}
               className={`stack budget-help${helpOpen ? " budget-help-open" : ""}`}
             >
-              <p>{t("privacy")}</p>
               <p>{t("help")}</p>
             </div>
           <div className="stack">
@@ -230,7 +229,7 @@ export function GiftBudget({
           )}
           <PreservedForm
             key={`${scope}:${currency}:${saved?.amountCents ?? ""}`}
-            className="stack"
+            className="stack budget-form"
             action={(form) => perform(String(form.get("amount") || ""))}
           >
             <div className="stack">

@@ -35,10 +35,14 @@ export function GiftBrowser({
   gifts,
   owner,
   pagination,
+  filtersContent,
+  ideas,
 }: {
   gifts: (SearchableGift & { card: ReactNode })[];
   owner: boolean;
   pagination?: GiftPagination;
+  filtersContent?: ReactNode;
+  ideas?: { total: number; reset: () => void; empty: ReactNode };
 }) {
   const t = useTranslations("giftSearch");
   const p = useTranslations("improvements");
@@ -90,7 +94,9 @@ export function GiftBrowser({
         if (page > 1) url.searchParams.set("page", String(page));
         else url.searchParams.delete("page");
         startTransition(() => {
-          router.replace(url.pathname + url.search + url.hash, { scroll: false });
+          router.replace(url.pathname + url.search + url.hash, {
+            scroll: false,
+          });
         });
       });
     },
@@ -126,39 +132,44 @@ export function GiftBrowser({
   const paged = pagination
     ? { items: gifts, page: pagination.page, pages: pagination.pages }
     : paginateGifts(visible, page);
+  const viewControls = (
+    <div
+      className={`button-row gift-view-controls${ideas ? " gift-ideas-view-controls" : ""}`}
+      role="group"
+      aria-label={viewText("label")}
+    >
+      {(["photos", "compact"] as const).map((mode) => (
+        <Button
+          key={mode}
+          variant="secondary"
+          aria-pressed={view === mode}
+          onClick={() => setGiftView(mode)}
+        >
+          {viewText(mode)}
+        </Button>
+      ))}
+    </div>
+  );
   return (
     <div className="stack gift-browser" aria-busy={pending}>
-      <div
-        className="button-row gift-view-controls"
-        role="group"
-        aria-label={viewText("label")}
-      >
-        {(["photos", "compact"] as const).map((mode) => (
-          <Button
-            key={mode}
-            variant="secondary"
-            aria-pressed={view === mode}
-            onClick={() => setGiftView(mode)}
-          >
-            {viewText(mode)}
-          </Button>
-        ))}
-      </div>
-      <div className="gift-summary">
-        <p>
-          {t("total")}:{" "}
-          {Object.entries(totals)
-            .map(([currency, cents]) =>
-              new Intl.NumberFormat(locale, {
-                style: "currency",
-                currency,
-              }).format(cents / 100),
-            )
-            .join(" + ") || "—"}
-        </p>
-        {unpriced > 0 && <p>{t("unpriced", { count: unpriced })}</p>}
-        {mixedCurrencies && <p>{t("currencies")}</p>}
-      </div>
+      {!ideas && viewControls}
+      {!ideas && (
+        <div className="gift-summary">
+          <p>
+            {t("total")}:{" "}
+            {Object.entries(totals)
+              .map(([currency, cents]) =>
+                new Intl.NumberFormat(locale, {
+                  style: "currency",
+                  currency,
+                }).format(cents / 100),
+              )
+              .join(" + ") || "—"}
+          </p>
+          {unpriced > 0 && <p>{t("unpriced", { count: unpriced })}</p>}
+          {mixedCurrencies && <p>{t("currencies")}</p>}
+        </div>
+      )}
 
       <div className="gift-filters" role="search" aria-label={t("title")}>
         <div className="list-search gift-search">
@@ -187,61 +198,67 @@ export function GiftBrowser({
           </div>
         </div>
       </div>
-      <div
-        className="button-row quick-budget-filters"
-        role="group"
-        aria-label={w("quickBudget")}
-      >
-        {!mixedCurrencies &&
-          [
-            { label: w("allBudgets"), value: "" },
-            { label: "< 25 €", value: "25" },
-            { label: "< 50 €", value: "50" },
-            { label: "< 100 €", value: "100" },
-          ].map((pill) => (
-            <Button
-              key={pill.value}
-              type="button"
-              variant={
-                filters.maxPrice === pill.value ? "primary" : "secondary"
-              }
-              className="budget-pill"
-              onClick={() => change("maxPrice", pill.value)}
-            >
-              {pill.label}
-            </Button>
-          ))}
-        <Button
-          type="button"
-          variant={filters.priority === "ESSENTIAL" ? "primary" : "secondary"}
-          className="budget-pill"
-          aria-pressed={filters.priority === "ESSENTIAL"}
-          onClick={() =>
-            change(
-              "priority",
-              filters.priority === "ESSENTIAL" ? "all" : "ESSENTIAL",
-            )
-          }
+      {filtersContent}
+      {!ideas && (
+        <div
+          className="button-row quick-budget-filters"
+          role="group"
+          aria-label={w("quickBudget")}
         >
-          {t("quickEssential")}
-        </Button>
-        {!owner && (
+          {!mixedCurrencies &&
+            [
+              { label: w("allBudgets"), value: "" },
+              { label: "< 25 €", value: "25" },
+              { label: "< 50 €", value: "50" },
+              { label: "< 100 €", value: "100" },
+            ].map((pill) => (
+              <Button
+                key={pill.value}
+                type="button"
+                variant={
+                  filters.maxPrice === pill.value ? "primary" : "secondary"
+                }
+                className="budget-pill"
+                value={pill.value}
+                onClick={(event) =>
+                  change("maxPrice", event.currentTarget.value)
+                }
+              >
+                {pill.label}
+              </Button>
+            ))}
           <Button
             type="button"
-            variant={filters.status === "available" ? "primary" : "secondary"}
+            variant={filters.priority === "ESSENTIAL" ? "primary" : "secondary"}
             className="budget-pill"
-            aria-pressed={filters.status === "available"}
+            aria-pressed={filters.priority === "ESSENTIAL"}
             onClick={() =>
               change(
-                "status",
-                filters.status === "available" ? "all" : "available",
+                "priority",
+                filters.priority === "ESSENTIAL" ? "all" : "ESSENTIAL",
               )
             }
           >
-            {t("available")}
+            {t(ideas ? "quickPriority" : "quickEssential")}
           </Button>
-        )}
-      </div>
+          {!owner && (
+            <Button
+              type="button"
+              variant={filters.status === "available" ? "primary" : "secondary"}
+              className="budget-pill"
+              aria-pressed={filters.status === "available"}
+              onClick={() =>
+                change(
+                  "status",
+                  filters.status === "available" ? "all" : "available",
+                )
+              }
+            >
+              {t("available")}
+            </Button>
+          )}
+        </div>
+      )}
       <details className="form-options list-detail-options gift-filter-panel">
         <summary>
           {flow("sortAndFilters")}{" "}
@@ -274,7 +291,7 @@ export function GiftBrowser({
               ))}
             </select>
           </div>
-          {!mixedCurrencies && (
+          {!ideas && !mixedCurrencies && (
             <Input
               id={id + "-budget"}
               label={t("budget", {
@@ -300,7 +317,9 @@ export function GiftBrowser({
               <option value="all">{t("allPriorities")}</option>
               {Object.values(Priority).map((value) => (
                 <option key={value} value={value}>
-                  {w("priority" + value[0] + value.slice(1).toLowerCase())}
+                  {ideas && value === "ESSENTIAL"
+                    ? t("quickPriority")
+                    : w("priority" + value[0] + value.slice(1).toLowerCase())}
                 </option>
               ))}
             </select>
@@ -323,35 +342,40 @@ export function GiftBrowser({
           )}
         </div>
         <div className="button-row">
-          <Button
-            variant="secondary"
-            aria-pressed={filters.priority === "ESSENTIAL"}
-            onClick={() =>
-              change(
-                "priority",
-                filters.priority === "ESSENTIAL" ? "all" : "ESSENTIAL",
-              )
-            }
-          >
-            {t("quickEssential")}
-          </Button>
-          {!owner && (
-            <Button
-              variant="secondary"
-              aria-pressed={filters.status === "available"}
-              onClick={() =>
-                change(
-                  "status",
-                  filters.status === "available" ? "all" : "available",
-                )
-              }
-            >
-              {t("available")}
-            </Button>
+          {!ideas && (
+            <>
+              <Button
+                variant="secondary"
+                aria-pressed={filters.priority === "ESSENTIAL"}
+                onClick={() =>
+                  change(
+                    "priority",
+                    filters.priority === "ESSENTIAL" ? "all" : "ESSENTIAL",
+                  )
+                }
+              >
+                {t(ideas ? "quickPriority" : "quickEssential")}
+              </Button>
+              {!owner && (
+                <Button
+                  variant="secondary"
+                  aria-pressed={filters.status === "available"}
+                  onClick={() =>
+                    change(
+                      "status",
+                      filters.status === "available" ? "all" : "available",
+                    )
+                  }
+                >
+                  {t("available")}
+                </Button>
+              )}
+            </>
           )}
           <Button
             variant="secondary"
             onClick={() => {
+              ideas?.reset();
               if (pagination) {
                 navigate(initial);
                 return;
@@ -364,13 +388,33 @@ export function GiftBrowser({
           </Button>
         </div>
       </details>
+      {ideas && viewControls}
       <p role="status" className="result-count">
         {t("shown", {
           count: paged.items.length,
-          total: pagination?.total ?? gifts.length,
+          total: ideas?.total ?? pagination?.total ?? gifts.length,
         })}
       </p>
-      {!visible.length && <p>{t("noResults")}</p>}
+      {!visible.length &&
+        (ideas?.total === 0 ? (
+          ideas.empty
+        ) : (
+          <div className="stack">
+            <p>{t("noResults")}</p>
+            {ideas && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  ideas.reset();
+                  setFilters(initial);
+                  setPage(1);
+                }}
+              >
+                {t("reset")}
+              </Button>
+            )}
+          </div>
+        ))}
       <div
         className={`gift-grid${view === "compact" ? " gift-grid-compact" : ""}`}
       >

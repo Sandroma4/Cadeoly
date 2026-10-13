@@ -305,3 +305,61 @@ test("reminders use accessible upcoming events and only the giver's reservations
   assert.equal(other.gifts.length, 0);
   assert.equal(other.events.length, 0);
 });
+
+test("dashboard separates empty lists and excludes undated or distant reminders", async () => {
+  const user = await db.user.create({
+    data: {
+      name: "Reminder boundaries",
+      email: "reminder-boundaries@example.test",
+    },
+  });
+  const makeList = (name, neededBy, filled = false) =>
+    db.wishlist.create({
+      data: {
+        name,
+        ownerId: user.id,
+        neededBy,
+        ...(filled ? { items: { create: { title: "Wish" } } } : {}),
+      },
+    });
+  const empty = await makeList("Empty distant", "2026-12-25");
+  const today = await makeList("Today", "2026-10-07", true);
+  const last = await makeList("Last included day", "2026-10-21", true);
+  await makeList("Outside window", "2026-10-22", true);
+  await makeList("Past", "2026-10-06", true);
+  await db.wishlist.create({
+    data: {
+      name: "Undated gift list",
+      ownerId: stranger.id,
+      visibility: "PUBLIC",
+      items: {
+        create: {
+          title: "Undated reserved gift",
+          reservations: { create: { userId: user.id } },
+        },
+      },
+    },
+  });
+  const result = await readReminders(
+    db,
+    user.id,
+    new Date("2026-10-07T12:00:00Z"),
+  );
+  assert.deepEqual(
+    result.incompleteLists.map((row) => row.id),
+    [empty.id],
+  );
+  assert.deepEqual(
+    new Set(result.lists.map((row) => row.id)),
+    new Set([today.id, last.id]),
+  );
+  assert.equal(result.gifts.length, 0);
+  const email = await readReminders(
+    db,
+    user.id,
+    new Date("2026-10-07T12:00:00Z"),
+    { email: true },
+  );
+  assert.equal(email.incompleteLists.length, 0);
+  assert.equal(email.gifts.length, 1);
+});

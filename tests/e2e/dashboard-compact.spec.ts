@@ -25,10 +25,7 @@ for (const [locale, m] of [
       .getByRole("button", { name: m.tutorial.skip, exact: true })
       .click();
     const steps = page.locator("details").filter({
-      has: page.getByText(
-        m.onboarding.compactProgress.replace("{count}", "0"),
-        { exact: true },
-      ),
+      has: page.getByText(m.onboarding.list, { exact: true }),
     });
     await expect(steps).toBeVisible();
     await expect(steps).not.toHaveAttribute("open", "");
@@ -57,11 +54,16 @@ for (const [locale, m] of [
     await expect(page).toHaveURL(/dashboard\/wishlists\/(?!create$)[^/]+$/);
     await page.goto(`/${locale}/dashboard`);
     await expect(
-      page.getByText(m.onboarding.compactProgress.replace("{count}", "1"), {
+      page.getByText(m.onboarding.firstGift, {
         exact: true,
       }),
     ).toBeVisible();
-    await expect(page.locator(".reminder-panel")).toBeVisible();
+    await expect(page.locator(".reminder-panel")).toHaveCount(0);
+    await expect(
+      page
+        .locator('[class*="listsCard"]')
+        .getByRole("link", { name: m.wishlist.addItem, exact: true }),
+    ).toHaveCount(1);
     const response = await page.request.post("/api/account-import", {
       data: {
         confirm: true,
@@ -74,17 +76,24 @@ for (const [locale, m] of [
     expect(response.status()).toBe(200);
     await page.reload();
     await expect(
-      page.getByText(m.onboarding.compactProgress.replace("{count}", "1"), {
+      page.getByText(m.onboarding.firstGift, {
         exact: true,
       }),
     ).toHaveCount(0);
+    await page.screenshot({
+      path: `test-results/dashboard-${locale}-${info.project.name}.png`,
+      fullPage: true,
+    });
     if (info.project.name === "mobile") {
       const card = page.locator('[class*="listsCard"]');
       const entries = card.locator("li");
       await expect(entries).toHaveCount(2);
       for (const entry of await entries.all()) {
         await expect(entry).toHaveCSS("border-top-width", "1px");
-        await expect(entry.getByRole("link")).toHaveCSS("min-height", "48px");
+        await expect(entry.getByRole("link").first()).toHaveCSS(
+          "min-height",
+          "44px",
+        );
       }
       await expect(card.getByRole("heading")).toHaveCSS("font-weight", "700");
       expect(

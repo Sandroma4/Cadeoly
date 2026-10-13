@@ -5,66 +5,51 @@ for (const [locale, messages] of [
   ["fr", fr],
   ["en", en],
 ] as const) {
-  test(`${locale}: email reminders opt in, lead time and disabling persist`, async ({
+  test(`${locale}: email reminders autosave, preserve delay and disable correctly`, async ({
     page,
   }, info) => {
-    test.skip(
-      info.project.name !== "desktop",
-      "Settings persistence does not depend on viewport",
-    );
+    test.skip(info.project.name !== "desktop");
     await page.goto(`/${locale}/register`);
-    await page.locator('input[name="name"]').fill("Reminder user");
+    await page.locator('[name="name"]').fill("Reminder user");
     await page
-      .locator('input[name="email"]')
-      .fill(
-        `reminders-${locale}-${info.project.name}-${Date.now()}@example.test`,
-      );
-    await page.locator('input[name="password"]').fill("Browser-test-2026!");
+      .locator('[name="email"]')
+      .fill(`reminders-${locale}-${Date.now()}@example.test`);
+    await page.locator('[name="password"]').fill("Browser-test-2026!");
     await page
       .getByRole("button", { name: messages.auth.signUp, exact: true })
       .click();
     await expect(page).toHaveURL(new RegExp(`/${locale}/dashboard$`));
-    await page.goto(`/${locale}/dashboard/profile`);
-    const checkbox = page.getByRole("checkbox", {
-      name: messages.emailReminders.enabled,
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: messages.tutorial.skip, exact: true })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await page.goto(`/${locale}/dashboard/profile?section=preferences`);
+    const toggle = page.getByRole("switch", {
+      name: messages.emailReminders.title,
     });
     const days = page.getByLabel(messages.emailReminders.leadTime, {
       exact: true,
     });
-    const form = page.locator("form").filter({ has: checkbox });
-    await expect(checkbox).not.toBeChecked();
+    const status = page.locator("[data-profile-page] [role=status]");
+    await expect(toggle).not.toBeChecked();
+    await expect(days).toBeDisabled();
     await expect(days).toHaveValue("3");
     await page.locator('select[name="locale"]').selectOption(locale);
-    await checkbox.check();
+    await expect(status).toHaveText(messages.profileSettings.saved);
+    await toggle.check();
+    await expect(days).toBeEnabled();
+    await expect(status).toHaveText(messages.profileSettings.saved);
     await days.selectOption("7");
-    await Promise.all([
-      page.waitForResponse(
-        (response) =>
-          response.request().method() === "POST" &&
-          new URL(response.url()).pathname.endsWith("/dashboard/profile") &&
-          response.ok(),
-      ),
-      form
-        .getByRole("button", { name: messages.common.save, exact: true })
-        .click(),
-    ]);
+    await expect(status).toHaveText(messages.profileSettings.saved);
     await page.reload();
-    await expect(checkbox).toBeChecked();
+    await expect(toggle).toBeChecked();
     await expect(days).toHaveValue("7");
-    await checkbox.uncheck();
-    await Promise.all([
-      page.waitForResponse(
-        (response) =>
-          response.request().method() === "POST" &&
-          new URL(response.url()).pathname.endsWith("/dashboard/profile") &&
-          response.ok(),
-      ),
-      form
-        .getByRole("button", { name: messages.common.save, exact: true })
-        .click(),
-    ]);
+    await toggle.uncheck();
+    await expect(status).toHaveText(messages.profileSettings.saved);
     await page.reload();
-    await expect(checkbox).not.toBeChecked();
+    await expect(toggle).not.toBeChecked();
+    await expect(days).toBeDisabled();
     await expect(days).toHaveValue("7");
   });
 }

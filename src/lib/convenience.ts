@@ -2,6 +2,8 @@ export function sharedProduct(input: {
   url?: string;
   text?: string;
   title?: string;
+  price?: string;
+  image?: string;
 }) {
   const candidate =
     input.url || input.text?.match(/https?:\/\/[^\s<>]+/)?.[0] || "";
@@ -16,7 +18,25 @@ export function sharedProduct(input: {
     )
       url = candidate;
   } catch {}
-  return { url, title: (input.title || "").trim().slice(0, 120) };
+  let image = "";
+  try {
+    const parsed = new URL(input.image || "");
+    if (
+      parsed.protocol === "https:" &&
+      !parsed.username &&
+      !parsed.password &&
+      parsed.hostname.includes(".") &&
+      !/^[\d.]+$/.test(parsed.hostname) &&
+      parsed.toString().length <= 2048
+    )
+      image = parsed.toString();
+  } catch {}
+  const amount = (input.price || "").replace(",", ".");
+  const price =
+    /^\d+(?:\.\d{1,2})?$/.test(amount) && Number(amount) <= 9999999.99
+      ? Number(amount).toFixed(2)
+      : "";
+  return { url, title: (input.title || "").trim().slice(0, 120), price, image };
 }
 export function ownerPreview<
   T extends {

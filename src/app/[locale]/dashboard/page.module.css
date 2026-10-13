@@ -1,3 +1,55 @@
+.home {
+  gap: 1.5rem;
+}
+.primary,
+.supporting {
+  min-width: 0;
+}
+.supporting {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+.listsCard .entries li {
+  padding-block: 0.75rem;
+  border-top: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.listsCard .entries a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+}
+@container (min-width: 1000px) {
+  .home {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+    align-items: start;
+    column-gap: 1.5rem;
+  }
+  .home > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .primary {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .supporting {
+    grid-column: 2;
+    grid-row: 3 / span 3;
+    grid-template-columns: 1fr;
+  }
+  .quickActions {
+    grid-row: 2;
+  }
+  .home > details,
+  .home > :global(.reminder-panel) {
+    grid-column: 1;
+  }
+}
+
 .overview {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -81,6 +133,22 @@
   max-width: 100%;
   text-align: center;
 }
+.supportAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  align-self: flex-start;
+  color: var(--brand-foreground);
+  font-weight: 600;
+}
+.listsCard .entries .addWish {
+  color: var(--brand-foreground);
+  font-size: 0.85rem;
+}
+.listsCard .entries .addWish::after {
+  content: none;
+}
 
 @media (max-width: 768px) {
   .grid {
@@ -102,6 +170,10 @@
     font-weight: 700;
   }
   .listsCard .entries li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding-block: 0;
     border: 1px solid var(--border);
     border-radius: 0.75rem;
     background: color-mix(in srgb, var(--background) 55%, var(--card));
@@ -112,8 +184,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    min-height: 48px;
-    padding: 0.75rem 0.85rem 0.25rem;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
     overflow-wrap: anywhere;
   }
   .listsCard .entries a::after {
@@ -122,13 +194,14 @@
     flex-shrink: 0;
   }
   .listsCard .entries p {
+    grid-column: 1 / -1;
     margin: 0;
     padding: 0 0.85rem 0.75rem;
     font-size: 0.8rem;
   }
   .cardBody {
     min-height: 0;
-    gap: 0.65rem;
+    gap: 0.4rem;
     flex-grow: 0;
   }
   .entries {

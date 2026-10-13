@@ -97,3 +97,22 @@ export async function updateProfile(form: FormData) {
   refreshWishlists();
   return { success: true };
 }
+
+export async function updateProfilePreferences(form: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "unauthorized" };
+  const locale = z.enum(["fr", "en"]).safeParse(form.get("locale"));
+  if (!locale.success) return { error: "invalidFields" };
+  let reminders;
+  try {
+    reminders = parseEmailReminderSettings(form);
+  } catch {
+    return { error: "invalidFields" };
+  }
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { locale: locale.data, ...reminders },
+  });
+  refreshWishlists();
+  return { success: true };
+}

@@ -17,6 +17,9 @@
   margin-bottom: 0.5rem;
   flex-wrap: wrap;
 }
+.installApp {
+  margin-right: auto;
+}
 .benefits {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

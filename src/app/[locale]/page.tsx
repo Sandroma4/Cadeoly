@@ -20,6 +20,7 @@ export default async function Home() {
   return (
     <main className={styles.container}>
       <div className={styles.topControls}>
+        <InstallApp className={styles.installApp} />
         <QuickOptions initialTheme={theme} compact />
       </div>
       <div className={styles.illustration} aria-hidden="true">
@@ -43,7 +44,6 @@ export default async function Home() {
         <Link href="/guest" className={styles.secondaryButton}>
           {guest("continue")}
         </Link>
-        <InstallApp />
       </section>
       <section className={styles.benefits} aria-label={t("benefits")}>
         {["wishes", "duplicates", "surprise"].map((key) => (

@@ -244,7 +244,7 @@ export async function readWishlist(
       visibility: true,
       eventId: true,
       archivedAt: true,
-      owner: { select: { name: true } },
+      owner: { select: { name: true, profilePhoto: true } },
       event: { select: { name: true, date: true } },
       items: {
         where: {

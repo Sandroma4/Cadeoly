@@ -32,12 +32,18 @@ export default async function WishlistsPage({
   ]);
 
   const nav = await getTranslations("listNavigation");
+  const help = view !== "active" && (
+    <p>{lifecycle(view === "trash" ? "trashHelp" : "archiveHelp")}</p>
+  );
   return (
     <div className={`${styles.container} wishlist-page`}>
       <header className={styles.header}>
         <div>
           <h1>{t("myWishlists")}</h1>
-          <p className="page-intro">{tw("intro")}</p>
+          <p className="page-intro">
+            <span className={styles.desktopIntro}>{tw("intro")}</span>
+            <span className={styles.mobileIntro}>{tw("introMobile")}</span>
+          </p>
         </div>
         {(wishlists.length > 0 || view !== "active") && (
           <Link
@@ -66,9 +72,7 @@ export default async function WishlistsPage({
           ))}
         </nav>
       )}
-      {view !== "active" && (
-        <p>{lifecycle(view === "trash" ? "trashHelp" : "archiveHelp")}</p>
-      )}
+      {wishlists.length === 0 && help}
       {wishlists.length === 0 ? (
         <Card className={styles.emptyCard}>
           <CardContent className={styles.emptyContent}>
@@ -80,22 +84,27 @@ export default async function WishlistsPage({
                 ? tw("empty")
                 : nav(view === "trash" ? "emptyTrash" : "emptyArchive")}
             </p>
-            <Link
-              className="primary-link"
-              href={
-                view === "active"
-                  ? "/dashboard/wishlists/create"
-                  : "/dashboard/wishlists"
-              }
-            >
-              <span>
-                {view === "active" ? tw("createFirst") : lifecycle("activeTab")}
-              </span>
-            </Link>
+            {view !== "archived" && (
+              <Link
+                className="primary-link"
+                href={
+                  view === "active"
+                    ? "/dashboard/wishlists/create"
+                    : "/dashboard/wishlists"
+                }
+              >
+                <span>
+                  {view === "active"
+                    ? tw("createFirst")
+                    : lifecycle("activeTab")}
+                </span>
+              </Link>
+            )}
           </CardContent>
         </Card>
       ) : (
         <ListBrowser
+          help={help}
           filters={
             <nav
               className="button-row segmented-filters"
@@ -117,7 +126,7 @@ export default async function WishlistsPage({
             name: list.name,
             description: list.description,
             card: (
-              <Card key={list.id} className={styles.wishlistCard}>
+              <Card key={`${view}-${list.id}`} className={styles.wishlistCard}>
                 <OptionsMenu
                   className={styles.cardMenu}
                   label={`${nav("manage")} : ${list.name}`}
@@ -133,6 +142,7 @@ export default async function WishlistsPage({
                       list.name
                     ) : (
                       <Link
+                        className={styles.cardLink}
                         href={`/dashboard/wishlists/${list.id}?from=${view}`}
                         prefetch={true}
                       >
@@ -147,10 +157,17 @@ export default async function WishlistsPage({
                       )}
                     </span>{" "}
                     <span className={styles.itemCount}>
-                      • {tw("itemsCount", { count: list._count.items })}
+                      {list._count.items === 0
+                        ? tw("noGifts")
+                        : tw("itemsCount", { count: list._count.items })}
                     </span>
                   </CardDescription>
                 </CardHeader>
+                {view !== "trash" && (
+                  <span className={styles.cardChevron} aria-hidden="true">
+                    ›
+                  </span>
+                )}
                 {list.description?.trim() && (
                   <CardContent>
                     <p className={styles.description}>{list.description}</p>

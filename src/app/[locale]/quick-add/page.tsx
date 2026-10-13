@@ -11,7 +11,13 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ url?: string; text?: string; title?: string }>;
+  searchParams: Promise<{
+    url?: string;
+    text?: string;
+    title?: string;
+    price?: string;
+    image?: string;
+  }>;
 }) {
   const { locale } = await params,
     product = sharedProduct(await searchParams),

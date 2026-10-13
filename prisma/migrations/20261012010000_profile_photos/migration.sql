@@ -1,0 +1,2 @@
+ALTER TABLE "User" ADD COLUMN "profilePhoto" TEXT;
+ALTER TABLE "User" ADD COLUMN "profilePhotoVisibility" TEXT NOT NULL DEFAULT 'PRIVATE';

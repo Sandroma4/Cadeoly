@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     ? readOnboarding(prisma, session.user.id)
     : null;
   return (
-    <div className="stack">
+    <div className={`stack ${styles.home}`}>
       <header className={styles.greeting}>
         <h1>
           {t("hello", {
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
         </h1>
         <p>{t("intro")}</p>
       </header>
-      <div className={styles.grid}>
+      <div className={styles.primary}>
         <Card className={`${styles.summaryCard} ${styles.listsCard}`}>
           <CardHeader>
             <CardTitle>{t("myWishlists")}</CardTitle>
@@ -70,10 +70,22 @@ export default async function DashboardPage() {
                     <Link href={"/dashboard/wishlists/" + list.id}>
                       {list.name}
                     </Link>
-                    <p>{w("itemsCount", { count: list._count.items })}</p>
+                    {list._count.items === 0 ? (
+                      <Link
+                        className={styles.addWish}
+                        href={`/dashboard/wishlists/${list.id}`}
+                      >
+                        {w("addItem")}
+                      </Link>
+                    ) : (
+                      <p>{w("itemsCount", { count: list._count.items })}</p>
+                    )}
                   </li>
                 ))}
               </ul>
+            )}
+            {lists.length === 3 && (
+              <Link href="/dashboard/wishlists">{t("viewAllLists")}</Link>
             )}
             <Link
               className={`primary-link ${styles.cardAction}`}
@@ -90,7 +102,7 @@ export default async function DashboardPage() {
           <Onboarding progress={onboarding} userId={session!.user!.id!} />
         </Suspense>
       )}
-      <div className="button-row dashboard-actions">
+      <div className={`button-row dashboard-actions ${styles.quickActions}`}>
         <Link
           className="primary-link"
           href={
@@ -111,7 +123,7 @@ export default async function DashboardPage() {
           <Reminders reminders={reminders} />
         </Suspense>
       )}
-      <div className={styles.grid}>
+      <div className={styles.supporting}>
         <Card className={styles.summaryCard}>
           <CardHeader>
             <CardTitle>{t("upcomingEvents")}</CardTitle>
@@ -143,10 +155,7 @@ export default async function DashboardPage() {
                 ))}
               </ul>
             )}
-            <Link
-              className={`secondary-link ${styles.cardAction}`}
-              href="/dashboard/events"
-            >
+            <Link className={styles.supportAction} href="/dashboard/events">
               <span aria-hidden="true">+</span>
               {t("createEvent")}
             </Link>
@@ -179,10 +188,7 @@ export default async function DashboardPage() {
                 ))}
               </ul>
             )}
-            <Link
-              className={`secondary-link ${styles.cardAction}`}
-              href="/dashboard/family"
-            >
+            <Link className={styles.supportAction} href="/dashboard/family">
               <span aria-hidden="true">+</span>
               {t("invite")}
             </Link>

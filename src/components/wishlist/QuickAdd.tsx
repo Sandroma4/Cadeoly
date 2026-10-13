@@ -7,10 +7,14 @@ export function QuickAdd({
   lists,
   url,
   title,
+  price = "",
+  image = "",
 }: {
   lists: { id: string; name: string }[];
   url: string;
   title: string;
+  price?: string;
+  image?: string;
 }) {
   const t = useTranslations("convenience");
   const [id, setId] = useState(lists[0]?.id || "");
@@ -37,11 +41,16 @@ export function QuickAdd({
             wishlistId={id}
             initialUrl={url}
             initialTitle={title}
+            initialPrice={price}
+            initialImage={image}
           />
           <Link href={`/dashboard/wishlists/${id}`}>{t("openList")}</Link>
         </>
       ) : (
-        <Link className="primary-link" href={`/dashboard/wishlists/create?${new URLSearchParams({ url, title })}`}>
+        <Link
+          className="primary-link"
+          href={`/dashboard/wishlists/create?${new URLSearchParams({ url, title, price, image })}`}
+        >
           {t("createFirst")}
         </Link>
       )}

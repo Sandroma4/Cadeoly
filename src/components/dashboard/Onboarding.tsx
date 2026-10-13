@@ -17,7 +17,7 @@ export async function Onboarding({
   return (
     <OnboardingDisclosure
       userId={userId}
-      label={t("compactProgress", { count: state.listId ? 1 : 0 })}
+      label={t(state.listId ? "firstGift" : "list")}
       hideLabel={t("hide")}
     >
       <Link

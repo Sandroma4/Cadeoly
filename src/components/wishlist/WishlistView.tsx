@@ -1,4 +1,8 @@
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
+import { auth } from "@/auth";
+import { UserAvatar } from "@/components/ui/UserAvatar";
+import { canReadProfilePhoto } from "@/lib/profile-photos";
+import { profilePhotoUrl } from "@/lib/profile-photo-url";
 import { getLocale, getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -36,6 +40,15 @@ export async function WishlistView({
   const flow = await getTranslations("dailyFlow");
   const locale = await getLocale();
   const total = wishlist.pagination?.total ?? wishlist.items.length;
+  const ownerPhoto =
+    wishlist.owner.profilePhoto &&
+    (await canReadProfilePhoto(
+      prisma,
+      wishlist.ownerId,
+      (await auth())?.user?.id,
+    ))
+      ? profilePhotoUrl(wishlist.ownerId, wishlist.owner.profilePhoto)
+      : null;
   const guestSession = !loggedIn
     ? (await cookies()).get("cadeoly-guest")?.value
     : undefined;
@@ -74,7 +87,14 @@ export async function WishlistView({
       <header>
         <h1>{wishlist.name}</h1>
         <div className="wishlist-header-meta">
-          <p>{t("byOwner", { name: wishlist.owner.name || c("unknown") })}</p>
+          <div className="button-row">
+            <UserAvatar
+              name={wishlist.owner.name || c("unknown")}
+              src={ownerPhoto}
+              size={32}
+            />
+            <p>{t("byOwner", { name: wishlist.owner.name || c("unknown") })}</p>
+          </div>
           {wishlist.recipient && (
             <p>{t("forRecipient", { name: wishlist.recipient.name })}</p>
           )}
@@ -83,20 +103,23 @@ export async function WishlistView({
               {t("event")}: {wishlist.event.name}
             </p>
           )}
-          {wishlist.occasion && (
-            <p>
-              {t("occasion")}: {wishlist.occasion}
-            </p>
-          )}
-          {wishlist.neededBy && (
-            <p>
-              {t("neededBy")}:{" "}
-              {new Intl.DateTimeFormat(locale, {
-                dateStyle: "long",
-                timeZone: "UTC",
-              }).format(new Date(wishlist.neededBy + "T00:00:00Z"))}
-            </p>
-          )}
+          <div className="wishlist-occasion-date">
+            {wishlist.occasion && (
+              <p>
+                <span className="wishlist-meta-label">{t("occasion")}: </span>
+                {wishlist.occasion}
+              </p>
+            )}
+            {wishlist.neededBy && (
+              <p>
+                <span className="wishlist-meta-label">{t("neededBy")}: </span>
+                {new Intl.DateTimeFormat(locale, {
+                  dateStyle: "long",
+                  timeZone: "UTC",
+                }).format(new Date(wishlist.neededBy + "T00:00:00Z"))}
+              </p>
+            )}
+          </div>
         </div>
       </header>
       {daysLeft !== null && daysLeft >= 0 && daysLeft <= 30 && (
@@ -150,10 +173,21 @@ export async function WishlistView({
             <div className="empty-art">
               <OccasionIcon />
             </div>
-            <p>{wishlist.canEdit ? flow("firstWish") : t("noItems")}</p>
-            <p>
-              {flow(wishlist.canEdit ? "emptyGiftsOwner" : "emptyGiftsVisitor")}
+            <p className="wishlist-empty-title">
+              {wishlist.canEdit ? (
+                <>
+                  <span className="wishlist-empty-desktop">
+                    {flow("firstWish")}
+                  </span>
+                  <span className="wishlist-empty-mobile">
+                    {flow("emptyTitleMobile")}
+                  </span>
+                </>
+              ) : (
+                t("noItems")
+              )}
             </p>
+            {!wishlist.canEdit && <p>{flow("emptyGiftsVisitor")}</p>}
           </div>
           {wishlist.canEdit && <AddItemForm wishlistId={wishlist.id} />}
         </div>

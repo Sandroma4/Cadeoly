@@ -28,8 +28,10 @@ export function OccasionIcon({
         </>
       ) : kind === "people" ? (
         <>
-          <circle cx="9" cy="8" r="3" />
-          <path d="M3 21v-2a6 6 0 0 1 12 0v2m1-16a3 3 0 0 1 0 6m3 10v-2a6 6 0 0 0-3-5" />
+          <circle cx="7" cy="7" r="3" />
+          <circle cx="17" cy="7" r="3" />
+          <path d="M2 20v-3a5 5 0 0 1 10 0v3" />
+          <path d="M12 20v-3a5 5 0 0 1 10 0v3" />
         </>
       ) : kind === "list" ? (
         <>

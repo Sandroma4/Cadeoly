@@ -2,7 +2,8 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
-import { Input } from "@/components/ui/Input";
+import { ProfileFilePicker } from "./ProfileFilePicker";
+import styles from "@/app/[locale]/dashboard/profile/page.module.css";
 import { Button } from "@/components/ui/Button";
 type Preview = {
   lists: { name: string; gifts: number; photos: number }[];
@@ -11,6 +12,8 @@ type Preview = {
 export function PersonalImport() {
   const t = useTranslations("improvements"),
     router = useRouter();
+  const settings = useTranslations("profileSettings");
+  const [selectedName, setSelectedName] = useState("");
   const source = useRef<unknown>(null),
     file = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<Preview | null>(null),
@@ -41,6 +44,7 @@ export function PersonalImport() {
         setPreview(null);
         source.current = null;
         if (file.current) file.current.value = "";
+        setSelectedName("");
         setMessage(t("imported", { lists: data.lists, gifts: data.gifts }));
         router.refresh();
       } else setPreview(data);
@@ -59,15 +63,26 @@ export function PersonalImport() {
   }
   return (
     <section className="stack" aria-labelledby="import-heading">
-      <h2 id="import-heading">{t("importTitle")}</h2>
-      <p>{t("importHelp")}</p>
-      <Input
-        ref={file}
-        type="file"
+      <h3 id="import-heading">{settings("importTitle")}</h3>
+      <p>{settings("importHelp")}</p>
+      <details className={styles.help}>
+        <summary>{settings("learnMore")}</summary>
+        <p>{t("importHelp")}</p>
+      </details>
+      <ProfileFilePicker
+        inputRef={file}
+        selectedName={selectedName}
         accept="application/json,.json"
         label={t("importFile")}
         disabled={pending}
-        onChange={() => {
+        onClear={() => {
+          setSelectedName("");
+          setPreview(null);
+          setMessage("");
+          source.current = null;
+        }}
+        onChange={(event) => {
+          setSelectedName(event.target.files?.[0]?.name || "");
           setPreview(null);
           setMessage("");
           source.current = null;
@@ -75,7 +90,7 @@ export function PersonalImport() {
       />
       <Button
         variant="secondary"
-        disabled={pending}
+        disabled={pending || !selectedName}
         onClick={() => void submit(false)}
       >
         {pending ? t("working") : t("previewImport")}

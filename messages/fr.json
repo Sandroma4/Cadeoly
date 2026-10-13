@@ -1,4 +1,43 @@
 {
+  "profileSettings": {
+    "accountGroup": "Compte",
+    "familyGroup": "Famille",
+    "dataGroup": "Données",
+    "choosePhoto": "Choisir une photo",
+    "clearFile": "Retirer le fichier sélectionné",
+    "photoHelpCompact": "JPG, PNG ou WebP · 5 Mo max",
+    "learnMore": "En savoir plus",
+    "saved": "Modification enregistrée",
+    "saveDetails": "Enregistrer mes informations",
+    "savePreferences": "Réessayer l’enregistrement",
+    "remindersHelp": "Un rappel avant vos occasions. Désactivez-le à tout moment.",
+    "noPeople": "Aucun profil de proche pour le moment.",
+    "addPerson": "Ajouter un proche",
+    "exportHelp": "Téléchargez une copie de vos listes, cadeaux et photos.",
+    "importTitle": "Importer mes données",
+    "importHelp": "Importez un fichier d’export Cadéoly précédemment téléchargé.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "intro": "Gérez votre identité, vos préférences et la sécurité de votre compte.",
+    "navigation": "Rubriques du profil",
+    "identity": "Identité et photo",
+    "details": "Informations personnelles",
+    "preferences": "Préférences",
+    "security": "Connexion et sécurité",
+    "securityHelp": "Gérez vos moyens de connexion et votre mot de passe.",
+    "people": "Profils de proches",
+    "data": "Mes données",
+    "photo": "Photo de profil",
+    "photoHelp": "JPG, PNG ou WebP, 5 Mo maximum. La photo sera affichée dans un cercle.",
+    "visibility": "Qui peut voir ma photo ?",
+    "private": "Moi uniquement",
+    "family": "Les membres de mes familles",
+    "members": "Tous les utilisateurs connectés",
+    "privacyHelp": "Votre photo reste privée par défaut. Elle peut apparaître dans vos familles et sur vos listes selon ce choix. Les visiteurs non connectés ne la voient jamais.",
+    "removePhoto": "Supprimer ma photo",
+    "photoSaved": "Photo et visibilité enregistrées.",
+    "photoRemoved": "Photo de profil supprimée."
+  },
   "guest": {
     "myAccount": "Mon compte",
     "continue": "Continuer en tant qu’invité",
@@ -146,13 +185,15 @@
     "next": "Suivant",
     "page": "Page {page} sur {pages}",
     "reminders": "À préparer bientôt",
-    "reminderHelp": "Événements des 14 prochains jours et cadeaux que tu as réservés. Ces rappels restent dans l’application.",
+    "reminderHelp": "Échéances d’aujourd’hui et des 14 jours à venir.",
     "noReminders": "Rien à préparer pour le moment.",
     "reservedGift": "À offrir à {name}",
     "contributedGift": "Participation au cadeau collectif de {name}",
     "noDate": "Date à préciser",
     "myReservations": "Voir mes réservations",
-    "loadingReminders": "Chargement des rappels…"
+    "loadingReminders": "Chargement des rappels…",
+    "incompleteLists": "Listes à compléter",
+    "addWish": "Ajouter une envie"
   },
   "home": {
     "title": "Bienvenue sur <brand>Cadéoly</brand>",
@@ -199,6 +240,7 @@
   },
   "dashboard": {
     "title": "Tableau de bord",
+    "viewAllLists": "Voir toutes mes listes",
     "myWishlists": "Mes listes",
     "familySpace": "Espace Famille",
     "events": "Événements",
@@ -225,6 +267,8 @@
     "navMore": "Plus"
   },
   "wishlist": {
+    "introMobile": "Créez et partagez vos envies.",
+    "noGifts": "Aucun cadeau ajouté",
     "intro": "Retrouvez, créez et partagez toutes vos listes de souhaits.",
     "createTitle": "Créer une liste d'envies",
     "name": "Nom de la liste",
@@ -482,6 +526,7 @@
     "unpriced": "{count, plural, =1 {1 cadeau sans prix indiqué} other {# cadeaux sans prix indiqué}}",
     "currencies": "Les montants sont regroupés par devise, sans conversion.",
     "noResults": "Aucun cadeau ne correspond à ces critères.",
+    "quickPriority": "Envies prioritaires",
     "quickEssential": "Mes indispensables",
     "shown": "{count, plural, one {# cadeau affiché} other {# cadeaux affichés}} sur {total}",
     "surpriseHelp": "Les réservations restent cachées pour préserver votre surprise.",
@@ -581,9 +626,19 @@
     "loading": "Lecture du lien…",
     "help": "Collez un lien HTTPS de produit. Les champs déjà remplis sont conservés. Certains sites bloquent la lecture ; vous pouvez toujours remplir le cadeau vous-même.",
     "failed": "Informations indisponibles. Complétez les champs manuellement ou réessayez dans quelques secondes.",
-    "review": "Informations proposées : vérifiez le nom, le prix et la photo avant de sauvegarder. Le prix peut changer.",
+    "review": "Vérifiez les informations préremplies avant de les enregistrer.",
     "photoAlt": "Photo proposée pour le cadeau",
-    "remove": "Retirer la photo proposée"
+    "remove": "Retirer la photo proposée",
+    "fromLink": "Nom proposé à partir du lien. Vérifie-le et complète le prix et la photo : le site ne fournit pas ses informations produit.",
+    "captureTitle": "Importer depuis une fiche ouverte",
+    "captureHelp": "Si le site exige une connexion ou bloque la lecture, ouvrez sa fiche produit dans votre navigateur et utilisez le favori Cadéoly. Le nom, le prix en euros et la photo disponibles sont transmis au formulaire, sans enregistrer le cadeau.",
+    "captureBookmark": "Ajouter à Cadéoly",
+    "captureInstall": "Sur ordinateur, glissez ce bouton dans votre barre de favoris. Sur mobile, créez un favori, puis remplacez son adresse par le code ci-dessous. Utilisez ensuite ce favori depuis la fiche produit ouverte.",
+    "captureCopy": "Copier le code du favori",
+    "captureCode": "Code à coller dans l’adresse du favori",
+    "captureCopied": "Code copié. Vérifiez le nom, le prix et la photo dans Cadéoly avant de sauvegarder.",
+    "captureCopyManually": "Sélectionnez et copiez le code ci-dessous.",
+    "capturePhotoFailed": "La photo n’a pas pu être importée. Ajoutez-la depuis votre appareil ou retirez la photo proposée avant de réessayer."
   },
   "contributions": {
     "title": "Mes participations aux cadeaux groupés",
@@ -631,6 +686,8 @@
     "checkField": "Vérifie ce champ.",
     "addAnother": "Ajouter un autre cadeau",
     "requiredName": "Nom du cadeau — obligatoire",
+    "requiredNameHint": "Seul le nom est obligatoire.",
+    "fillingHelp": "Aide au remplissage",
     "optionalHelp": "Seul le nom est obligatoire. Tu peux compléter les autres informations plus tard.",
     "estimatedPrice": "Prix estimé ({currency}) — facultatif",
     "priorityHelp": "Indique à tes proches ce qui te ferait le plus plaisir.",
@@ -671,7 +728,9 @@
     "emptyFamily": "Crée une famille, puis invite tes proches. Pour rejoindre une famille existante, demande une invitation à son administrateur.",
     "emptyGiftsOwner": "Ajoute ta première envie depuis un lien ou manuellement.",
     "emptyGiftsVisitor": "Le propriétaire n’a pas encore ajouté de cadeaux. Reviens consulter cette liste plus tard.",
-    "firstWish": "Ta liste attend sa première envie"
+    "firstWish": "Ta liste attend sa première envie",
+    "changeVisibility": "Modifier la visibilité",
+    "emptyTitleMobile": "Aucun cadeau pour le moment"
   },
   "theme": {
     "label": "Thème",
@@ -684,6 +743,7 @@
     "label": "Chargement de la page…"
   },
   "listNavigation": {
+    "closeSearch": "Fermer la recherche",
     "search": "Rechercher une liste",
     "shown": "{count, plural, one {# liste} other {# listes}} sur {total}",
     "noResults": "Aucune liste ne correspond à ta recherche.",
@@ -696,7 +756,14 @@
     "settings": "Réglages de la liste",
     "emptyTrash": "Aucune liste dans la corbeille.",
     "emptyArchive": "Aucune liste archivée.",
-    "parameters": "Paramètres de la liste"
+    "parameters": "Paramètres de la liste",
+    "manageList": "Gérer la liste",
+    "backToList": "← Retour à la liste",
+    "manageNamed": "Gérer {name}",
+    "informationGroup": "Informations",
+    "sharingGroup": "Partage",
+    "occasionGroup": "Occasion et préférences",
+    "otherActions": "Autres actions"
   },
   "installApp": {
     "button": "Installer Cadéoly",
@@ -714,6 +781,9 @@
     "createFirst": "Créer une première liste",
     "ideas": "Quoi offrir ?",
     "ideasBadge": "Inspirations & Idées",
+    "ideasEmpty": "Aucun cadeau disponible dans vos familles",
+    "ideasEmptyHelp": "Retrouvez ici les envies partagées par vos proches. Rejoignez une famille ou invitez vos proches à partager leurs listes.",
+    "ideasFamilyAction": "Voir mes familles",
     "ideasHelp": "Retrouvez les cadeaux disponibles des membres de vos familles, hors de vos propres listes. Affinez par destinataire, événement et budget.",
     "recipient": "Destinataire",
     "event": "Événement",
@@ -868,7 +938,7 @@
   },
   "giftSuggestions": {
     "range": "Tranche de prix",
-    "currency": "Devise de la tranche",
+    "currency": "Devise",
     "allPrices": "Tous les prix",
     "under25": "Moins de {a}",
     "25to50": "De {a} à moins de {b}",

@@ -10,13 +10,14 @@ export function returnPath(value: unknown, locale: string) {
       const rawPath = value.split(/[?#]/, 1)[0];
       const path = parsed.pathname.replace(/^\/(fr|en)/, "");
       let keys: string[] | undefined;
-      if (path === "/quick-add") keys = ["url", "title", "text"];
+      if (path === "/quick-add")
+        keys = ["url", "title", "text", "price", "image"];
       else if (path === "/guest") keys = ["section"];
       else if (/^\/guest\/reservations\/[A-Za-z0-9_-]+$/.test(path)) keys = [];
       else if (/^\/(invite|share|lists)\/[A-Za-z0-9_-]+$/.test(path)) keys = [];
       else if (path === "/dashboard/wishlists") keys = ["view"];
       else if (path === "/dashboard/wishlists/create")
-        keys = ["eventId", "url", "title", "text"];
+        keys = ["eventId", "url", "title", "text", "price", "image"];
       else if (/^\/dashboard\/wishlists\/[A-Za-z0-9_-]+$/.test(path))
         keys = [
           "from",

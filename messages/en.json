@@ -1,4 +1,43 @@
 {
+  "profileSettings": {
+    "accountGroup": "Account",
+    "familyGroup": "Family",
+    "dataGroup": "Data",
+    "choosePhoto": "Choose a photo",
+    "clearFile": "Clear selected file",
+    "photoHelpCompact": "JPG, PNG or WebP · 5 MB max",
+    "learnMore": "Learn more",
+    "saved": "Change saved",
+    "saveDetails": "Save personal information",
+    "savePreferences": "Retry saving",
+    "remindersHelp": "A reminder before your occasions. Turn it off at any time.",
+    "noPeople": "No loved ones’ profiles yet.",
+    "addPerson": "Add a loved one",
+    "exportHelp": "Download a copy of your lists, gifts and photos.",
+    "importTitle": "Import my data",
+    "importHelp": "Import a Cadéoly export file you previously downloaded.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "intro": "Manage your identity, preferences and account security.",
+    "navigation": "Profile sections",
+    "identity": "Identity and photo",
+    "details": "Personal information",
+    "preferences": "Preferences",
+    "security": "Sign-in and security",
+    "securityHelp": "Manage your sign-in methods and password.",
+    "people": "Loved ones’ profiles",
+    "data": "My data",
+    "photo": "Profile photo",
+    "photoHelp": "JPG, PNG or WebP, up to 5 MB. Your photo will be displayed in a circle.",
+    "visibility": "Who can see my photo?",
+    "private": "Only me",
+    "family": "Members of my families",
+    "members": "All signed-in users",
+    "privacyHelp": "Your photo is private by default. It can appear in your families and on your lists according to this setting. Signed-out visitors can never see it.",
+    "removePhoto": "Remove my photo",
+    "photoSaved": "Photo and visibility saved.",
+    "photoRemoved": "Profile photo removed."
+  },
   "guest": {
     "myAccount": "My account",
     "continue": "Continue as a guest",
@@ -146,13 +185,15 @@
     "next": "Next",
     "page": "Page {page} of {pages}",
     "reminders": "Prepare soon",
-    "reminderHelp": "Events in the next 14 days and gifts you have reserved. These reminders stay in the app.",
+    "reminderHelp": "Due today or within the next 14 days.",
     "noReminders": "Nothing to prepare right now.",
     "reservedGift": "To give to {name}",
     "contributedGift": "Contribution to {name}'s group gift",
     "noDate": "Date to be confirmed",
     "myReservations": "View my reservations",
-    "loadingReminders": "Loading reminders…"
+    "loadingReminders": "Loading reminders…",
+    "incompleteLists": "Lists to complete",
+    "addWish": "Add a wish"
   },
   "home": {
     "title": "Welcome to <brand>Cadéoly</brand>",
@@ -199,6 +240,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "viewAllLists": "View all my lists",
     "myWishlists": "My Wishlists",
     "familySpace": "Family Space",
     "events": "Events",
@@ -225,6 +267,8 @@
     "navMore": "More"
   },
   "wishlist": {
+    "introMobile": "Create and share your wishes.",
+    "noGifts": "No gifts added",
     "intro": "Find, create, and share all your wishlists.",
     "createTitle": "Create a new Wishlist",
     "name": "Wishlist Name",
@@ -482,6 +526,7 @@
     "unpriced": "{count, plural, =1 {1 gift without a listed price} other {# gifts without a listed price}}",
     "currencies": "Amounts are grouped by currency without conversion.",
     "noResults": "No gifts match these criteria.",
+    "quickPriority": "Priority wishes",
     "quickEssential": "Essential gifts",
     "shown": "{count, plural, one {# gift shown} other {# gifts shown}} of {total}",
     "surpriseHelp": "Reservations stay hidden to preserve your surprise.",
@@ -581,9 +626,19 @@
     "loading": "Reading link…",
     "help": "Paste an HTTPS product link. Existing fields are kept. Some websites block previews; you can always fill in the gift yourself.",
     "failed": "Information unavailable. Fill in the fields manually or retry in a few seconds.",
-    "review": "Suggested information: check the name, price and photo before saving. Prices can change.",
+    "review": "Check the prefilled information before saving.",
     "photoAlt": "Suggested gift photo",
-    "remove": "Remove suggested photo"
+    "remove": "Remove suggested photo",
+    "fromLink": "Name suggested from the link. Check it and add the price and photo: the site did not provide its product information.",
+    "captureTitle": "Import from an open product page",
+    "captureHelp": "If the site requires sign-in or blocks previews, open its product page in your browser and use the Cadéoly bookmark. The available name, euro price and photo are sent to the form without saving the gift.",
+    "captureBookmark": "Add to Cadéoly",
+    "captureInstall": "On desktop, drag this button to your bookmarks bar. On mobile, create a bookmark and replace its address with the code below. Then use that bookmark on the open product page.",
+    "captureCopy": "Copy bookmark code",
+    "captureCode": "Code to paste into the bookmark address",
+    "captureCopied": "Code copied. Check the name, price and photo in Cadéoly before saving.",
+    "captureCopyManually": "Select and copy the code below.",
+    "capturePhotoFailed": "The photo could not be imported. Upload it from your device or remove the suggested photo before retrying."
   },
   "contributions": {
     "title": "My group gift contributions",
@@ -631,6 +686,8 @@
     "checkField": "Check this field.",
     "addAnother": "Add another gift",
     "requiredName": "Gift name — required",
+    "requiredNameHint": "Only the name is required.",
+    "fillingHelp": "Help filling in your wish",
     "optionalHelp": "Only the name is required. You can add other details later.",
     "estimatedPrice": "Estimated price ({currency}) — optional",
     "priorityHelp": "Let your family know what you would enjoy most.",
@@ -671,7 +728,9 @@
     "emptyFamily": "Create a family, then invite friends. To join an existing family, ask its administrator for an invitation.",
     "emptyGiftsOwner": "Add your first wish from a link or manually.",
     "emptyGiftsVisitor": "The owner has not added any gifts yet. Check this wishlist again later.",
-    "firstWish": "Your list is waiting for its first wish"
+    "firstWish": "Your list is waiting for its first wish",
+    "changeVisibility": "Change visibility",
+    "emptyTitleMobile": "No gifts yet"
   },
   "theme": {
     "label": "Theme",
@@ -684,6 +743,7 @@
     "label": "Loading page…"
   },
   "listNavigation": {
+    "closeSearch": "Close search",
     "search": "Search wishlists",
     "shown": "{count, plural, one {# wishlist} other {# wishlists}} of {total}",
     "noResults": "No wishlists match your search.",
@@ -696,7 +756,14 @@
     "settings": "Wishlist settings",
     "emptyTrash": "No wishlists in the trash.",
     "emptyArchive": "No archived wishlists.",
-    "parameters": "List settings"
+    "parameters": "List settings",
+    "manageList": "Manage list",
+    "backToList": "← Back to list",
+    "manageNamed": "Manage {name}",
+    "informationGroup": "Information",
+    "sharingGroup": "Sharing",
+    "occasionGroup": "Occasion and preferences",
+    "otherActions": "Other actions"
   },
   "installApp": {
     "button": "Install Cadéoly",
@@ -714,6 +781,9 @@
     "createFirst": "Create your first list",
     "ideas": "What to give?",
     "ideasBadge": "Gift Ideas & Inspiration",
+    "ideasEmpty": "No gifts available in your families",
+    "ideasEmptyHelp": "Find wishes shared by your loved ones here. Join a family or invite your loved ones to share their lists.",
+    "ideasFamilyAction": "View my families",
     "ideasHelp": "Available gifts from members of your families, excluding your own lists. Filter by recipient, event and budget.",
     "recipient": "Recipient",
     "event": "Event",

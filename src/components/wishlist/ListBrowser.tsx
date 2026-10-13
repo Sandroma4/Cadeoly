@@ -4,8 +4,10 @@ import { useTranslations } from "next-intl";
 export function ListBrowser({
   lists,
   filters,
+  help,
 }: {
   filters?: ReactNode;
+  help?: ReactNode;
   lists: {
     id: string;
     name: string;
@@ -18,6 +20,12 @@ export function ListBrowser({
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
+  const searchToggle = useRef<HTMLButtonElement>(null);
+  function closeSearch() {
+    setQuery("");
+    setSearchOpen(false);
+    searchToggle.current?.focus();
+  }
   useEffect(() => {
     if (searchOpen) searchInput.current?.focus();
   }, [searchOpen]);
@@ -36,14 +44,15 @@ export function ListBrowser({
       <div className="list-toolbar">
         {filters}
         <button
+          ref={searchToggle}
           type="button"
           className="list-search-toggle"
           aria-label={t("search")}
           aria-expanded={searchOpen}
           aria-controls={`${searchId}-panel`}
           onClick={() => {
-            if (searchOpen) setQuery("");
-            setSearchOpen(!searchOpen);
+            if (searchOpen) closeSearch();
+            else setSearchOpen(true);
           }}
         >
           <svg
@@ -87,10 +96,24 @@ export function ListBrowser({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               maxLength={120}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") closeSearch();
+              }}
             />
+            {searchOpen && (
+              <button
+                type="button"
+                className="list-search-close"
+                aria-label={t("closeSearch")}
+                onClick={closeSearch}
+              >
+                ×
+              </button>
+            )}
           </div>
         </div>
       </div>
+      {help}
       <p className="result-count" role="status">
         {t("shown", { count: visible.length, total: lists.length })}
       </p>

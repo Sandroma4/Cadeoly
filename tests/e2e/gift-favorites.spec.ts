@@ -25,6 +25,10 @@ for (const [locale, t] of [
         .getByRole("button", { name: t.auth.signUp, exact: true })
         .click();
       await expect(target).toHaveURL(new RegExp(`/${locale}/dashboard$`));
+      await target
+        .getByRole("button", { name: t.tutorial.skip, exact: true })
+        .click();
+      await expect(target.locator("dialog[open]")).toHaveCount(0);
     }
     await register(
       page,
@@ -94,14 +98,30 @@ for (const [locale, t] of [
         .click();
       await expect(buyer).toHaveURL(new RegExp(`/${locale}/dashboard/family$`));
       await buyer.goto(`/${locale}/dashboard/gift-ideas`);
-      const card = buyer
-        .locator(".gift-card")
-        .filter({
-          has: buyer.getByRole("heading", {
-            name: "Favorite book",
-            exact: true,
-          }),
-        });
+      const search = buyer.getByRole("searchbox");
+      await search.fill("Favorite book");
+      await buyer
+        .locator("#filter-recipient")
+        .selectOption({ label: "Favorite owner" });
+      await expect(search).toHaveValue("Favorite book");
+      await expect(buyer.locator(".gift-card")).toHaveCount(1);
+      await search.fill("No matching gift");
+      await expect(
+        buyer.getByText(t.giftSearch.noResults, { exact: true }),
+      ).toBeVisible();
+      await buyer
+        .getByRole("button", { name: t.giftSearch.reset, exact: true })
+        .last()
+        .click();
+      await expect(search).toHaveValue("");
+      await expect(buyer.locator("#filter-recipient")).toHaveValue("");
+      await expect(buyer.locator(".gift-card")).toHaveCount(2);
+      const card = buyer.locator(".gift-card").filter({
+        has: buyer.getByRole("heading", {
+          name: "Favorite book",
+          exact: true,
+        }),
+      });
       await card
         .getByRole("button", { name: t.giftFavorites.save, exact: true })
         .click();
@@ -109,7 +129,9 @@ for (const [locale, t] of [
         card.getByRole("button", { name: t.giftFavorites.remove, exact: true }),
       ).toHaveAttribute("aria-pressed", "true");
       await buyer.reload();
-      await buyer.getByLabel(t.giftFavorites.only, { exact: true }).check();
+      await buyer
+        .getByRole("checkbox", { name: t.giftFavorites.only, exact: true })
+        .check();
       await expect(buyer.locator(".gift-card")).toHaveCount(1);
       await card
         .getByRole("button", { name: t.wishlist.reserve, exact: true })
@@ -121,14 +143,18 @@ for (const [locale, t] of [
         }),
       ).toBeVisible();
       await buyer.reload();
-      await buyer.getByLabel(t.giftFavorites.only, { exact: true }).check();
+      await buyer
+        .getByRole("checkbox", { name: t.giftFavorites.only, exact: true })
+        .check();
       await expect(card).toBeVisible();
       await card
         .getByRole("button", { name: t.giftFavorites.remove, exact: true })
         .click();
       await expect(buyer.locator(".gift-card")).toHaveCount(0);
       await buyer.reload();
-      await buyer.getByLabel(t.giftFavorites.only, { exact: true }).check();
+      await buyer
+        .getByRole("checkbox", { name: t.giftFavorites.only, exact: true })
+        .check();
       await expect(buyer.locator(".gift-card")).toHaveCount(0);
     } finally {
       await buyerContext.close();

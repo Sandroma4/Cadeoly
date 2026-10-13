@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { createRecipient, updateRecipient } from "@/app/actions/recipient";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { PreservedForm } from "@/components/ui/PreservedForm";
+import styles from "@/app/[locale]/dashboard/profile/page.module.css";
 export function RecipientManager({
   recipients,
 }: {
@@ -17,6 +18,8 @@ export function RecipientManager({
     router = useRouter();
   const [pending, setPending] = useState(false),
     [message, setMessage] = useState("");
+  const settings = useTranslations("profileSettings");
+  const add = useRef<HTMLDetailsElement>(null);
   async function run(
     action: () => Promise<{ error?: string; success?: boolean }>,
   ) {
@@ -26,7 +29,10 @@ export function RecipientManager({
     try {
       const result = await action();
       setMessage(result.error ? errors(result.error) : p("recipientUpdated"));
-      if (!result.error) router.refresh();
+      if (!result.error) {
+        if (add.current) add.current.open = false;
+        router.refresh();
+      }
     } catch {
       setMessage(errors("unexpected"));
     } finally {
@@ -37,6 +43,9 @@ export function RecipientManager({
     <section className="stack" aria-labelledby="recipients-heading">
       <h2 id="recipients-heading">{t("recipients")}</h2>
       <p>{t("recipientHelp")}</p>
+      {!recipients.length && (
+        <p className={styles.hint}>{settings("noPeople")}</p>
+      )}
       <div className="stack">
         {recipients.map((r) => (
           <details className="recipient-row" key={r.id}>
@@ -110,19 +119,22 @@ export function RecipientManager({
           </details>
         ))}
       </div>
-      <PreservedForm
-        className="stack"
-        aria-busy={pending}
-        action={(form) => run(() => createRecipient(form))}
-      >
-        <Input
-          name="name"
-          label={t("recipientName")}
-          maxLength={120}
-          required
-        />
-        <Button disabled={pending}>{t("addRecipient")}</Button>
-      </PreservedForm>
+      <details ref={add} className={styles.addPerson}>
+        <summary>+ {settings("addPerson")}</summary>
+        <PreservedForm
+          className="stack"
+          aria-busy={pending}
+          action={(form) => run(() => createRecipient(form))}
+        >
+          <Input
+            name="name"
+            label={t("recipientName")}
+            maxLength={120}
+            required
+          />
+          <Button disabled={pending}>{t("addRecipient")}</Button>
+        </PreservedForm>
+      </details>
       <p role="status">{message}</p>
     </section>
   );

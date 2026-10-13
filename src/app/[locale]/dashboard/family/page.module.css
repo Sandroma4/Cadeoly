@@ -57,8 +57,13 @@
 }
 
 .emptyCard {
+  width: 100%;
   text-align: center;
   padding: 1.5rem 1rem;
+}
+
+.emptyContent p {
+  max-width: 65ch;
 }
 
 @media (max-width: 768px) {

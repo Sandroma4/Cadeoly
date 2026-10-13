@@ -20,7 +20,6 @@ export function WishlistManager({
 }) {
   const t = useTranslations("wishlist");
   const account = useTranslations("guestAccount");
-  const help = useTranslations("usageHelp");
   const flow = useTranslations("dailyFlow");
   const errors = useTranslations("errors");
   const locale = useLocale();
@@ -83,13 +82,36 @@ export function WishlistManager({
           {t("visibility" + visibility[0] + visibility.slice(1).toLowerCase())}
         </span>
       </div>
-      <p>{help(visibility.toLowerCase() + "Help")}</p>
       {visibility === "FAMILY" && (
         <Link className="primary-link" href="/dashboard/family">
           {flow("inviteFamily")}
         </Link>
       )}
-      {visibility === "PRIVATE" && <p>{flow("privateSharing")}</p>}
+      {visibility === "PRIVATE" && (
+        <Button
+          variant="secondary"
+          onClick={() => {
+            if (window.matchMedia("(max-width: 768px)").matches) {
+              router.push(
+                `/dashboard/wishlists/${id}?manage=1&focus=visibility`,
+              );
+              return;
+            }
+            const settings = document.getElementById("list-settings");
+            if (!(settings instanceof HTMLDetailsElement)) return;
+            const actions = settings.closest("details.wishlist-actions");
+            if (actions instanceof HTMLDetailsElement) actions.open = true;
+            settings.open = true;
+            const field = settings.querySelector<HTMLSelectElement>(
+              "select[name='visibility']",
+            );
+            field?.focus();
+            field?.scrollIntoView({ block: "center", behavior: "smooth" });
+          }}
+        >
+          {flow("changeVisibility")}
+        </Button>
+      )}
       {visibility === "PUBLIC" && (
         <ShareLink href={"/" + locale + "/lists/" + id} title={name} />
       )}

@@ -58,7 +58,9 @@ export async function readPublicResource(
           lookup: (_host, _options, callback) =>
             callback(null, addresses[0].address, 4),
           headers: {
-            "User-Agent": "Cadéoly/1.0 (product preview)",
+            ...(kind === "html"
+              ? { "User-Agent": "Cadéoly/1.0 (product preview)" }
+              : {}),
             Accept:
               kind === "html" ? "text/html" : "image/jpeg,image/png,image/webp",
             "Accept-Encoding": "identity",
@@ -83,7 +85,11 @@ export async function readPublicResource(
               : ["image/jpeg", "image/png", "image/webp"].includes(type))
           ) {
             res.destroy();
-            reject(Object.assign(new Error("unsupported"), { status: res.statusCode }));
+            reject(
+              Object.assign(new Error("unsupported"), {
+                status: res.statusCode,
+              }),
+            );
             return;
           }
           const chunks: Buffer[] = [];
@@ -152,7 +158,86 @@ function decode(value: string) {
     .replace(/\s+/g, " ")
     .trim();
 }
+function structuredProduct(html: string): Record<string, unknown> {
+  for (const script of html.matchAll(
+    /<script\b[^>]*\btype\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+  )) {
+    try {
+      let root: unknown;
+      try {
+        root = JSON.parse(script[1]);
+      } catch {
+        root = JSON.parse(decode(script[1]));
+      }
+      const queue: unknown[] = [root];
+      for (let i = 0; i < queue.length && i < 5000; i++) {
+        const node = queue[i];
+        if (!node || typeof node !== "object") continue;
+        if (Array.isArray(node)) {
+          queue.push(...node);
+          continue;
+        }
+        const data = node as Record<string, unknown>;
+        const types = Array.isArray(data["@type"])
+          ? data["@type"]
+          : [data["@type"]];
+        if (
+          types.some(
+            (type) =>
+              typeof type === "string" && /(?:^|[/#])Product$/i.test(type),
+          )
+        )
+          return data;
+        for (const key of ["mainEntity", "@graph", "item"])
+          if (data[key]) queue.push(data[key]);
+      }
+    } catch {}
+  }
+  return {};
+}
+function merchantProduct(html: string, base: string): Record<string, unknown> {
+  const host = new URL(base).hostname;
+  const leboncoin = /(^|\.)leboncoin\.fr$/.test(host);
+  const vinted = /(^|\.)vinted\.fr$/.test(host);
+  if (!leboncoin && !vinted) return {};
+  for (const script of html.matchAll(
+    /<script\b[^>]*\bid\s*=\s*["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/gi,
+  )) {
+    try {
+      const props = JSON.parse(script[1])?.props?.pageProps;
+      // Read only the primary listing, never recommendations or other sellers.
+      const item = leboncoin ? props?.ad : props?.item;
+      if (!item || typeof item !== "object") continue;
+      return {
+        name: leboncoin ? item.subject : item.title,
+        image: leboncoin
+          ? item.images?.urls_large?.[0] || item.images?.urls?.[0]
+          : item.photos?.[0]?.full_size_url || item.photos?.[0]?.url,
+        offers: {
+          price: leboncoin ? item.price?.[0] : item.price?.amount,
+          priceCurrency: leboncoin ? "EUR" : item.price?.currency,
+        },
+      };
+    } catch {}
+  }
+  return {};
+}
 export function parseProduct(html: string, base: string) {
+  if (
+    /\/(?:login|signin|sign-in|risk\/challenge)(?:\.html|\/|$)/i.test(
+      new URL(base).pathname,
+    )
+  )
+    return { title: "", price: "", image: "" };
+  const pageTitle = decode(
+    html.match(/<title\b[^>]*>([^<]*)<\/title>/i)?.[1] || "",
+  );
+  if (
+    /^(?:403\b|access denied\b|accès (?:bloqué|refusé)\b|forbidden\b|just a moment\b|robot check\b|verify (?:you are|you're) human\b)/i.test(
+      pageTitle,
+    )
+  )
+    return { title: "", price: "", image: "" };
   const meta: Record<string, string> = {};
   for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
     const attrs: Record<string, string> = {};
@@ -160,10 +245,39 @@ export function parseProduct(html: string, base: string) {
       /([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g,
     ))
       attrs[match[1].toLowerCase()] = decode(match[2] ?? match[3] ?? match[4]);
-    const key = attrs.property || attrs.name;
+    const key = attrs.property || attrs.name || attrs.itemprop;
     if (key && attrs.content && !meta[key.toLowerCase()])
       meta[key.toLowerCase()] = attrs.content;
   }
+  const product = {
+    ...merchantProduct(html, base),
+    ...structuredProduct(html),
+  };
+  const productName =
+    typeof product.name === "string" ? decode(product.name) : "";
+  const offers = (
+    Array.isArray(product.offers) ? product.offers : [product.offers]
+  ).flatMap((value) => {
+    if (!value || typeof value !== "object") return [];
+    const specification = value.priceSpecification;
+    return [
+      { ...value, price: value.price ?? value.lowPrice },
+      ...(Array.isArray(specification) ? specification : [specification]).map(
+        (price) => ({
+          ...price,
+          priceCurrency: price?.priceCurrency || value.priceCurrency,
+        }),
+      ),
+    ];
+  });
+  const offer = offers.find(
+    (value) =>
+      value &&
+      typeof value === "object" &&
+      String(value.priceCurrency).toUpperCase() === "EUR" &&
+      /^(?:\d+)(?:[.,]\d{1,2})?$/.test(String(value.price)) &&
+      Number(String(value.price).replace(",", ".")) <= 9999999.99,
+  );
   const amazon =
     /(^|\.)amazon\.(fr|com|de|it|es|nl|pl|se|com\.be|co\.uk|ca|com\.au|co\.jp)$/.test(
       new URL(base).hostname,
@@ -186,9 +300,11 @@ export function parseProduct(html: string, base: string) {
     : "";
   const title = (
     amazonTitle ||
+    productName ||
     meta["og:title"] ||
     meta["twitter:title"] ||
-    decode(html.match(/<title\b[^>]*>([^<]*)<\/title>/i)?.[1] || "")
+    meta["name"] ||
+    pageTitle
   ).slice(0, 120);
   let amazonPrice = "";
   if (amazon) {
@@ -201,15 +317,23 @@ export function parseProduct(html: string, base: string) {
     );
     if (amount) amazonPrice = amount[1].replace(/[ .]/g, "").replace(",", ".");
   }
-  const currency = meta["product:price:currency"] || meta["og:price:currency"];
+  const currency =
+    meta["product:price:currency"] ||
+    meta["og:price:currency"] ||
+    meta["pricecurrency"];
   const rawPrice =
-    meta["product:price:amount"] || meta["og:price:amount"] || "";
+    meta["product:price:amount"] ||
+    meta["og:price:amount"] ||
+    meta["price"] ||
+    "";
   let price =
     /^\d+(?:[.,]\d{1,2})?$/.test(rawPrice) &&
     currency === "EUR" &&
     Number(rawPrice.replace(",", ".")) <= 9999999.99
       ? Number(rawPrice.replace(",", ".")).toFixed(2)
       : "";
+  if (offer && !amazonPrice)
+    price = Number(String(offer.price).replace(",", ".")).toFixed(2);
   if (
     !price &&
     /^\d{1,7}\.\d{2}$/.test(amazonPrice) &&
@@ -242,8 +366,72 @@ export function parseProduct(html: string, base: string) {
           .sort((a, b) => b[1][0] * b[1][1] - a[1][0] * a[1][1])[0]?.[0] ||
         amazonImage;
     } catch {}
-    const raw = meta["og:image"] || meta["twitter:image"] || amazonImage;
+    const images = Array.isArray(product.image)
+      ? product.image
+      : [product.image];
+    const productImage = images
+      .map((value) =>
+        typeof value === "string"
+          ? value
+          : value &&
+              typeof value === "object" &&
+              "url" in value &&
+              typeof value.url === "string"
+            ? value.url
+            : "",
+      )
+      .find(Boolean);
+    const raw =
+      amazonImage ||
+      productImage ||
+      meta["og:image:secure_url"] ||
+      meta["og:image"] ||
+      meta["twitter:image"] ||
+      meta["twitter:image:src"] ||
+      meta["image"];
     if (raw) image = productUrl(new URL(raw, base).toString()).toString();
   } catch {}
   return { title, price, image };
+}
+
+export function productTitleFromUrl(value: string) {
+  try {
+    const url = productUrl(value);
+    const patterns: [RegExp, RegExp][] = [
+      [/(^|\.)joybuy\.(?:fr|de|nl|co\.uk|com)$/, /^\/dp\/([^/]+)\/\d+\/?$/],
+      [/(^|\.)vinted\.fr$/, /^\/items\/\d+-([^/]+)\/?$/],
+      [/(^|\.)e\.leclerc$/, /^\/fp\/([^/]+)-\d+\/?$/],
+      [/(^|\.)lidl\.fr$/, /^\/p\/([^/]+)\/p\d+\/?$/],
+      [/(^|\.)carrefour\.fr$/, /^\/p\/([^/]+)-\d+\/?$/],
+      [/(^|\.)shein\.com$/, /^\/(?:[a-z]{2}\/)?([^/]+)-p-\d+\.html$/],
+      [/(^|\.)temu\.com$/, /^\/(?:[a-z]{2}\/)?([^/]+)-g-\d+\.html$/],
+      [/(^|\.)cdiscount\.com$/, /^\/(?:[^/]+\/)+([^/]+)\/f-[^/]+\.html$/],
+    ];
+    const pattern = patterns.find(([host]) => host.test(url.hostname))?.[1];
+    const slug = pattern && url.pathname.match(pattern)?.[1];
+    if (!slug) return "";
+    return decodeURIComponent(slug).replace(/[-_]+/g, " ").trim().slice(0, 120);
+  } catch {
+    return "";
+  }
+}
+
+export function productImageFromUrl(value: string) {
+  try {
+    const url = productUrl(value);
+    if (
+      !/(^|\.)temu\.com$/.test(url.hostname) ||
+      !/^\/(?:[a-z]{2}\/)?goods\.html$/.test(url.pathname) ||
+      !/^\d+$/.test(url.searchParams.get("goods_id") || "")
+    )
+      return "";
+    const image = productUrl(
+      url.searchParams.get("share_img") ||
+        url.searchParams.get("top_gallery_url") ||
+        "",
+    );
+    return image.hostname === "img.kwcdn.com" ? image.toString() : "";
+  } catch {
+    return "";
+  }
 }

@@ -5,6 +5,39 @@ import { signOut } from "next-auth/react";
 import { changePassword } from "@/app/actions/auth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import styles from "@/app/[locale]/dashboard/profile/page.module.css";
+import type { ComponentProps } from "react";
+
+function PasswordField(props: ComponentProps<typeof Input>) {
+  const [visible, setVisible] = useState(false);
+  const t = useTranslations("profileSettings");
+  return (
+    <div className={styles.passwordField}>
+      <Input {...props} type={visible ? "text" : "password"} />
+      <Button
+        type="button"
+        variant="ghost"
+        aria-label={t(visible ? "hidePassword" : "showPassword")}
+        aria-pressed={visible}
+        onClick={() => setVisible(!visible)}
+      >
+        <svg
+          aria-hidden="true"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z" />
+          <circle cx="12" cy="12" r="3" />
+          {visible && <path d="m3 3 18 18" />}
+        </svg>
+      </Button>
+    </div>
+  );
+}
 export function ChangePasswordForm() {
   const t = useTranslations("accountSecurity"),
     a = useTranslations("auth"),
@@ -27,9 +60,9 @@ export function ChangePasswordForm() {
   }
   return (
     <form action={submit} className="stack">
-      <h2>{t("title")}</h2>
+      <h3>{t("title")}</h3>
       <p>{t("hint")}</p>
-      <Input
+      <PasswordField
         id="current-password"
         name="currentPassword"
         type="password"
@@ -38,7 +71,7 @@ export function ChangePasswordForm() {
         maxLength={128}
         required
       />
-      <Input
+      <PasswordField
         id="change-new-password"
         name="password"
         type="password"
@@ -49,7 +82,7 @@ export function ChangePasswordForm() {
         required
       />
       <p>{a("passwordHint")}</p>
-      <Input
+      <PasswordField
         id="change-confirmation"
         name="confirmation"
         type="password"

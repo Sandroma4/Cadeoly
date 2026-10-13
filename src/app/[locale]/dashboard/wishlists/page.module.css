@@ -166,38 +166,6 @@
 }
 
 @media (max-width: 768px) {
-  .container:has(.newWishlist) {
-    padding-bottom: 5rem;
-  }
-  .header > .newWishlist {
-    position: fixed;
-    right: 1rem;
-    bottom: calc(76px + env(safe-area-inset-bottom));
-    z-index: 40;
-    width: 56px;
-    height: 56px;
-    padding: 0;
-    border-radius: 50%;
-    box-shadow: var(--shadow-lg);
-  }
-  .newWishlist::before {
-    content: "+";
-    font-size: 2rem;
-    line-height: 1;
-  }
-  .newWishlistLabel {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-
-@media (max-width: 768px) {
   .container {
     gap: 0.75rem;
   }
@@ -206,5 +174,80 @@
   }
   .emptyContent {
     gap: 1rem;
+  }
+}
+
+.mobileIntro,
+.cardChevron {
+  display: none;
+}
+@media (max-width: 768px) {
+  .container {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+  .container > .header {
+    padding-right: 0;
+    align-items: stretch;
+  }
+  .header > div {
+    padding-right: 100px;
+  }
+  .desktopIntro {
+    display: none;
+  }
+  .mobileIntro {
+    display: inline;
+  }
+  .header > .newWishlist {
+    width: 100%;
+    min-height: 44px;
+    gap: 0.5rem;
+  }
+  .newWishlist::before {
+    content: "+";
+    font-size: 1.25rem;
+  }
+  .wishlistCard > .cardFooter {
+    display: none;
+  }
+  .cardMenu {
+    z-index: 2;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  .wishlistCard > div:first-of-type {
+    padding: 1rem 3.75rem 1rem 1rem;
+  }
+  .cardLink::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: var(--radius);
+  }
+  .cardLink:focus-visible {
+    outline: none;
+  }
+  .cardLink:focus-visible::after {
+    outline: 2px solid var(--brand-foreground);
+    outline-offset: 2px;
+  }
+  .cardChevron {
+    display: block;
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1rem;
+    color: var(--brand-foreground);
+    font-size: 1.75rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .wishlistCard h3,
+  .wishlistCard h2 {
+    overflow-wrap: anywhere;
+  }
+  .itemCount {
+    display: block;
+    margin-top: 0.25rem;
   }
 }

@@ -67,9 +67,7 @@ export default async function FamilyPage() {
                     <ul className={styles.list}>
                       {family.members.map((member) => (
                         <li key={member.id} className={styles.memberItem}>
-                          <div className={styles.avatar}>
-                            {member.user.name?.[0]?.toUpperCase() || "U"}
-                          </div>
+                          <UserAvatar name={member.user.name || ""} className={styles.avatar} src={member.user.profilePhoto && (member.userId === session?.user?.id || ["FAMILY", "MEMBERS"].includes(member.user.profilePhotoVisibility)) ? profilePhotoUrl(member.userId, member.user.profilePhoto) : null} />
                           <div>
                             <p className={styles.memberName}>
                               {member.user.name}
@@ -130,3 +128,5 @@ export default async function FamilyPage() {
     </div>
   );
 }
+import { UserAvatar } from "@/components/ui/UserAvatar";
+import { profilePhotoUrl } from "@/lib/profile-photo-url";

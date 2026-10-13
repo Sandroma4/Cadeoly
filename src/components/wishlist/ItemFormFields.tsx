@@ -6,10 +6,12 @@ import { Priority } from "@/lib/domain-values";
 export function ItemFormFields({
   item,
   initialTitle,
+  initialPrice = "",
   fieldErrors,
 }: {
   item?: Gift;
   initialTitle: string;
+  initialPrice?: string;
   fieldErrors: string[];
 }) {
   const t = useTranslations("wishlist");
@@ -42,7 +44,9 @@ export function ItemFormFields({
           label={flow("estimatedPrice", { currency })}
           placeholder="29.90"
           defaultValue={
-            item?.priceCents == null ? "" : (item.priceCents / 100).toFixed(2)
+            item?.priceCents == null
+              ? initialPrice
+              : (item.priceCents / 100).toFixed(2)
           }
         />
         <div className="gift-priority">
@@ -58,7 +62,6 @@ export function ItemFormFields({
               </option>
             ))}
           </select>
-          <p className="form-hint">{flow("priorityHelp")}</p>
         </div>
       </div>
       <details className="form-options list-detail-options">

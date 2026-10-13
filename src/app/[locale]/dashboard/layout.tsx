@@ -19,6 +19,8 @@ import { QuickOptions } from "@/components/ui/QuickOptions";
 import { currentGuestOwner } from "@/lib/guest-list-access";
 import { GuestFeatureGate } from "@/components/dashboard/GuestFeatureGate";
 import { returnPath } from "@/lib/return-path";
+import { UserAvatar } from "@/components/ui/UserAvatar";
+import { profilePhotoUrl } from "@/lib/profile-photo-url";
 export default async function DashboardLayout({
   children,
   params,
@@ -39,9 +41,13 @@ export default async function DashboardLayout({
   const user = session?.user?.id
     ? await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { name: true, tutorialCompletedAt: true },
+        select: { name: true, tutorialCompletedAt: true, profilePhoto: true },
       })
-    : { name: account("guestName"), tutorialCompletedAt: new Date() };
+    : {
+        name: account("guestName"),
+        tutorialCompletedAt: new Date(),
+        profilePhoto: null,
+      };
   if (!user) redirect(login);
   const t = await getTranslations("dashboard");
   const preferences = await cookies();
@@ -97,9 +103,9 @@ export default async function DashboardLayout({
                 className={styles.settings}
                 label={t("displaySettings")}
                 mobilePortal
-                mobileAction={<InstallApp className={styles.installControl} />}
               >
                 <div className={styles.settingsPanel}>
+                  <InstallApp />
                   <Link
                     href="/dashboard/profile"
                     className={styles.optionsProfile}
@@ -208,9 +214,15 @@ export default async function DashboardLayout({
                 </div>
               </OptionsMenu>
               <Link href="/dashboard/profile" className={styles.profile}>
-                <div className={styles.avatar}>
-                  {user.name?.[0]?.toUpperCase() || "U"}
-                </div>
+                <UserAvatar
+                  name={user.name || ""}
+                  src={
+                    user.profilePhoto && session?.user?.id
+                      ? profilePhotoUrl(session.user.id, user.profilePhoto)
+                      : null
+                  }
+                  className={styles.avatar}
+                />
                 <span className={styles.userName}>
                   {user.name || t("myProfile")}
                 </span>

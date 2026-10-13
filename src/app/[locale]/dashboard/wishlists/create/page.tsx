@@ -8,7 +8,13 @@ import { sharedProduct } from "@/lib/convenience";
 export default async function CreateWishlistPage({
   searchParams,
 }: {
-  searchParams: Promise<{ eventId?: string; url?: string; title?: string }>;
+  searchParams: Promise<{
+    eventId?: string;
+    url?: string;
+    title?: string;
+    price?: string;
+    image?: string;
+  }>;
 }) {
   const [availableEvents, families] = await Promise.all([
     getEvents(),

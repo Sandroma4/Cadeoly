@@ -13,6 +13,7 @@ import { getTrashedGifts } from "@/app/actions/item";
 import { GiftTrash } from "@/components/wishlist/GiftTrash";
 import { ownerPreview } from "@/lib/convenience";
 import { giftPageOptions } from "@/lib/gift-search";
+import { WishlistActions } from "@/components/wishlist/WishlistActions";
 import { PrintListButton } from "@/components/wishlist/PrintListButton";
 export default async function WishlistDetailsPage({
   params,
@@ -53,6 +54,38 @@ export default async function WishlistDetailsPage({
     });
     if (event) events.push(event);
   }
+  const detailHref = `/dashboard/wishlists/${id}${from === "archived" ? "?from=archived" : ""}`;
+  const manageHref = `/dashboard/wishlists/${id}?manage=1${from === "archived" ? "&from=archived" : ""}`;
+  if (query.manage === "1" && wishlist.isOwner && !preview) {
+    return (
+      <div className="stack wishlist-detail-page wishlist-management-page">
+        <Link className="secondary-link management-back" href={detailHref}>
+          {nav("backToList")}
+        </Link>
+        <h1 id="manage-list-title" tabIndex={-1}>
+          {nav("manageNamed", { name: wishlist.name })}
+        </h1>
+        {wishlist.canEdit && (
+          <WishlistForm
+            guestMode={guestMode}
+            events={events}
+            initial={wishlist}
+            recipients={recipients}
+            returnTo={detailHref}
+            focusVisibility={query.focus === "visibility"}
+          />
+        )}
+        <section className="stack list-management-lifecycle">
+          <h2>{nav("otherActions")}</h2>
+          <ListLifecycle
+            id={id}
+            name={wishlist.name}
+            state={wishlist.archivedAt ? "archived" : "active"}
+          />
+        </section>
+      </div>
+    );
+  }
   const token = wishlist.isOwner
     ? (
         await prisma.wishlist.findUnique({
@@ -78,90 +111,98 @@ export default async function WishlistDetailsPage({
           </svg>
           {nav(wishlist.isOwner ? "back" : "backFamily")}
         </Link>
-        <PrintListButton />
-        {wishlist.canEdit && !preview && (
-          <details
-            id="list-settings"
-            className="form-options list-detail-options list-settings-control"
-          >
-            <summary>
-              <svg
-                aria-hidden="true"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-              >
-                <path d="M4 7h16M4 17h16" />
-                <circle cx="9" cy="7" r="3" fill="var(--background)" />
-                <circle cx="15" cy="17" r="3" fill="var(--background)" />
-              </svg>
-              {nav("parameters")}
-            </summary>
-            <div className="stack">
-              <WishlistForm
-                key={JSON.stringify([
-                  wishlist.name,
-                  wishlist.description,
-                  wishlist.occasion,
-                  wishlist.neededBy,
-                  wishlist.preferences,
-                  wishlist.visibility,
-                  wishlist.eventId,
-                ])}
-                guestMode={guestMode}
-                events={events}
-                initial={wishlist}
-                recipients={recipients}
-              />
-              <div className="list-sensitive-actions">
-                <h3>{nav("manage")}</h3>
-                <ListLifecycle
-                  id={id}
-                  name={wishlist.name}
-                  state={wishlist.archivedAt ? "archived" : "active"}
-                />
-              </div>
-            </div>
-          </details>
-        )}
-        {wishlist.isOwner && !wishlist.canEdit && !preview && (
-          <details
-            id="list-manage"
-            className="form-options list-detail-options list-settings-control"
-          >
-            <summary>
-              <svg
-                aria-hidden="true"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-              >
-                <path d="M4 7h16M4 17h16" />
-                <circle cx="9" cy="7" r="3" fill="var(--background)" />
-                <circle cx="15" cy="17" r="3" fill="var(--background)" />
-              </svg>
-              {nav("parameters")}
-            </summary>
-            <ListLifecycle id={id} name={wishlist.name} state="archived" />
-          </details>
-        )}
-      </div>
-      {wishlist.isOwner && (
-        <Link
-          className="secondary-link"
-          href={`/dashboard/wishlists/${id}${preview ? "" : "?preview=1"}`}
-        >
-          {(await getTranslations("wishlist"))(
-            preview ? "exitPreview" : "previewAsGuest",
+        <WishlistActions>
+          {wishlist.isOwner && !preview && (
+            <Link
+              className="secondary-link list-mobile-settings"
+              href={manageHref}
+            >
+              {(await getTranslations("wishlist"))("editTitle")}
+            </Link>
           )}
-        </Link>
-      )}
+          <PrintListButton />
+          {wishlist.canEdit && !preview && (
+            <details
+              id="list-settings"
+              className="form-options list-detail-options list-settings-control"
+            >
+              <summary>
+                <svg
+                  aria-hidden="true"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path d="M4 7h16M4 17h16" />
+                  <circle cx="9" cy="7" r="3" fill="var(--background)" />
+                  <circle cx="15" cy="17" r="3" fill="var(--background)" />
+                </svg>
+                {nav("parameters")}
+              </summary>
+              <div className="stack">
+                <WishlistForm
+                  key={JSON.stringify([
+                    wishlist.name,
+                    wishlist.description,
+                    wishlist.occasion,
+                    wishlist.neededBy,
+                    wishlist.preferences,
+                    wishlist.visibility,
+                    wishlist.eventId,
+                  ])}
+                  guestMode={guestMode}
+                  events={events}
+                  initial={wishlist}
+                  recipients={recipients}
+                />
+                <div className="list-sensitive-actions">
+                  <h3>{nav("manage")}</h3>
+                  <ListLifecycle
+                    id={id}
+                    name={wishlist.name}
+                    state={wishlist.archivedAt ? "archived" : "active"}
+                  />
+                </div>
+              </div>
+            </details>
+          )}
+          {wishlist.isOwner && !wishlist.canEdit && !preview && (
+            <details
+              id="list-manage"
+              className="form-options list-detail-options list-settings-control"
+            >
+              <summary>
+                <svg
+                  aria-hidden="true"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path d="M4 7h16M4 17h16" />
+                  <circle cx="9" cy="7" r="3" fill="var(--background)" />
+                  <circle cx="15" cy="17" r="3" fill="var(--background)" />
+                </svg>
+                {nav("parameters")}
+              </summary>
+              <ListLifecycle id={id} name={wishlist.name} state="archived" />
+            </details>
+          )}
+          {preview && (
+            <Link
+              className="secondary-link"
+              href={`/dashboard/wishlists/${id}`}
+            >
+              {(await getTranslations("wishlist"))("exitPreview")}
+            </Link>
+          )}
+        </WishlistActions>
+      </div>
       {preview && (
         <p role="status">
           {(await getTranslations("wishlist"))("previewHelp")}

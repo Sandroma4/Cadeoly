@@ -54,43 +54,53 @@ export async function readReminders(
       },
     },
   };
-  const [events, reservations, contributions, lists] = await Promise.all([
-    db.event.findMany({
-      where: {
-        date: { gte: today, lt: end },
-        family: { members: { some: { userId } } },
-      },
-      orderBy: { date: "asc" },
-      ...(options.email ? {} : { take: 10 }),
-      select: { id: true, name: true, date: true },
-    }),
-    db.reservation.findMany(giftQuery),
-    db.contribution.findMany(giftQuery),
-    db.wishlist.findMany({
-      where: {
-        ownerId: userId,
-        archivedAt: null,
-        deletedAt: null,
-        OR: [
-          ...(options.email ? [] : [{ items: { none: { deletedAt: null } } }]),
-          {
-            neededBy: {
-              gte: today.toISOString().slice(0, 10),
-              lt: end.toISOString().slice(0, 10),
-            },
+  const [events, reservations, contributions, lists, incompleteLists] =
+    await Promise.all([
+      db.event.findMany({
+        where: {
+          date: { gte: today, lt: end },
+          family: { members: { some: { userId } } },
+        },
+        orderBy: { date: "asc" },
+        ...(options.email ? {} : { take: 10 }),
+        select: { id: true, name: true, date: true },
+      }),
+      db.reservation.findMany(giftQuery),
+      db.contribution.findMany(giftQuery),
+      db.wishlist.findMany({
+        where: {
+          ownerId: userId,
+          archivedAt: null,
+          deletedAt: null,
+          ...(options.email ? {} : { items: { some: { deletedAt: null } } }),
+          neededBy: {
+            gte: today.toISOString().slice(0, 10),
+            lt: end.toISOString().slice(0, 10),
           },
-        ],
-      },
-      ...(options.email ? {} : { take: 3 }),
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        neededBy: true,
-        _count: { select: { items: { where: { deletedAt: null } } } },
-      },
-    }),
-  ]);
+        },
+        ...(options.email ? {} : { take: 3 }),
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          neededBy: true,
+          _count: { select: { items: { where: { deletedAt: null } } } },
+        },
+      }),
+      options.email
+        ? Promise.resolve([])
+        : db.wishlist.findMany({
+            where: {
+              ownerId: userId,
+              archivedAt: null,
+              deletedAt: null,
+              items: { none: { deletedAt: null } },
+            },
+            take: 3,
+            orderBy: { updatedAt: "desc" },
+            select: { id: true, name: true },
+          }),
+    ]);
   const gifts = [];
   const seen = new Set<string>();
   const participations = [
@@ -112,7 +122,8 @@ export async function readReminders(
     const due = list.neededBy
       ? new Date(list.neededBy + "T12:00:00Z")
       : list.event?.date || null;
-    if (due && (due < today || due >= end)) continue;
+    if ((!due && !options.email) || (due && (due < today || due >= end)))
+      continue;
     seen.add(item.id);
     gifts.push({
       id: item.id,
@@ -126,5 +137,10 @@ export async function readReminders(
   gifts.sort(
     (a, b) => (a.due?.getTime() || Infinity) - (b.due?.getTime() || Infinity),
   );
-  return { events, gifts: options.email ? gifts : gifts.slice(0, 12), lists };
+  return {
+    events,
+    gifts: options.email ? gifts : gifts.slice(0, 12),
+    lists,
+    incompleteLists,
+  };
 }

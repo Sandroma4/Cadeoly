@@ -181,7 +181,8 @@
 }
 
 .content {
-  padding: clamp(1rem, 2.5vw, 2rem);
+  padding: clamp(1rem, 2.5vw, 3rem);
+  container-type: inline-size;
   scrollbar-gutter: stable;
   flex-grow: 1;
   overflow-y: auto;
@@ -315,7 +316,7 @@
 
 .content > * {
   width: 100%;
-  max-width: var(--page-width, 1280px);
+  max-width: var(--page-width, 1600px);
   margin-inline: auto;
   flex-shrink: 0;
 }
@@ -368,6 +369,7 @@
   }
   .logo {
     display: flex;
+    container-type: inline-size;
     justify-content: flex-start;
     align-items: center;
     padding-block: 0.25rem;
@@ -376,13 +378,14 @@
   }
   .logo h2 {
     margin: 0;
-    font-size: 1.65rem;
+    font-size: 17cqi;
+    white-space: nowrap;
     display: flex;
     align-items: center;
   }
   .logo svg {
-    width: 38px;
-    height: 38px;
+    width: 26cqi;
+    height: 26cqi;
   }
   .nav {
     gap: 0.375rem;
@@ -415,8 +418,9 @@
   }
   .profile {
     min-width: 0;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.5rem;
+    padding-inline: 0.875rem;
     padding-top: 0.875rem;
     min-height: 52px;
   }
@@ -769,6 +773,36 @@
   margin-block: 0.5rem;
 }
 
+@media (min-width: 769px) {
+  button.installControl,
+  .installControl > summary {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    border-radius: 0.875rem;
+    background: var(--secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    list-style: none;
+  }
+  .installControl > summary::-webkit-details-marker {
+    display: none;
+  }
+  .installControl svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  button.installControl:hover,
+  .installControl > summary:hover {
+    border-color: var(--brand-foreground);
+    background: color-mix(in srgb, var(--brand-foreground) 10%, var(--card));
+  }
+}
+
 @media (max-width: 768px) {
   .installControl {
     position: absolute;
@@ -820,5 +854,13 @@
     border-radius: 0;
     padding-top: 1rem;
     font-size: 0.875rem;
+  }
+}
+
+/* Profile has its own mobile navigation and keeps the bottom bar clearance. */
+@media (max-width: 768px) {
+  .content:has([data-profile-page]) > .settings,
+  .content:has([data-profile-page]) > .installControl {
+    display: none;
   }
 }
