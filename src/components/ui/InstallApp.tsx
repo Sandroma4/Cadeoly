@@ -23,10 +23,14 @@ export function InstallApp({ className = "" }: { className?: string }) {
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
   const [installed, setInstalled] = useState(true);
   useEffect(() => {
-    const media = window.matchMedia("(display-mode: standalone)");
+    const media = window.matchMedia(
+      "(display-mode: standalone), (display-mode: minimal-ui), (display-mode: fullscreen)",
+    );
     const sync = () =>
       setInstalled(
         media.matches ||
+          document.documentElement.dataset.native === "android" ||
+          document.referrer.startsWith("android-app://") ||
           Boolean(
             (navigator as Navigator & { standalone?: boolean }).standalone,
           ),
