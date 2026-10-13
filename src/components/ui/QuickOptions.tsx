@@ -8,21 +8,31 @@ export function QuickOptions({
   initialTheme = "system",
   compact = true,
   className = "",
+  showLanguage = true,
 }: {
   initialTheme?: string;
   compact?: boolean;
   className?: string;
+  showLanguage?: boolean;
 }) {
   return (
     <div
       className={`${styles.dock} ${className}`}
       role="group"
-      aria-label="Préférences d'affichage et langue"
+      aria-label={
+        showLanguage
+          ? "Préférences d'affichage et langue"
+          : "Préférences d'affichage"
+      }
     >
-      <div className={styles.segment}>
-        <LanguageSwitcher compact={compact} />
-      </div>
-      <span className={styles.divider} aria-hidden="true" />
+      {showLanguage && (
+        <>
+          <div className={styles.segment}>
+            <LanguageSwitcher compact={compact} />
+          </div>
+          <span className={styles.divider} aria-hidden="true" />
+        </>
+      )}
       <div className={styles.segment}>
         <ThemeSwitcher initial={initialTheme} compact={compact} />
       </div>

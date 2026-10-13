@@ -21,7 +21,7 @@ export default async function Home() {
     <main className={styles.container}>
       <div className={styles.topControls}>
         <InstallApp className={styles.installApp} />
-        <QuickOptions initialTheme={theme} compact />
+        <QuickOptions initialTheme={theme} compact showLanguage={false} />
       </div>
       <div className={styles.illustration} aria-hidden="true">
         <BrandLogo iconOnly />
