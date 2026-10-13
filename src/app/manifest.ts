@@ -14,6 +14,39 @@ export default function manifest(): MetadataRoute.Manifest {
       params: { title: "title", text: "text", url: "url" },
     },
     display: "standalone",
+    orientation: "any",
+    lang: "fr",
+    dir: "ltr",
+    categories: ["lifestyle", "shopping"],
+    prefer_related_applications: false,
+    screenshots: [
+      {
+        src: "/screenshots/home-mobile-fr.jpg",
+        sizes: "382x827",
+        type: "image/jpeg",
+        form_factor: "narrow",
+        label: "Accueil de Cadéoly sur mobile",
+      },
+      {
+        src: "/screenshots/home-desktop-fr.jpg",
+        sizes: "1272x795",
+        type: "image/jpeg",
+        form_factor: "wide",
+        label: "Accueil de Cadéoly sur ordinateur",
+      },
+    ],
+    shortcuts: [
+      {
+        name: "Mes listes de cadeaux",
+        short_name: "Mes listes",
+        url: "/fr/dashboard/wishlists",
+      },
+      {
+        name: "Ajouter une envie",
+        short_name: "Ajouter",
+        url: "/fr/quick-add",
+      },
+    ],
     background_color: "#faf8f5",
     theme_color: "#6543be",
     icons: [
