@@ -44,18 +44,11 @@ db.exec(
   "INSERT INTO User (id,name,email,updatedAt) VALUES ('migration-user','Migration','migration@example.test',CURRENT_TIMESTAMP); INSERT INTO Wishlist (id,name,ownerId,updatedAt) VALUES ('migration-list','Migration','migration-user',CURRENT_TIMESTAMP); INSERT INTO WishlistItem (id,title,price,wishlistId,updatedAt) VALUES ('migration-gift','Migration',45.50,'migration-list',CURRENT_TIMESTAMP);",
 );
 db.exec(upgrade);
-for (const folder of [
-  "202610030003_query_indexes",
-  "202610030004_gift_details_password_reset",
-  "202610030005_accounts_families_list_lifecycle",
-  "202610030006_gift_trash",
-  "20261004110000_group_gifts_and_feedback",
-  "202610070001_convenience",
-  "202610090001_email_reminders_budgets",
-  "202610100001_gift_preparation_favorites_order",
-  "202610100002_account_tutorial",
-  "202610100003_guest_reservations",
-])
+// Apply every later migration so the test schema always matches Prisma.
+for (const folder of fs
+  .readdirSync(path.join(__dirname, "../prisma/migrations"))
+  .filter((name) => /^\d/.test(name) && name > "202610030002_secure_wishlists")
+  .sort())
   db.exec(
     fs.readFileSync(
       path.join(__dirname, "../prisma/migrations", folder, "migration.sql"),

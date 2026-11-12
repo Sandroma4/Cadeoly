@@ -7,12 +7,12 @@ const ts = require('typescript');
 function render({ mode = 'browser', ios = false, native = false, referrer = '' } = {}) {
   const state = [];
   let index = 0;
-  const module = { exports: {} };
+  const sandbox = { exports: {} };
   const source = ts.transpileModule(fs.readFileSync('src/components/ui/InstallApp.tsx', 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   vm.runInNewContext(source, {
-    module, exports: module.exports,
+    module: sandbox, exports: sandbox.exports,
     require: name => name === 'react' ? {
       useState: initial => { const key = index++; if (!(key in state)) state[key] = initial; return [state[key], value => { state[key] = value; }]; },
       useEffect: effect => effect(),
@@ -24,9 +24,9 @@ function render({ mode = 'browser', ios = false, native = false, referrer = '' }
       addEventListener() {}, removeEventListener() {},
     },
   });
-  module.exports.InstallApp({});
+  sandbox.exports.InstallApp({});
   index = 0;
-  return module.exports.InstallApp({});
+  return sandbox.exports.InstallApp({});
 }
 
 test('installation control remains available in a regular browser', () => {

@@ -1,3 +1,4 @@
+import { daysUntil } from "@/lib/event-countdown";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { auth } from "@/auth";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -78,9 +79,7 @@ export async function WishlistView({
     : wishlist.neededBy
       ? new Date(wishlist.neededBy + "T00:00:00Z")
       : null;
-  const daysLeft = targetDate
-    ? Math.ceil((targetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : null;
+  const daysLeft = targetDate ? daysUntil(targetDate) : null;
 
   return (
     <div className="stack" id="list-gifts">

@@ -18,7 +18,7 @@ export async function requestReset(
     create: { key: globalKey, windowStart: now, attempts: 1 },
     update: { attempts: { increment: 1 } },
   });
-  if (globalThrottle.attempts > 100) return;
+  if (globalThrottle.attempts > 1000) return;
   const key = createHmac("sha256", secret).update(email).digest("hex");
   const bucket = Math.floor(now.getTime() / (15 * 60 * 1000));
   const throttleKey = `${key}:${bucket}`;
