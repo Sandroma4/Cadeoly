@@ -18,6 +18,7 @@ export async function registerUser(form: FormData): Promise<ActionResult> {
   if (!parsed.success) return { error: "registrationInvalid" };
   const { name, email, password } = parsed.data;
   if (!process.env.AUTH_SECRET) return { error: "unexpected" };
+  const ip = await requestIp();
   if (
     !(await allowAccountAttempt(
       prisma,
@@ -27,14 +28,16 @@ export async function registerUser(form: FormData): Promise<ActionResult> {
       1000,
       60,
     )) ||
-    !(await allowAccountAttempt(
-      prisma,
-      "signup-ip",
-      await requestIp(),
-      process.env.AUTH_SECRET,
-      20,
-      60,
-    )) ||
+    // Without a client address, a shared "unknown" bucket would block everyone.
+    (ip !== null &&
+      !(await allowAccountAttempt(
+        prisma,
+        "signup-ip",
+        ip,
+        process.env.AUTH_SECRET,
+        20,
+        60,
+      ))) ||
     !(await allowAccountAttempt(
       prisma,
       "signup",
