@@ -9,6 +9,10 @@ export function eventCountdownDays(date: Date | string, today: number): number {
   return utcCalendarDay(date) - today;
 }
 
+export function daysUntil(target: Date, now = Date.now()): number {
+  return Math.ceil((target.getTime() - now) / DAY);
+}
+
 export function millisecondsUntilNextUtcDay(now: number): number {
   return DAY - (now % DAY);
 }

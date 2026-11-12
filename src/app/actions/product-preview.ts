@@ -1,6 +1,7 @@
 "use server";
 import { listOwnerId } from "@/lib/action-auth";
 import { prisma } from "@/lib/prisma";
+import { allowAccountAttempt } from "@/lib/account-service";
 import {
   productImageFromUrl,
   productTitleFromUrl,
@@ -35,6 +36,19 @@ export async function previewProduct(
     for (const [key, time] of attempts)
       if (time < Date.now() - 60000) attempts.delete(key);
   attempts.set(user, Date.now());
+  // Persistent hourly cap: outbound fetches survive restarts and multiple instances.
+  if (
+    !process.env.AUTH_SECRET ||
+    !(await allowAccountAttempt(
+      prisma,
+      "product-preview",
+      user,
+      process.env.AUTH_SECRET,
+      60,
+      60,
+    ))
+  )
+    return { error: true };
   try {
     const page = capturedImage
       ? {

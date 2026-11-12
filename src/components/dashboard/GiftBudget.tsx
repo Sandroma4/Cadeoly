@@ -1,5 +1,5 @@
 "use client";
-import { useId, useState, useEffect } from "react";
+import { useId, useState, useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -37,12 +37,12 @@ export function GiftBudget({
     currencyId = useId();
   const helpId = useId();
   const [helpOpen, setHelpOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
 
+  // Open after hydration on wide screens or when budgets exist; the user's toggle stays native.
   useEffect(() => {
-    if (typeof window !== "undefined" && (window.innerWidth > 768 || budgets.length > 0)) {
-      setIsOpen(true);
-    }
+    if (detailsRef.current && (window.innerWidth > 768 || budgets.length > 0))
+      detailsRef.current.open = true;
   }, [budgets.length]);
   const occasions = [
     ...new Set([
@@ -97,8 +97,7 @@ export function GiftBudget({
       <CardContent>
         <details
           className="gift-budget-dropdown"
-          open={isOpen}
-          onToggle={(e) => setIsOpen(e.currentTarget.open)}
+          ref={detailsRef}
         >
           <summary className="gift-budget-summary">
             <div className="gift-budget-summary-left">

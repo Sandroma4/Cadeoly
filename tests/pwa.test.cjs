@@ -1,12 +1,12 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');
 test('manifest screenshots exist with accurate dimensions and device formats', async () => {
   const ts = require('typescript');
-  const module = { exports: {} };
+  const sandbox = { exports: {} };
   const source = ts.transpileModule(fs.readFileSync('src/app/manifest.ts', 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS },
   }).outputText;
-  vm.runInNewContext(source, { exports: module.exports, module });
-  const manifest = module.exports.default();
+  vm.runInNewContext(source, { exports: sandbox.exports, module: sandbox });
+  const manifest = sandbox.exports.default();
   assert.deepEqual(Array.from(manifest.screenshots, shot => shot.form_factor).sort(), ['narrow', 'wide']);
   for (const shot of manifest.screenshots) {
     const metadata = await require('sharp')('public' + shot.src).metadata();

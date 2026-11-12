@@ -6,6 +6,7 @@ import { reportBusinessEvent } from "@/lib/observability";
 import { fields, registrationSchema } from "@/lib/validation";
 import { auth } from "@/auth";
 import { refreshWishlists } from "@/lib/refresh";
+import { requestIp } from "@/lib/request-ip";
 import { z } from "zod";
 import { parseEmailReminderSettings } from "@/lib/email-reminder-settings";
 import {
@@ -23,7 +24,15 @@ export async function registerUser(form: FormData): Promise<ActionResult> {
       "signup-global",
       "all",
       process.env.AUTH_SECRET,
-      100,
+      1000,
+      60,
+    )) ||
+    !(await allowAccountAttempt(
+      prisma,
+      "signup-ip",
+      await requestIp(),
+      process.env.AUTH_SECRET,
+      20,
       60,
     )) ||
     !(await allowAccountAttempt(

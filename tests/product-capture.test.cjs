@@ -128,6 +128,7 @@ function photoAction({ owner = "owner", ownsList = true, download }) {
     { compilerOptions: { module: 1, target: 7, esModuleInterop: true } },
   ).outputText;
   const exports = {};
+  process.env.AUTH_SECRET ??= "test-secret";
   vm.runInNewContext(source, {
     exports,
     Buffer,
@@ -135,6 +136,8 @@ function photoAction({ owner = "owner", ownsList = true, download }) {
     console: { warn() {} },
     require(id) {
       if (id === "@/lib/action-auth") return { listOwnerId: async () => owner };
+      if (id === "@/lib/account-service")
+        return { allowAccountAttempt: async () => true };
       if (id === "@/lib/prisma")
         return {
           prisma: {
