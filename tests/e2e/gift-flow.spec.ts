@@ -53,7 +53,7 @@ for (const [locale, text] of [
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await page.goto(createPath);
     await expect(page.locator('select[name="visibility"]')).toHaveValue(
-      "PRIVATE",
+      "LINK",
     );
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
     if (testInfo.project.name === "mobile") {

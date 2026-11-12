@@ -38,6 +38,7 @@ export default async function SearchPage({
           type="search"
           label={t("query")}
           defaultValue={query}
+          autoFocus={!query}
           minLength={2}
           maxLength={120}
           required

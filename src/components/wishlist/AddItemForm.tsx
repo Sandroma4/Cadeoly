@@ -61,6 +61,9 @@ export function AddItemForm({
   const [importMessage, setImportMessage] = useState("");
   const [importedPhoto, setImportedPhoto] = useState("");
   const [capturedImage, setCapturedImage] = useState(initialImage);
+  // Text typed in the quick-entry field: a link to import or a gift name.
+  const [seed, setSeed] = useState("");
+  const autoImport = useRef(false);
   async function importLink() {
     const form = formRef.current;
     if (!form) return;
@@ -108,7 +111,7 @@ export function AddItemForm({
     if (open && !mode) {
       chooserRef.current?.scrollIntoView({ block: "start" });
       chooserRef.current
-        ?.querySelector<HTMLButtonElement>("button")
+        ?.querySelector<HTMLInputElement>("input")
         ?.focus({ preventScroll: true });
     }
     if (open && mode) {
@@ -118,7 +121,13 @@ export function AddItemForm({
           mode === "manual" ? 'input[name="title"]' : 'input[name="url"]',
         )
         ?.focus({ preventScroll: true });
+      if (autoImport.current) {
+        autoImport.current = false;
+        void importLink();
+      }
     }
+    // importLink only reads the mounted form; running it once per mode change is intended.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mode]);
   useEffect(() => {
     if (preview)
@@ -132,6 +141,7 @@ export function AddItemForm({
     setOpen(false);
     setPreview(null);
     setMode(item ? "manual" : null);
+    setSeed("");
     setDirty(false);
     setLocalPhoto("");
     setImportedPhoto("");
@@ -215,6 +225,7 @@ export function AddItemForm({
         photoRead.current++;
         setPreview(null);
         setMode(item ? "manual" : null);
+        setSeed("");
         setOpen(false);
         setImportedPhoto("");
         setCapturedImage("");
@@ -266,7 +277,11 @@ export function AddItemForm({
     return (
       <ItemModeChooser
         chooserRef={chooserRef}
-        onChoose={setMode}
+        onChoose={(next, value) => {
+          setSeed(value || "");
+          autoImport.current = next === "link" && Boolean(value);
+          setMode(next);
+        }}
         onCancel={cancel}
       />
     );
@@ -331,7 +346,9 @@ export function AddItemForm({
                 error={fieldError("url")}
                 type="url"
                 label={t("link")}
-                defaultValue={item?.url || initialUrl}
+                defaultValue={
+                  item?.url || initialUrl || (mode === "link" ? seed : "")
+                }
                 maxLength={2048}
               />
               <Button
@@ -348,7 +365,7 @@ export function AddItemForm({
           {mode === "link" && <ProductCapture />}
           <ItemFormFields
             item={item}
-            initialTitle={initialTitle}
+            initialTitle={initialTitle || (mode === "manual" ? seed : "")}
             initialPrice={initialPrice}
             fieldErrors={fieldErrors}
           />

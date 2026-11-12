@@ -675,6 +675,10 @@
     "chooseMode": "How would you like to add this wish?",
     "fromLink": "From a link",
     "manual": "Manually",
+    "quickEntryLabel": "Product link or gift name",
+    "quickEntryPlaceholder": "https://… or “Headphones”",
+    "quickEntryContinue": "Continue",
+    "quickEntryHelp": "With a link, we try to fetch the name, price and photo.",
     "moreOptions": "More options",
     "moreFilters": "More filters",
     "filtersActive": "Filters active",
@@ -713,7 +717,7 @@
     "publicHelp": "Anyone can view this wishlist.",
     "groupTitle": "Group gift",
     "groupHelp": "Set a price so friends can pledge a contribution. Cadéoly does not collect payments. Contributions stay hidden from the owner to preserve the surprise.",
-    "noFamilyHelp": "You have no family yet: the list starts private. Create a family or choose link sharing to invite friends and family."
+    "noFamilyHelp": "You have no family yet: the list is shared by link by default, so only people you send it to can open it. Create a family to share it with your relatives."
   },
   "dailyFlow": {
     "eventListsHelp": "Find the participants’ wishlists you have permission to view here.",

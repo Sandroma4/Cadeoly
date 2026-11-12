@@ -120,6 +120,11 @@ export default async function WishlistDetailsPage({
               {(await getTranslations("wishlist"))("editTitle")}
             </Link>
           )}
+          {wishlist.canEdit && !preview && wishlist.items.length > 0 && (
+            <a className="primary-link" href="#list-share">
+              {(await getTranslations("dailyFlow"))("sharingTitle")}
+            </a>
+          )}
           <PrintListButton />
           {wishlist.canEdit && !preview && (
             <details

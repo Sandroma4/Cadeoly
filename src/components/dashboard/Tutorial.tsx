@@ -15,6 +15,16 @@ import { Button } from "@/components/ui/Button";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import styles from "./Tutorial.module.css";
 
+// Remembers a skip in this tab until the background save reaches the server.
+const FINISHED_KEY = "cadeoly-tutorial-finished";
+function locallyFinished() {
+  try {
+    return sessionStorage.getItem(FINISHED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 const Replay = createContext<(() => void) | null>(null);
 const steps = ["welcome", "list", "share", "reserve"] as const;
 const icons = ["gift", "list", "people", "giving"] as const;
@@ -34,10 +44,9 @@ export function Tutorial({
   const heading = useRef<HTMLHeadingElement>(null);
   const [step, setStep] = useState(0);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!completed && !dialog.current?.open) {
+    if (!completed && !dialog.current?.open && !locallyFinished()) {
       dialog.current?.showModal();
       heading.current?.focus();
     }
@@ -48,25 +57,24 @@ export function Tutorial({
 
   function replay() {
     setStep(0);
-    setError(false);
     dialog.current?.showModal();
     heading.current?.focus();
   }
 
+  // Close at once and save in the background: if saving fails, the tutorial
+  // simply shows again on the next visit, which is harmless.
   async function finish(createList = false) {
     if (pending) return;
     setPending(true);
-    setError(false);
+    dialog.current?.close();
     try {
-      const result = guestMode ? { success: true } : await completeTutorial();
-      if ("error" in result && result.error) {
-        setError(true);
-        return;
-      }
-      dialog.current?.close();
-      if (createList) router.push("/dashboard/wishlists/create");
+      sessionStorage.setItem(FINISHED_KEY, "1");
+    } catch {}
+    if (createList) router.push("/dashboard/wishlists/create");
+    try {
+      if (!guestMode) await completeTutorial();
     } catch {
-      setError(true);
+      // Ignored on purpose, see above.
     } finally {
       setPending(false);
     }
@@ -138,11 +146,6 @@ export function Tutorial({
           </div>
         </div>
 
-        {error && (
-          <p role="alert" className={styles.errorText}>
-            {t("saveError")}
-          </p>
-        )}
 
         <div className={styles.actions}>
           {step > 0 && (
