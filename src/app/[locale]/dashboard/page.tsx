@@ -38,6 +38,7 @@ export default async function DashboardPage() {
   const onboarding = session?.user?.id
     ? readOnboarding(prisma, session.user.id)
     : null;
+  const emptyList = lists.find((list) => list._count.items === 0);
   return (
     <div className={`stack ${styles.home}`}>
       <header className={styles.greeting}>
@@ -70,7 +71,7 @@ export default async function DashboardPage() {
                     <Link href={"/dashboard/wishlists/" + list.id}>
                       {list.name}
                     </Link>
-                    {list._count.items === 0 ? (
+                    {list._count.items === 0 && list.id !== emptyList?.id ? (
                       <Link
                         className={styles.addWish}
                         href={`/dashboard/wishlists/${list.id}`}
@@ -87,8 +88,22 @@ export default async function DashboardPage() {
             {lists.length === 3 && (
               <Link href="/dashboard/wishlists">{t("viewAllLists")}</Link>
             )}
+            {/* An empty list makes "add a wish" the next step; a new list becomes secondary. */}
+            {emptyList && (
+              <Link
+                className={`primary-link ${styles.cardAction}`}
+                href={`/dashboard/wishlists/${emptyList.id}`}
+              >
+                <span aria-hidden="true">+</span>
+                {w("addItem")}
+              </Link>
+            )}
             <Link
-              className={`primary-link ${styles.cardAction}`}
+              className={
+                emptyList
+                  ? styles.supportAction
+                  : `primary-link ${styles.cardAction}`
+              }
               href="/dashboard/wishlists/create"
             >
               <span aria-hidden="true">+</span>

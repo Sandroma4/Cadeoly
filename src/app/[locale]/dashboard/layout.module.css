@@ -74,6 +74,19 @@
 
 .searchLink {
   min-height: 48px;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--muted);
+}
+.searchKbd {
+  margin-left: auto;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  font: inherit;
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  white-space: nowrap;
 }
 
 .sidebarFooter {
@@ -397,6 +410,9 @@
     gap: 0.5rem;
     padding: 0.75rem 0.875rem;
     min-height: 48px;
+  }
+  .searchLink {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
   }
   .navItem > span:first-child {
     display: flex;

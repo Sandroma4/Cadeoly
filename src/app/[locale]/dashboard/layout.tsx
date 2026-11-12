@@ -11,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DashboardNavigation } from "@/components/dashboard/DashboardNavigation";
+import { SearchShortcut } from "@/components/dashboard/SearchShortcut";
 import { DashboardBreadcrumbs } from "@/components/dashboard/DashboardBreadcrumbs";
 import { OptionsMenu } from "@/components/dashboard/OptionsMenu";
 import { Tutorial, TutorialReplay } from "@/components/dashboard/Tutorial";
@@ -71,9 +72,9 @@ export default async function DashboardLayout({
                 <BrandLogo />
               </h2>
             </div>
-            <DashboardNavigation />
             <Link
               className={`${styles.navItem} ${styles.searchLink} dashboard-search-link`}
+              aria-keyshortcuts="Control+K Meta+K"
               href="/dashboard/search"
             >
               <span aria-hidden="true">
@@ -94,7 +95,12 @@ export default async function DashboardLayout({
               <span className={styles.navLabel}>
                 {(await getTranslations("globalSearch"))("title")}
               </span>
+              <kbd className={styles.searchKbd} aria-hidden="true">
+                Ctrl K
+              </kbd>
             </Link>
+            <SearchShortcut />
+            <DashboardNavigation />
             <div className={styles.sidebarFooter}>
               <div className={styles.desktopControls}>
                 <QuickOptions initialTheme={theme} compact />

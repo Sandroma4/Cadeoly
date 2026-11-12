@@ -58,7 +58,8 @@ export function WishlistForm({
   const [visibility, setVisibility] = useState(
     guestMode
       ? "PRIVATE"
-      : initial?.visibility || (hasFamily ? "FAMILY" : "PRIVATE"),
+      : // New lists are shareable right away: family if any, otherwise by private link.
+        initial?.visibility || (hasFamily ? "FAMILY" : "LINK"),
   );
   const [saved, setSaved] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
@@ -134,6 +135,19 @@ export function WishlistForm({
 
       <div className={returnTo ? "stack list-management-group" : "stack"}>
         {returnTo && <h2>{nav("informationGroup")}</h2>}
+        <div className="list-form-field">
+          <Input
+            id="list-name"
+            name="name"
+            error={fieldError("name")}
+            label={t("name")}
+            defaultValue={initial?.name}
+            placeholder={t("namePlaceholder")}
+            required
+            maxLength={120}
+            autoFocus={!initial && !returnTo}
+          />
+        </div>
         <div className="list-form-grid-2">
           {!initial && (
             <label className="list-form-field">
@@ -201,19 +215,6 @@ export function WishlistForm({
               ))}
             </select>
           </label>
-        </div>
-
-        <div className="list-form-field">
-          <Input
-            id="list-name"
-            name="name"
-            error={fieldError("name")}
-            label={t("name")}
-            defaultValue={initial?.name}
-            placeholder={t("namePlaceholder")}
-            required
-            maxLength={120}
-          />
         </div>
       </div>
       <div className={returnTo ? "stack list-management-group" : "stack"}>

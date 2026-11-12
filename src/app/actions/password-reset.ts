@@ -15,11 +15,14 @@ export async function requestPasswordReset(form: FormData, locale: string) {
   }
   if (!process.env.AUTH_SECRET) return { error: "emailUnavailable" };
   // Same response when limited, so the form never reveals throttling or accounts.
+  // Without a client address, a shared "unknown" bucket would block everyone.
+  const ip = await requestIp();
   if (
+    ip !== null &&
     !(await allowAccountAttempt(
       prisma,
       "reset-ip",
-      await requestIp(),
+      ip,
       process.env.AUTH_SECRET,
       10,
       60,

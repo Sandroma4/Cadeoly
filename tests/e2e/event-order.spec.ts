@@ -127,7 +127,7 @@ for (const [locale, t] of [
     await expect.poll(async () => (await titles())[0]).toBe(target);
     await page.locator("#list-settings > summary").click();
     await expect(page.locator('select[name="visibility"]')).toHaveValue(
-      "PRIVATE",
+      "LINK",
     );
   });
 }
