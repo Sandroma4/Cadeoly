@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openListSettings } from "./fixtures";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
 for (const [locale, m] of [
@@ -49,9 +50,9 @@ for (const [locale, m] of [
     ).json();
     const ownerURL = `/${locale}/dashboard/wishlists/${exported.lists[0].id}`;
     await page.goto(ownerURL);
-    await page.locator("#list-settings > summary").click();
-    await page.locator('select[name="visibility"]').selectOption("LINK");
-    await page
+    const settings = await openListSettings(page);
+    await settings.locator('select[name="visibility"]').selectOption("LINK");
+    await settings
       .locator(".list-form")
       .getByRole("button", { name: m.common.save, exact: true })
       .click();

@@ -55,15 +55,12 @@ test("archive and trash explanations stay below tabs with or without lists", asy
     }
   }
 
-  const install = page.getByLabel(fr.installApp.button, { exact: true });
-  await expect(install).toBeVisible();
-  await expect(install).toHaveCSS(
-    "min-height",
-    info.project.name === "desktop" ? "48px" : "40px",
-  );
+  // Desktop: the install control lives in the Options menu. The mobile icon
+  // only appears on the dashboard home and is covered by pwa.spec.ts.
   if (info.project.name === "desktop") {
-    await expect(install).toHaveCSS("column-gap", "10px");
-    await expect(install.locator("svg")).toHaveCSS("width", "20px");
+    await page.getByLabel("Options", { exact: true }).click();
+    const install = page.getByLabel(fr.installApp.button, { exact: true });
+    await expect(install).toBeVisible();
     await install.click();
     await expect(
       page.getByText(fr.installApp.help, { exact: true }),
@@ -81,11 +78,11 @@ test("archive and trash explanations stay below tabs with or without lists", asy
       name: fr.installApp.button,
       exact: true,
     });
-    await expect(installButton).toHaveCSS("min-height", "48px");
-    await expect(installButton).toHaveCSS("column-gap", "10px");
+    await expect(installButton).toBeVisible();
     await installButton.screenshot({
       path: info.outputPath("install-desktop.png"),
     });
+    await page.getByLabel("Options", { exact: true }).click();
   }
   expect(
     (

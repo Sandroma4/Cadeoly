@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openListSettings } from "./fixtures";
 import fr from "../../messages/fr.json";
 test("guest edits a private list and another guest cannot access it", async ({
   page,
@@ -9,12 +10,9 @@ test("guest edits a private list and another guest cannot access it", async ({
   await page.getByRole("button", { name: fr.common.save, exact: true }).click();
   await expect(page).toHaveURL(/dashboard\/wishlists\/(?!create$)[^/]+$/);
   const url = page.url();
-  await page.locator("#list-settings > summary").click();
-  await page
-    .locator('#list-settings input[name="name"]')
-    .fill("Renamed private list");
-  await page
-    .locator("#list-settings")
+  const settings = await openListSettings(page);
+  await settings.locator('input[name="name"]').fill("Renamed private list");
+  await settings
     .getByRole("button", { name: fr.common.save, exact: true })
     .click();
   await expect(

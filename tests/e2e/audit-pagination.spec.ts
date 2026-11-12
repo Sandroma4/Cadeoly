@@ -1,4 +1,10 @@
-import { test, expect, type Page } from "@playwright/test";
+import {
+  test,
+  expect,
+  dismissTutorial,
+  type Page,
+  openListSettings,
+} from "./fixtures";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
 
@@ -39,6 +45,10 @@ for (const [locale, t] of [
             {
               name: "Paged family list",
               recipient: { name: "Child" },
+              // Dashboard reminders only list gifts due within 15 days.
+              neededBy: new Date(Date.now() + 5 * 86_400_000)
+                .toISOString()
+                .slice(0, 10),
               gifts: Array.from({ length: 49 }, (_, i) => ({
                 title:
                   i === 48
@@ -89,9 +99,9 @@ for (const [locale, t] of [
     }
     await page.locator('input[type="search"]').fill("");
     await expect(page.locator(".gift-grid > div")).toHaveCount(24);
-    await page.locator("#list-settings > summary").click();
-    await page.locator('select[name="visibility"]').selectOption("LINK");
-    await page
+    const settings = await openListSettings(page);
+    await settings.locator('select[name="visibility"]').selectOption("LINK");
+    await settings
       .locator(".list-form")
       .getByRole("button", { name: t.common.save, exact: true })
       .click();
@@ -110,6 +120,7 @@ for (const [locale, t] of [
     });
     try {
       const giver = await context.newPage();
+      await dismissTutorial(giver);
       await register(giver, "Giver", href);
       await giver.locator('input[type="search"]').fill("Group gift");
       const group = giver.locator(".gift-card").filter({

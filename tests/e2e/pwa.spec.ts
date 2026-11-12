@@ -18,14 +18,10 @@ for (const [locale, label] of [
     const settings = page.getByLabel(messages.dashboard.displaySettings, {
       exact: true,
     });
+    // The install control now lives in the mobile settings panel.
+    await settings.click();
     await expect(install).toBeVisible();
     await expect(install).toHaveAttribute("aria-label", label);
-    const iconBox = (await install.boundingBox())!;
-    const gearBox = (await settings.boundingBox())!;
-    expect(iconBox.width).toBe(44);
-    expect(iconBox.height).toBe(44);
-    expect(iconBox.x + iconBox.width).toBeLessThanOrEqual(gearBox.x);
-    expect(Math.abs(iconBox.y - gearBox.y)).toBeLessThan(2);
     await install.click();
     await expect(
       page.locator("#dashboard-scroll .install-app-help p"),

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
 import sharp from "sharp";
@@ -40,8 +40,12 @@ for (const [locale, t] of [["fr", fr], ["en", en]] as const) {
     expect(await page.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith("cadeoly-draft:")).length)).toBe(0);
     await page.getByRole("link", { name: t.convenience.openList, exact: true }).click();
     await expect(page.getByRole("heading", { name: "Saved draft book", exact: true })).toBeVisible();
-    await expect(page.locator('a[href="https://second.example/book"]')).toBeVisible();
-    await page.getByRole("link", { name: t.wishlist.previewAsGuest, exact: true }).click();
+    // Alternative links now sit in the card's collapsed details panel.
+    const secondLink = page.locator('a[href="https://second.example/book"]').first();
+    await page.locator(".gift-details-panel", { has: secondLink }).first().locator(":scope > summary").click();
+    await expect(secondLink).toBeVisible();
+    // The preview link was removed from the list page; the preview mode remains reachable by URL.
+    await page.goto(page.url().split(/[?#]/)[0] + "?preview=1");
     await expect(page).toHaveURL(/preview=1$/);
     await expect(page.locator("#list-settings")).toHaveCount(0);
     await expect(page.getByRole("button", { name: t.wishlist.reserve, exact: true })).toHaveCount(0);

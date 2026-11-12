@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openListSettings } from "./fixtures";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
 for (const [locale, m] of [
@@ -98,8 +99,7 @@ for (const [locale, m] of [
       await expect(
         page.getByRole("heading", { name: "Guest saved book", exact: true }),
       ).toBeVisible();
-      await page.locator("#list-settings > summary").click();
-      const settings = page.locator("#list-settings");
+      const settings = await openListSettings(page);
       await settings.locator('select[name="visibility"]').selectOption("LINK");
       await settings
         .getByRole("button", { name: m.common.save, exact: true })
