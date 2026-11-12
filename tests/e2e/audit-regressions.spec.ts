@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "./fixtures";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
 
@@ -29,7 +29,11 @@ for (const [locale, t] of [
     await page.goto(
       `/${locale}/dashboard/wishlists?view=archived&tag=a&tag=b#dashboard-content`,
     );
-    await page.locator("aside summary[aria-label]").click();
+    // Desktop shows the language switcher in the sidebar; mobile keeps it in Options.
+    if (info.project.name === "mobile")
+      await page
+        .getByLabel(t.dashboard.displaySettings, { exact: true })
+        .click();
     await page
       .getByRole("button", {
         name: locale === "fr" ? "English" : "Français",

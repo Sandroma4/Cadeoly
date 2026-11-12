@@ -25,17 +25,26 @@ for (const [locale, t] of [
       .getByRole("button", { name: t.auth.signUp, exact: true })
       .click();
     await expect(page).toHaveURL(new RegExp(`/${locale}/dashboard$`));
+    // The welcome tutorial holds keyboard focus until it is dismissed.
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: t.tutorial.skip, exact: true })
+      .click();
+    // An empty reminders panel is hidden on a brand-new account.
     await expect(
       page.getByRole("heading", { name: t.improvements.reminders }),
-    ).toBeVisible();
+    ).toHaveCount(0);
     await page.goto(`/${locale}/dashboard`);
+    // The dashboard streams in after its loading skeleton; wait for the real content.
+    await expect(page.locator("#dashboard-content")).toBeVisible();
     await page.keyboard.press("Tab");
     await expect(
       page.getByRole("link", { name: t.improvements.skip }),
     ).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page.locator("#dashboard-content")).toBeFocused();
-    await page.goto(`/${locale}/dashboard/profile`);
+    // On mobile the profile is split into sections; import lives under "data".
+    await page.goto(`/${locale}/dashboard/profile?section=data`);
     expect(
       (
         await page.request.post("/api/account-import", {
@@ -75,13 +84,13 @@ for (const [locale, t] of [
         },
       ],
     };
-    await page
-      .getByLabel(t.improvements.importFile)
-      .setInputFiles({
-        name: "personal.json",
-        mimeType: "application/json",
-        buffer: Buffer.from(JSON.stringify(document)),
-      });
+    // The file picker only enables "check" once hydrated.
+    await page.waitForLoadState("networkidle");
+    await page.getByLabel(t.improvements.importFile).setInputFiles({
+      name: "personal.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(document)),
+    });
     await page
       .getByRole("button", { name: t.improvements.previewImport })
       .click();
@@ -108,6 +117,7 @@ for (const [locale, t] of [
     expect(
       exported.lists[0].gifts.filter((g: { photo: unknown }) => g.photo),
     ).toHaveLength(1);
+    await page.goto(`/${locale}/dashboard/profile?section=people`);
     const child = page
       .locator("details.recipient-row")
       .filter({ has: page.locator("summary", { hasText: /^Child$/ }) });
@@ -123,6 +133,10 @@ for (const [locale, t] of [
         .locator("details.recipient-row > summary")
         .filter({ hasText: /^Renamed child$/ }),
     ).toBeVisible();
+    // The add-person form is now behind a collapsed disclosure.
+    await page
+      .locator("summary", { hasText: t.profileSettings.addPerson })
+      .click();
     await page
       .getByLabel(t.convenience.recipientName, { exact: true })
       .fill("Sibling");
@@ -168,12 +182,23 @@ for (const [locale, t] of [
     expect(exported.lists[0].recipient).toBeNull();
     await page.goto(`/${locale}/dashboard/wishlists/${exported.lists[0].id}`);
     await expect(page.locator(".gift-grid > div")).toHaveCount(24);
-      await expect(page.getByRole("heading", { name: "Restored list", exact: true })).toBeVisible();
-      await page.screenshot({ path: `test-results/improvements-${info.project.name}-${locale}.png` });
+    await expect(
+      page.getByRole("heading", { name: "Restored list", exact: true }),
+    ).toBeVisible();
+    await page.screenshot({
+      path: `test-results/improvements-${info.project.name}-${locale}.png`,
+    });
     await page
       .getByRole("button", { name: t.improvements.next, exact: true })
       .click();
     await expect(page.locator(".gift-grid > div")).toHaveCount(1);
+    // Link checks now sit in the card's collapsed "link tools" panel.
+    await page
+      .locator(".gift-details-panel > summary", {
+        hasText: t.wishlist.linkTools,
+      })
+      .first()
+      .click();
     await page
       .getByRole("button", { name: t.improvements.checkLinks, exact: true })
       .click();

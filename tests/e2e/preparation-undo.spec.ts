@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, dismissTutorial, type Page } from "./fixtures";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
 
@@ -55,14 +55,12 @@ for (const [locale, t] of [
     ).json();
     await page.goto(`/${locale}/dashboard/wishlists/${exported.lists[0].id}`);
     const ownerURL = page.url();
-    const gift = page
-      .locator(".gift-card")
-      .filter({
-        has: page.getByRole("heading", {
-          name: "Preparation book",
-          exact: true,
-        }),
-      });
+    const gift = page.locator(".gift-card").filter({
+      has: page.getByRole("heading", {
+        name: "Preparation book",
+        exact: true,
+      }),
+    });
     page.once("dialog", (dialog) => dialog.accept());
     await gift
       .getByRole("button", { name: t.giftTrash.move, exact: true })
@@ -90,6 +88,7 @@ for (const [locale, t] of [
     });
     try {
       const giver = await context.newPage();
+      await dismissTutorial(giver);
       await register(giver, "Giver", href);
       await giver
         .getByRole("button", { name: t.wishlist.reserve, exact: true })
@@ -101,7 +100,9 @@ for (const [locale, t] of [
         }),
       ).toBeVisible();
       await giver.goto(`/${locale}/dashboard/reservations`);
-      const preparation = giver.getByLabel(t.preparation.label, {
+      // The stepper (radiogroup) and the select share this label; drive the select.
+      const preparation = giver.getByRole("combobox", {
+        name: t.preparation.label,
         exact: true,
       });
       await expect(preparation).toHaveValue("RESERVED");

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
 
@@ -19,11 +19,14 @@ for (const [locale, t] of [
       .getByRole("button", { name: t.auth.signUp, exact: true })
       .click();
     await expect(page).toHaveURL(new RegExp(`/${locale}/dashboard$`));
-    const onboarding = page.locator(".onboarding-panel");
+    // The onboarding disclosure now offers one next step: create a first list.
+    const onboarding = page.locator("details", {
+      has: page.locator('a[href$="/dashboard/wishlists/create"]'),
+    });
     await expect(onboarding).not.toHaveAttribute("open", "");
     await onboarding.locator("summary").click();
     await expect(
-      onboarding.getByRole("link", { name: t.auditUI.startFamily }),
+      onboarding.getByRole("link", { name: new RegExp(t.onboarding.list) }),
     ).toBeVisible();
     await onboarding.locator("summary").click();
     await page.screenshot({

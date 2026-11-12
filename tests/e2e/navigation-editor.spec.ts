@@ -10,9 +10,10 @@ for (const [locale, t] of [
     page,
   }, info) => {
     const destination = `/${locale}/dashboard/wishlists?view=archived`;
-    await page.goto(destination);
-    await expect(page).toHaveURL(new RegExp(`/${locale}/login\\?next=`));
-    expect(new URL(page.url()).searchParams.get("next")).toBe(destination);
+    // Signed-out visitors now get the guest dashboard, so start from the
+    // login link that carries the destination.
+    const login = `/${locale}/login?next=${encodeURIComponent(destination)}`;
+    await page.goto(login);
     await page.getByRole("link", { name: t.auth.signUp, exact: true }).click();
     expect(new URL(page.url()).searchParams.get("next")).toBe(destination);
     const email = `return-${locale}-${info.project.name}-${Date.now()}@example.test`;
@@ -26,9 +27,7 @@ for (const [locale, t] of [
       new RegExp(`/${locale}/dashboard/wishlists\\?view=archived$`),
     );
     await page.context().clearCookies();
-    await page.reload();
-    await expect(page).toHaveURL(new RegExp(`/${locale}/login\\?next=`));
-    expect(new URL(page.url()).searchParams.get("next")).toBe(destination);
+    await page.goto(login);
     await page.locator('input[name="email"]').fill(email);
     await page.locator('input[name="password"]').fill("Browser-test-2026!");
     await page

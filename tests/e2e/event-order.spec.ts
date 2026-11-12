@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
 
@@ -126,8 +126,9 @@ for (const [locale, t] of [
       .click();
     await expect.poll(async () => (await titles())[0]).toBe(target);
     await page.locator("#list-settings > summary").click();
+    // Duplicated lists are always private copies.
     await expect(page.locator('select[name="visibility"]')).toHaveValue(
-      "LINK",
+      "PRIVATE",
     );
   });
 }

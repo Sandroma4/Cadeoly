@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { openListSettings } from "./fixtures";
 import { createTranslator } from "next-intl";
 import fr from "../../messages/fr.json";
 import en from "../../messages/en.json";
@@ -38,9 +39,8 @@ for (const [locale, m] of [
     }
     await register(page, `owner-${suffix}@example.test`);
     const onboarding = page.locator('details[class*="disclosure"]');
-    await expect(onboarding).toContainText(
-      t("onboarding.compactProgress", { count: 0 }),
-    );
+    // The disclosure now names the next step instead of a progress counter.
+    await expect(onboarding.locator("summary")).toHaveText(m.onboarding.list);
     await onboarding.locator("summary").click();
     await onboarding
       .getByRole("link", { name: new RegExp(m.onboarding.list) })
@@ -61,9 +61,11 @@ for (const [locale, m] of [
       page.getByRole("status").filter({ hasText: m.notifications.listCreated }),
     ).toBeVisible();
     await page.getByRole("button", { name: m.notifications.dismiss }).click();
-    await expect(breadcrumbs.locator('[aria-current="page"]')).toHaveText(
-      m.breadcrumbs.wishlistDetails,
-    );
+    // Mobile list pages show a back link instead of breadcrumbs.
+    if (info.project.name === "desktop")
+      await expect(breadcrumbs.locator('[aria-current="page"]')).toHaveText(
+        m.breadcrumbs.wishlistDetails,
+      );
     expect(
       (
         await page.request.post("/api/account-import", {
@@ -106,9 +108,11 @@ for (const [locale, m] of [
     await page.goto(`/${locale}/dashboard`);
     await expect(onboarding).toHaveCount(0);
     await page.goto(listUrl);
-    await page.locator("#list-settings > summary").click();
-    await page.locator('select[name="visibility"]').selectOption("LINK");
-    await page
+    const settingsLink = await openListSettings(page);
+    await settingsLink
+      .locator('select[name="visibility"]')
+      .selectOption("LINK");
+    await settingsLink
       .locator(".list-form")
       .getByRole("button", { name: m.common.save, exact: true })
       .click();
@@ -208,9 +212,11 @@ for (const [locale, m] of [
       page.getByText(t("eventCountdown.future", { count: 2 }), { exact: true }),
     ).toBeVisible();
     await page.goto(listUrl);
-    await page.locator("#list-settings > summary").click();
-    await page.locator('select[name="visibility"]').selectOption("FAMILY");
-    await page
+    const settingsFamily = await openListSettings(page);
+    await settingsFamily
+      .locator('select[name="visibility"]')
+      .selectOption("FAMILY");
+    await settingsFamily
       .locator(".list-form")
       .getByRole("button", { name: m.common.save, exact: true })
       .click();
@@ -279,7 +285,8 @@ for (const [locale, m] of [
       ).toBeVisible();
       await giver.goto(`/${locale}/dashboard/reservations`);
       await giver
-        .getByLabel(m.preparation.label, { exact: true })
+        // The stepper and the select share this label; drive the select.
+        .getByRole("combobox", { name: m.preparation.label, exact: true })
         .selectOption("GIVEN");
       const history = giver.locator('section[aria-labelledby="gift-history"]');
       await expect(
@@ -312,7 +319,10 @@ for (const [locale, m] of [
         history.getByRole("heading", { name: "Small book", exact: true }),
       ).toBeVisible();
       await expect(
-        history.getByLabel(m.preparation.label, { exact: true }),
+        history.getByRole("combobox", {
+          name: m.preparation.label,
+          exact: true,
+        }),
       ).toHaveValue("GIVEN");
       await history.screenshot({ path: info.outputPath("gift-history.png") });
       expect(

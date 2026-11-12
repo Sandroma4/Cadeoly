@@ -204,6 +204,11 @@
 .gift-grid > :has(.gift-editor) {
   grid-column: 1 / -1;
 }
+/* The card footer is a wrapping flex row; let the editor's stack use the full width. */
+.gift-grid .stack:has(> .gift-editor) {
+  flex: 1 1 100%;
+  min-width: 0;
+}
 .gift-main-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
